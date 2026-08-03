@@ -287,11 +287,12 @@ export function buildStats(): string {
 }
 
 function boardCard(b: Billboard): string {
-  // Images are optional: drop a file of the named shape into public/ and the
-  // placeholder is replaced without touching markup.
+  // A real photo (dropped into public/ and referenced via `image` in
+  // site.ts) always wins. Failing that, the kind-matched illustration
+  // stands in — never a flat gradient, since every board now has proper art.
   const media = b.image
     ? `<img class="board-card__img" src="/${esc(b.image)}" alt="${esc(b.location)} billboard in ${esc(b.city)}" loading="lazy" decoding="async" width="1200" height="800" />`
-    : '<div class="board-card__placeholder" aria-hidden="true"></div>';
+    : `<div class="board-card__placeholder" style="--board-img:url('/images/board-${b.kind}.svg')" aria-hidden="true"></div>`;
 
   return `
     <article class="board-card" data-reveal-item data-city="${esc(b.city)}">

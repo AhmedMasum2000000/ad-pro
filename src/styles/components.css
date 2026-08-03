@@ -63,14 +63,20 @@
   transition: opacity var(--dur-slow) var(--ease-in-out), visibility 0s;
 }
 
-/* Stand-in for the photography the reference site carries here. A gradient
-   keeps the composition and the contrast behaviour without shipping an image. */
+/*
+  An original SVG illustration (set per slide via the --slide-img custom
+  property) sits under two gradients: a soft top-left highlight and a scrim
+  that keeps the overlaid text readable against whatever the art underneath
+  is doing. `--slide-img` defaults to `none` so a slide that doesn't set one
+  still renders the gradients alone.
+*/
 .slide__media {
   position: absolute;
   inset: 0;
   background:
     radial-gradient(120% 90% at 20% 15%, rgba(215, 213, 198, 0.16), transparent 60%),
-    linear-gradient(160deg, #1b1d24 0%, #15161b 55%, #101116 100%);
+    linear-gradient(160deg, rgba(27, 29, 36, 0.82) 0%, rgba(21, 22, 27, 0.88) 55%, rgba(16, 17, 22, 0.94) 100%),
+    var(--slide-img, none) center / cover no-repeat;
   transform: scale(1.06);
   transition: transform 6s var(--ease-out);
 }
@@ -205,12 +211,18 @@
   transform: scale(1.03);
 }
 
+/*
+  The illustration (set per instance via --card-img) sits under a highlight
+  gradient, so the hover-brighten effect above still reads as lighting on
+  top of the art rather than a flat wash replacing it.
+*/
 .grid-item-media__inner {
   position: absolute;
   inset: 0;
   transition: transform var(--dur-slow) var(--ease-out);
   background:
-    radial-gradient(90% 70% at 70% 25%, rgba(215, 213, 198, 0.12), transparent 65%);
+    radial-gradient(90% 70% at 70% 25%, rgba(215, 213, 198, 0.12), transparent 65%),
+    var(--card-img, none) center / cover no-repeat;
 }
 
 .grid-item-media__label {
@@ -708,10 +720,17 @@ body.menu-open .menu-link {
 
 .board-card:hover .board-card__img { transform: scale(1.05); }
 
+/*
+  Used when a billboard has no real photograph on file (see `image` in
+  site.ts). --board-img carries the kind-matched illustration; the gradient
+  on top keeps a consistent highlight regardless of which one is showing.
+*/
 .board-card__placeholder {
   position: absolute;
   inset: 0;
-  background: radial-gradient(90% 70% at 30% 20%, rgba(215, 213, 198, 0.12), transparent 65%);
+  background:
+    radial-gradient(90% 70% at 30% 20%, rgba(215, 213, 198, 0.12), transparent 65%),
+    var(--board-img, none) center / cover no-repeat;
 }
 
 .board-card__kind {
