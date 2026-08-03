@@ -206,3 +206,4 @@ npm run build           # -> dist/, root-relative URLs
 
 Vite rewrites asset and public-file URLs to the configured base; internal
 page links are relative, so they work at any depth without configuration.
+
