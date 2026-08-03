@@ -7,6 +7,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
+    "build:pages": "BASE_PATH=/ad-pro/ npm run build && node scripts/publish-root.mjs",
     "preview": "vite preview",
     "typecheck": "tsc -b --noEmit"
   },

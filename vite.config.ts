@@ -160,7 +160,7 @@ const shellPlugin = (): Plugin => ({
 });
 
 const input = Object.fromEntries(
-  pages.map((name) => [name, resolve(__dirname, `${name}.html`)]),
+  pages.map((name) => [name, resolve(__dirname, `pages/${name}.html`)]),
 );
 
 // Root-relative by default, which is what any plain static host wants. A

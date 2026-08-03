@@ -156,14 +156,53 @@ route list without also appearing in the sitemap:
 
 ---
 
+## Repository layout
+
+The repository root holds the **built** site, not the sources. That is
+deliberate — read the deploy section below before moving anything.
+
+```
+pages/*.html       source templates (carry <!--@SHELL--> placeholders)
+src/               TypeScript, styles, data, build-time generators
+public/            static assets copied verbatim (favicon, illustrations)
+scripts/           publish-root.mjs
+—— everything below is generated, do not hand-edit ——
+*.html             built pages
+assets/            hashed JS, CSS and fonts
+images/            illustrations, copied from public/
+sitemap.xml  robots.txt  favicon.svg  .nojekyll
+```
+
 ## Deploying
 
-Root-relative by default, which suits any plain static host. For a GitHub
-Pages *project* site served from a subpath, set `BASE_PATH`:
+GitHub Pages for this repository is set to **"Deploy from a branch"**, which
+serves the branch contents verbatim — there is no build step on GitHub's
+side. The root therefore has to already be the finished site, which is why
+the build output is committed alongside the sources.
+
+After changing anything in `pages/`, `src/` or `public/`:
 
 ```
-BASE_PATH=/repo-name/ npm run build
+npm run build:pages     # builds with BASE_PATH=/ad-pro/, then promotes dist/ to the root
+git add -A && git commit && git push
 ```
 
-Vite rewrites asset and public-file URLs to that base; internal page links
-are relative, so they work at any depth without configuration.
+`scripts/publish-root.mjs` copies `dist/` over the root, flattening
+`dist/pages/*.html` up a level so the deployed URLs are `/x.html`. It never
+touches `pages/`, `src/` or `public/`.
+
+**If you prefer CI to build instead:** set Settings → Pages → Source to
+"GitHub Actions", then run the `Deploy to GitHub Pages` workflow once from
+the Actions tab. From then on it builds and publishes on its own and the
+committed root output becomes redundant. Note that a repository whose
+Actions token is read-only cannot create a Pages site from a workflow —
+that is the failure this layout exists to route around.
+
+For any other static host, build without the base override:
+
+```
+npm run build           # -> dist/, root-relative URLs
+```
+
+Vite rewrites asset and public-file URLs to the configured base; internal
+page links are relative, so they work at any depth without configuration.
