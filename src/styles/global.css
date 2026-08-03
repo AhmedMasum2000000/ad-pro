@@ -1,0 +1,308 @@
+/*
+  Base layer: reset, document chrome, and the structural pieces that every
+  page shares (canvas, curtain, header, footer).
+*/
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  font-size: var(--base-font-size);
+  -webkit-text-size-adjust: 100%;
+}
+
+/*
+  Native smooth scrolling is disabled because Lenis owns scrolling. Leaving it
+  on makes anchor jumps fight the interpolated position and stutter.
+*/
+html.lenis {
+  scroll-behavior: auto;
+}
+
+.lenis.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+
+body {
+  margin: 0;
+  background: var(--bg-color);
+  color: var(--text-color);
+  font-family: var(--font-main);
+  font-size: var(--p-size);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  /* Every page has a full-bleed canvas and marquees that intentionally run
+     past the viewport; without this they would produce a horizontal scrollbar. */
+  overflow-x: hidden;
+}
+
+/* Scroll is locked while the intro curtain is up and while the menu is open,
+   so the visitor cannot scroll content they cannot yet see. */
+body.isLoading,
+body.menu-open {
+  overflow: hidden;
+  height: 100%;
+}
+
+img,
+svg,
+canvas {
+  display: block;
+  max-width: 100%;
+}
+
+ul, ol {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+
+:focus-visible {
+  outline: 2px solid var(--lightalpha-color);
+  outline-offset: 3px;
+}
+
+/* Visible only to screen readers, and to keyboard users once focused. */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.skip-link {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 100;
+  padding: 0.75rem 1.25rem;
+  background: var(--lightalpha-color);
+  color: var(--bg-color);
+  transform: translateY(-120%);
+  transition: transform var(--dur-fast) var(--ease-out);
+}
+
+.skip-link:focus-visible {
+  transform: translateY(0);
+}
+
+/* --- WebGL canvas --------------------------------------------------------- */
+
+/*
+  One canvas for the whole document, fixed behind the content. Individual
+  sections register regions with the renderer rather than each mounting their
+  own context — browsers cap the number of live WebGL contexts, and a
+  per-section canvas would hit that ceiling on the projects page.
+*/
+.wgl-canvas {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: var(--z-canvas);
+  pointer-events: none;
+}
+
+.all-content-wrapper {
+  position: relative;
+  z-index: var(--z-content);
+  width: 100%;
+  max-width: var(--max-width);
+}
+
+/* Held back until the curtain finishes so content never flashes behind it. */
+.hideOnLoad {
+  opacity: 0;
+}
+
+body:not(.isLoading) .hideOnLoad {
+  opacity: 1;
+  transition: opacity var(--dur-base) var(--ease-out);
+}
+
+/* --- intro curtain -------------------------------------------------------- */
+
+.fixed__cover {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-curtain);
+  pointer-events: none;
+}
+
+.fixed__cover:not(.visible) {
+  display: none;
+}
+
+.cover_curtain_wrapper {
+  position: absolute;
+  inset: 0;
+  display: flex;
+}
+
+/* Four panels rather than one sheet: staggering their retraction reads as a
+   wipe with direction, where a single panel only reads as a fade. */
+.curtain-item {
+  flex: 1 1 25%;
+  height: 100%;
+  background: var(--bg-color);
+  transform-origin: top center;
+  will-change: transform;
+}
+
+.intro_logo____wrapper {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1;
+}
+
+.intro_logo____placeholder {
+  font-family: var(--font-heading);
+  font-size: clamp(2.5rem, 9vw, 7rem);
+  letter-spacing: 0.06em;
+  color: var(--text-color);
+  text-transform: uppercase;
+  will-change: transform, opacity;
+}
+
+/* --- header --------------------------------------------------------------- */
+
+.main-nav-wrapper {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: var(--z-header);
+  padding: 1.25rem var(--gl-padding-lr);
+  mix-blend-mode: difference; /* keeps the wordmark legible over any section */
+}
+
+.brand {
+  font-family: var(--font-heading);
+  font-size: 1.4rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.main-links-wrapper {
+  gap: 1.5rem;
+}
+
+.menu-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: var(--menu-size);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.menu-toggle__bars {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 22px;
+}
+
+.menu-toggle__bars span {
+  display: block;
+  height: 1px;
+  background: currentColor;
+  transition: transform var(--dur-fast) var(--ease-out);
+}
+
+body.menu-open .menu-toggle__bars span:first-child {
+  transform: translateY(2.5px) rotate(45deg);
+}
+
+body.menu-open .menu-toggle__bars span:last-child {
+  transform: translateY(-2.5px) rotate(-45deg);
+}
+
+/* --- footer --------------------------------------------------------------- */
+
+#footer {
+  border-top: 1px solid var(--line-color);
+  margin-top: clamp(4rem, 12vw, 10rem);
+}
+
+.footer-grid {
+  row-gap: var(--grid-gap);
+}
+
+.footer-heading {
+  font-size: var(--h2-size);
+  margin-bottom: 1.5rem;
+}
+
+.social-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.25rem;
+  margin-top: 1.5rem;
+}
+
+.footer-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem 2rem;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-top: clamp(2rem, 6vw, 4rem);
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--line-color);
+  font-size: var(--sub-size);
+  color: var(--grey-dark-color);
+}
+
+/* --- cookie alert --------------------------------------------------------- */
+
+.cookie-alert-wrapper {
+  position: fixed;
+  left: var(--gl-padding-lr);
+  bottom: 1.5rem;
+  z-index: var(--z-alert);
+  max-width: 30rem;
+  padding: 1.5rem;
+  border: 1px solid var(--line-color);
+  background: var(--darkalpha-color);
+  backdrop-filter: blur(12px);
+  font-size: var(--sub-size);
+  transition: opacity var(--dur-base) var(--ease-out),
+              transform var(--dur-base) var(--ease-out);
+}
+
+.cookie-alert-wrapper[hidden] {
+  display: none;
+}
+
+.cookie-alert-wrapper.is-dismissed {
+  opacity: 0;
+  transform: translateY(1rem);
+  pointer-events: none;
+}
+
+.alert-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  align-items: flex-start;
+}

@@ -1,0 +1,889 @@
+/*
+  Section-level components: hero slideshow, intro block, card grid, project
+  list, marquee, and the overlay menu.
+*/
+
+/* --- breadcrumb ------------------------------------------------------------
+   The interlink from each format page back to the Billboards hub — the
+   backlink structure the brief asked for, made visible rather than left to
+   the footer alone. */
+
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding-top: clamp(6rem, 12vw, 8rem);
+  font-size: var(--sub-size);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--grey-dark-color);
+}
+
+/* --- hero slideshow ------------------------------------------------------- */
+
+.main-header {
+  position: relative;
+  min-height: var(--size-vh100);
+  display: flex;
+  align-items: flex-end;
+  padding-bottom: clamp(2rem, 6vw, 5rem);
+  overflow: hidden;
+}
+
+.slider-wrapper {
+  position: absolute;
+  inset: 0;
+}
+
+/*
+  Slides stack in one grid cell rather than being absolutely positioned, so
+  the tallest slide establishes the height and the others cannot overflow it.
+  Only opacity and transform animate — no layout property — so a slide change
+  costs a composite and nothing else.
+*/
+.slider-track {
+  display: grid;
+  height: 100%;
+}
+
+.slide {
+  grid-area: 1 / 1;
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity var(--dur-slow) var(--ease-in-out),
+              visibility 0s linear var(--dur-slow);
+}
+
+.slide.is-active {
+  opacity: 1;
+  visibility: visible;
+  transition: opacity var(--dur-slow) var(--ease-in-out), visibility 0s;
+}
+
+/* Stand-in for the photography the reference site carries here. A gradient
+   keeps the composition and the contrast behaviour without shipping an image. */
+.slide__media {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(120% 90% at 20% 15%, rgba(215, 213, 198, 0.16), transparent 60%),
+    linear-gradient(160deg, #1b1d24 0%, #15161b 55%, #101116 100%);
+  transform: scale(1.06);
+  transition: transform 6s var(--ease-out);
+}
+
+.slide.is-active .slide__media {
+  transform: scale(1);
+}
+
+.slider-text {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+}
+
+.slider-article {
+  max-width: 44rem;
+}
+
+.slider-article .sub-text {
+  display: block;
+  margin-bottom: 1rem;
+}
+
+.slider-copyright-text {
+  margin-top: 1.5rem;
+  font-size: var(--sub-size);
+  color: var(--grey-dark-color);
+}
+
+/* --- slideshow controls --------------------------------------------------- */
+
+.slider-nav {
+  position: absolute;
+  right: var(--gl-padding-lr);
+  bottom: clamp(2rem, 6vw, 5rem);
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.slideshow-control {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: var(--sub-size);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.slideshow-control__icon {
+  position: relative;
+  width: 34px;
+  height: 34px;
+  border: 1px solid var(--line-color);
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+}
+
+/* Pause glyph while playing, play triangle while paused — built from borders
+   so there is no icon font or SVG to load for a 10px mark. */
+.slideshow-control__icon::before,
+.slideshow-control__icon::after {
+  content: '';
+  position: absolute;
+  background: currentColor;
+  transition: opacity var(--dur-fast) var(--ease-out);
+}
+
+.slideshow-control.isPlaying .slideshow-control__icon::before,
+.slideshow-control.isPlaying .slideshow-control__icon::after {
+  width: 2px;
+  height: 10px;
+  opacity: 1;
+}
+
+.slideshow-control.isPlaying .slideshow-control__icon::before { transform: translateX(-3px); }
+.slideshow-control.isPlaying .slideshow-control__icon::after { transform: translateX(3px); }
+
+.slideshow-control:not(.isPlaying) .slideshow-control__icon::before {
+  width: 0;
+  height: 0;
+  background: transparent;
+  border-left: 8px solid currentColor;
+  border-top: 5px solid transparent;
+  border-bottom: 5px solid transparent;
+  transform: translateX(1px);
+}
+
+.slideshow-control:not(.isPlaying) .slideshow-control__icon::after { opacity: 0; }
+
+.slideshow-control_num {
+  font-variant-numeric: tabular-nums; /* stops the counter jittering on change */
+  font-size: var(--sub-size);
+  letter-spacing: 0.08em;
+}
+
+/* --- intro / accent text -------------------------------------------------- */
+
+.intro-text-wrapper {
+  padding-block: clamp(4rem, 14vw, 12rem);
+}
+
+.intro-text {
+  max-width: 60rem;
+}
+
+.intro-text h2 {
+  margin-bottom: 2rem;
+}
+
+/* --- card grid ------------------------------------------------------------ */
+
+.module-img {
+  padding-block: clamp(2rem, 6vw, 5rem);
+  row-gap: var(--grid-gap);
+  align-items: center;
+}
+
+.grid-item-media {
+  position: relative;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  background: linear-gradient(150deg, #1d1f27, #131419);
+  border: 1px solid var(--line-color);
+}
+
+/* The media tile lifts and brightens as a unit on hover; the label slides in
+   from the bottom edge underneath it. */
+.grid-item-media.has-link:hover .grid-item-media__inner {
+  transform: scale(1.03);
+}
+
+.grid-item-media__inner {
+  position: absolute;
+  inset: 0;
+  transition: transform var(--dur-slow) var(--ease-out);
+  background:
+    radial-gradient(90% 70% at 70% 25%, rgba(215, 213, 198, 0.12), transparent 65%);
+}
+
+.grid-item-media__label {
+  position: absolute;
+  left: 1.25rem;
+  bottom: 1.25rem;
+  z-index: 2;
+  font-size: var(--sub-size);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--lightalpha-color);
+}
+
+.card-grid__text {
+  padding: clamp(1rem, 3vw, 3rem);
+}
+
+.card-grid__text h3 {
+  margin-bottom: 1rem;
+}
+
+/* --- project list --------------------------------------------------------- */
+
+.filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1.5rem;
+  padding-block: 2rem;
+  border-bottom: 1px solid var(--line-color);
+}
+
+.filter-btn {
+  font-size: var(--menu-size);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--grey-dark-color);
+  transition: color var(--dur-fast) var(--ease-out);
+}
+
+.filter-btn[aria-pressed='true'],
+.filter-btn:hover {
+  color: var(--text-color);
+}
+
+.filter-btn__count {
+  font-size: 0.75em;
+  vertical-align: super;
+  margin-left: 0.2em;
+}
+
+/* --- services / principles ------------------------------------------------ */
+
+.service-block {
+  padding-block: clamp(2.5rem, 7vw, 6rem);
+  border-bottom: 1px solid var(--line-color);
+  row-gap: var(--grid-gap);
+}
+
+.service-block__title {
+  font-size: var(--h2-size);
+}
+
+.service-block__subtitle {
+  font-size: var(--accent-title-size);
+  color: var(--lightalpha-color);
+  margin-bottom: 1rem;
+}
+
+.principle {
+  padding-block: clamp(2rem, 5vw, 4rem);
+}
+
+.principle__num {
+  font-size: var(--sub-size);
+  color: var(--grey-dark-color);
+  display: block;
+  margin-bottom: 0.75rem;
+}
+
+.awards-list li {
+  padding-block: 0.75rem;
+  border-bottom: 1px solid var(--line-color);
+  font-size: var(--accent-size);
+}
+
+.checklist li {
+  position: relative;
+  padding-left: 1.75rem;
+  padding-block: 0.6rem;
+  font-size: var(--accent-size);
+}
+
+.checklist li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 1.35em;
+  width: 10px;
+  height: 1px;
+  background: var(--grey-dark-color);
+}
+
+/* --- marquee -------------------------------------------------------------- */
+
+/*
+  Two copies of the track translate in lockstep, offset by one full width, so
+  the moment one leaves the viewport the other is already in place. The seam
+  is never visible because both are always moving at the same rate.
+*/
+.marquee {
+  position: relative;
+  width: var(--marquee-width);
+  overflow: hidden;
+  padding-block: clamp(2rem, 5vw, 4rem);
+  border-block: 1px solid var(--line-color);
+  white-space: nowrap;
+}
+
+.marquee__track {
+  display: inline-block;
+  font-family: var(--font-heading);
+  font-size: var(--marquee-size);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  will-change: transform;
+  animation: marquee 22s linear infinite;
+}
+
+.marquee:hover .marquee__track {
+  animation-play-state: paused;
+}
+
+.marquee__item {
+  display: inline-block;
+  padding-inline: 1.5rem;
+}
+
+.marquee__item::after {
+  content: '—';
+  margin-left: 3rem;
+  color: var(--grey-dark-color);
+}
+
+@keyframes marquee {
+  from { transform: translateX(var(--move-initial)); }
+  to { transform: translateX(var(--move-final)); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .marquee__track {
+    animation: none;
+    transform: translateX(0);
+  }
+}
+
+/* --- overlay menu --------------------------------------------------------- */
+
+.menu-wrapper {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-menu);
+  visibility: hidden;
+  pointer-events: none;
+}
+
+body.menu-open .menu-wrapper {
+  visibility: visible;
+  pointer-events: auto;
+}
+
+.main-navigation {
+  position: absolute;
+  inset: 0;
+  background: var(--bg-color);
+  overflow-y: auto;
+  /* Scales down from the top edge, so the panel reads as unfolding rather
+     than sliding over the page. */
+  transform: scaleY(0);
+  transform-origin: top center;
+  transition: transform var(--dur-base) var(--ease-in-out);
+}
+
+body.menu-open .main-navigation {
+  transform: scaleY(1);
+}
+
+.menu-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.25rem var(--gl-padding-lr);
+}
+
+/*
+  The explicit close control.
+
+  Escape and a backdrop click both close the menu too, but neither is
+  discoverable — a visible X is what a visitor actually reaches for, and its
+  absence was the bug this fixes.
+*/
+.menu-close {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: var(--menu-size);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.menu-close__x {
+  position: relative;
+  width: 22px;
+  height: 22px;
+}
+
+.menu-close__x::before,
+.menu-close__x::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 100%;
+  height: 1px;
+  background: currentColor;
+  transform-origin: center;
+}
+
+.menu-close__x::before { transform: rotate(45deg); }
+.menu-close__x::after { transform: rotate(-45deg); }
+
+.main__nav {
+  padding: clamp(1rem, 6vw, 4rem) var(--gl-padding-lr) clamp(2rem, 8vw, 6rem);
+  row-gap: var(--grid-gap);
+  align-items: start;
+}
+
+.menu-item {
+  margin-bottom: clamp(0.5rem, 2vw, 1.25rem);
+}
+
+/* --- submenu (Billboards > Static / Digital) ------------------------------ */
+
+.menu-sublist {
+  margin-top: 0.5rem;
+  padding-left: clamp(1rem, 3vw, 2rem);
+  border-left: 1px solid var(--line-color);
+}
+
+.menu-sublink {
+  display: block;
+  padding-block: 0.35rem;
+  font-family: var(--font-main);
+  font-size: clamp(0.95rem, 1.6vw, 1.2rem);
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--grey-dark-color);
+  transform: translateY(60%);
+  opacity: 0;
+  transition: transform var(--dur-fast) var(--ease-out),
+              opacity var(--dur-fast) var(--ease-out),
+              color var(--dur-fast) var(--ease-out);
+  transition-delay: 0s;
+}
+
+body.menu-open .menu-sublink {
+  transform: translateY(0);
+  opacity: 1;
+  transition-delay: calc(0.25s + var(--i, 0) * 0.05s);
+}
+
+.menu-sublink:hover,
+.menu-sublink:focus-visible {
+  color: var(--text-color);
+}
+
+.menu-foot {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1.5rem;
+  padding-bottom: clamp(1.5rem, 4vw, 3rem);
+  font-size: var(--menu-size);
+}
+
+.links_group__label {
+  font-size: var(--sub-size);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--grey-dark-color);
+  margin-bottom: 1.5rem;
+  display: block;
+}
+
+/*
+  Each link is revealed by translating it inside a clipping parent (see
+  .menu-link__mask), so it starts pushed fully below its own mask.
+
+  The stagger is a transition-delay scaled by `--i`, which the shell writes
+  onto each link as a running index. Keeping this in CSS rather than a JS
+  timeline means the reveal cannot desynchronise from the panel's own unfold —
+  both are transitions on the same class change.
+*/
+.menu-link {
+  display: block;
+  font-family: var(--font-heading);
+  font-size: clamp(2rem, 6vw, 4.5rem);
+  text-transform: uppercase;
+  line-height: 1.05;
+  transform: translateY(105%);
+  transition: transform var(--dur-base) var(--ease-out);
+  /* Waits out the panel unfold before the first link moves. */
+  transition-delay: 0s;
+}
+
+body.menu-open .menu-link {
+  transform: translateY(0);
+  transition-delay: calc(0.25s + var(--i, 0) * 0.05s);
+}
+
+.menu-link__mask {
+  overflow: hidden;
+  display: block;
+}
+
+.menu-link:hover {
+  color: var(--lightalpha-color);
+}
+
+.menu-link[aria-current='page'] {
+  color: var(--grey-dark-color);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .main-navigation { transition: none; }
+  .menu-link,
+  body.menu-open .menu-link,
+  .menu-sublink,
+  body.menu-open .menu-sublink {
+    transform: none;
+    opacity: 1;
+    transition: none;
+    transition-delay: 0s;
+  }
+}
+
+/* --- custom cursor ---------------------------------------------------------
+   A small follower that swells over anything clickable and carries a label
+   over media tiles ("View"). Pointer-only: a touch device never gets one, so
+   there is nothing to strand mid-screen after the last tap. */
+
+.cursor {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: var(--z-header);
+  width: 14px;
+  height: 14px;
+  margin: -7px 0 0 -7px;
+  border-radius: 50%;
+  background: var(--lightalpha-color);
+  mix-blend-mode: difference;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity var(--dur-fast) var(--ease-out),
+              width var(--dur-fast) var(--ease-out),
+              height var(--dur-fast) var(--ease-out),
+              margin var(--dur-fast) var(--ease-out);
+  will-change: transform;
+}
+
+.cursor.is-active { opacity: 1; }
+
+.cursor.is-hover {
+  width: 52px;
+  height: 52px;
+  margin: -26px 0 0 -26px;
+}
+
+.cursor.is-media {
+  width: 84px;
+  height: 84px;
+  margin: -42px 0 0 -42px;
+  background: var(--bg-color);
+  border: 1px solid var(--lightalpha-color);
+}
+
+.cursor__label {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--lightalpha-color);
+  opacity: 0;
+  transition: opacity var(--dur-fast) var(--ease-out);
+}
+
+.cursor.is-media .cursor__label { opacity: 1; }
+
+@media (hover: none), (prefers-reduced-motion: reduce) {
+  .cursor { display: none; }
+}
+
+/* --- header utility --------------------------------------------------------
+   Two-line wordmark (name over a small descriptor) used across the fixed
+   header and the menu brand mark. */
+
+.brand {
+  display: inline-flex;
+  flex-direction: column;
+  line-height: 1;
+}
+
+.brand__sub {
+  margin-top: 0.3em;
+  font-family: var(--font-main);
+  font-size: 0.62rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--grey-dark-color);
+}
+
+@media (max-width: 640px) {
+  .hide-xsm { display: none; }
+}
+
+/* --- stat band -------------------------------------------------------------
+   The headline figures. Numeric, so tabular figures keep the four values
+   aligned even though their digit counts differ. */
+
+.stats-band {
+  padding-block: clamp(2.5rem, 6vw, 5rem);
+  border-block: 1px solid var(--line-color);
+}
+
+.stat {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  padding-inline-end: var(--grid-gap);
+}
+
+.stat__value {
+  font-family: var(--font-heading);
+  font-size: clamp(2.2rem, 5vw, 4rem);
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  color: var(--lightalpha-color);
+}
+
+.stat__label {
+  font-size: var(--menu-size);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.stat__detail {
+  font-size: var(--sub-size);
+  color: var(--grey-dark-color);
+}
+
+/* --- billboard inventory grid ---------------------------------------------- */
+
+.board-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 20rem), 1fr));
+  gap: var(--grid-gap);
+  padding-block: clamp(2rem, 5vw, 4rem);
+}
+
+.board-card {
+  border: 1px solid var(--line-color);
+  transition: border-color var(--dur-fast) var(--ease-out);
+}
+
+.board-card:hover { border-color: var(--lightalpha-color); }
+
+.board-card[hidden] { display: none; }
+
+.board-card__media {
+  position: relative;
+  aspect-ratio: 3 / 2;
+  overflow: hidden;
+  background: linear-gradient(150deg, #1d1f27, #131419);
+}
+
+.board-card__img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform var(--dur-slow) var(--ease-out);
+}
+
+.board-card:hover .board-card__img { transform: scale(1.05); }
+
+.board-card__placeholder {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(90% 70% at 30% 20%, rgba(215, 213, 198, 0.12), transparent 65%);
+}
+
+.board-card__kind {
+  position: absolute;
+  top: 0.85rem;
+  left: 0.85rem;
+  padding: 0.3em 0.7em;
+  font-size: var(--sub-size);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  background: var(--darkalpha-color);
+  backdrop-filter: blur(6px);
+}
+
+.board-card__body {
+  padding: clamp(1rem, 2.5vw, 1.5rem);
+}
+
+.board-card__title {
+  font-size: var(--h3-size);
+  margin-bottom: 0.25rem;
+}
+
+.board-card__specs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem;
+  margin: 0.85rem 0;
+  font-size: var(--sub-size);
+}
+
+.board-card__specs dt {
+  color: var(--grey-dark-color);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.board-card__specs dd {
+  margin: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+.board-card__note {
+  font-size: var(--sub-size);
+  color: var(--grey-dark-color);
+  margin-bottom: 1rem;
+}
+
+/* --- comparison table ------------------------------------------------------ */
+
+.table-scroll {
+  overflow-x: auto;
+  padding-block: clamp(1.5rem, 4vw, 3rem);
+}
+
+.compare-table {
+  width: 100%;
+  min-width: 32rem;
+  border-collapse: collapse;
+  font-size: var(--accent-size);
+}
+
+.compare-table th,
+.compare-table td {
+  padding: 0.85rem 1rem;
+  text-align: left;
+  border-bottom: 1px solid var(--line-color);
+}
+
+.compare-table thead th {
+  font-family: var(--font-heading);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-size: var(--menu-size);
+  color: var(--lightalpha-color);
+}
+
+.compare-table th[scope='row'] {
+  color: var(--grey-dark-color);
+  font-weight: 400;
+  white-space: nowrap;
+}
+
+/* --- client wall ------------------------------------------------------------
+   Monogram tiles rather than reproduced logos — see buildClientWall(). Each
+   tile still carries the real name so the list reads as a client roster
+   under a screen reader, not a grid of initials. */
+
+.client-wall {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(7.5rem, 1fr));
+  gap: 1px;
+  background: var(--line-color);
+  border: 1px solid var(--line-color);
+}
+
+.client-tile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  aspect-ratio: 1;
+  background: var(--bg-color);
+  padding: 0.75rem;
+  text-align: center;
+  transition: background var(--dur-fast) var(--ease-out);
+}
+
+.client-tile:hover { background: #1a1c22; }
+
+.client-tile__monogram {
+  font-family: var(--font-heading);
+  font-size: 1.5rem;
+  color: var(--lightalpha-color);
+}
+
+.client-tile__name {
+  font-size: 0.65rem;
+  letter-spacing: 0.02em;
+  color: var(--grey-dark-color);
+  line-height: 1.2;
+}
+
+/* --- FAQ --------------------------------------------------------------------
+   <details>/<summary> rather than a JS accordion: it works with no script,
+   is keyboard-operable for free, and content is in the DOM for search
+   engines and screen readers regardless of open state. */
+
+.faq__item {
+  border-bottom: 1px solid var(--line-color);
+}
+
+.faq__q {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  padding-block: 1.5rem;
+  font-family: var(--font-heading);
+  font-size: var(--h4-size);
+  text-transform: uppercase;
+  cursor: pointer;
+  list-style: none;
+}
+
+.faq__q::-webkit-details-marker { display: none; }
+
+.faq__marker {
+  position: relative;
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+}
+
+.faq__marker::before,
+.faq__marker::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 100%;
+  height: 1px;
+  background: currentColor;
+  transition: transform var(--dur-fast) var(--ease-out);
+}
+
+.faq__marker::after { transform: rotate(90deg); }
+
+details[open] .faq__marker::after { transform: rotate(0deg); }
+
+.faq__a {
+  padding-bottom: 1.5rem;
+  max-width: 60ch;
+}

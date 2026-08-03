@@ -1,0 +1,110 @@
+/*
+  Design tokens.
+
+  The type scale is fluid rather than stepped: every heading is a `clamp()`
+  with a viewport term, so there is no breakpoint at which text jumps size.
+  That is what lets a single grid carry a display headline from 390px to
+  2560px without a media query per step.
+
+  `--vh` and `--vw` are written by JS (see src/lib/viewport.ts) rather than
+  using raw `vh`/`vw` units. Mobile browsers change the viewport height when
+  the address bar collapses, which makes `100vh` resize mid-scroll and shifts
+  everything below it; a JS-set custom property only updates on a real resize.
+*/
+
+:root {
+  /* --- colour ------------------------------------------------------------ */
+  --bg-color: #15161b;
+  --text-color: #d7d9dc;
+  --grey-dark-color: #656565;
+  --lightalpha-color: #d7d5c6;
+  --darkalpha-color: rgba(21, 22, 27, 0.75);
+  --darkalphasolid-color: #d1d2d6;
+  --line-color: rgba(215, 217, 220, 0.16);
+  --accent-color: #d7d5c6;
+
+  /* --- type -------------------------------------------------------------- */
+  --base-font-size: 16px;
+  --font-heading: 'Bebas Neue', Impact, system-ui, -apple-system, sans-serif;
+  --font-main: 'Inter Variable', 'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+
+  --h1-size: clamp(1.6rem, 10vw + 1rem, 7.32rem);
+  --h1-strong-size: clamp(3rem, 15vw + 1rem, 15.32rem);
+  --h1em-size: clamp(16px, 0.5vw + 0.6rem, 1.55rem);
+  --h2-size: clamp(1.2rem, 3vw + 1rem, 3rem);
+  --h3-size: clamp(1.125rem, 1.2vw + 1rem, 1.55rem);
+  --h4-size: clamp(1.1rem, 1.2vw + 1rem, 1.375rem);
+  --h5-size: clamp(0.938rem, 2vw + 1rem, 1.063rem);
+  --h6-size: 14px;
+  --p-size: clamp(0.95rem, 1vw + 0.5rem, 0.98rem);
+  --sub-size: 13px;
+  --menu-size: clamp(14px, 1vw + 0.5rem, 15px);
+  --accent-size: clamp(0.95rem, 1.35vw, 1.12rem);
+  --accent-title-size: clamp(1.125rem, 1.2vw + 1rem, 1.55rem);
+  --mtitle-size: clamp(1.2rem, 3vw + 1rem, 4rem);
+  --marquee-size: clamp(1.125rem, 2.2vw + 1rem, 1.75rem);
+
+  /* --- viewport-derived sizing ------------------------------------------- */
+  --vh: 1vh;
+  --vw: 1vw;
+  --size-vh100: calc(var(--vh, 1vh) * 100);
+  --size-vh80: calc(var(--vh, 1vh) * 80);
+  --size-vh60: calc(var(--vh, 1vh) * 60);
+  --size-vh50: calc(var(--vh, 1vh) * 50);
+  --size-vh25: calc(var(--vh, 1vh) * 25);
+  --size-vh12: calc(var(--vh, 1vh) * 12);
+  --size-vh8: calc(var(--vh, 1vh) * 8);
+  --size-vh4: calc(var(--vh, 1vh) * 4);
+  --size-vw100: calc(var(--vw, 1vw) * 100);
+  --size-vw60: calc(var(--vw, 1vw) * 60);
+  --size-vw25: calc(var(--vw, 1vw) * 25);
+  --size-vw8: calc(var(--vw, 1vw) * 8);
+  --size-vw4: calc(var(--vw, 1vw) * 4);
+  --size-vw2: calc(var(--vw, 1vw) * 2);
+
+  --header-h: calc(var(--size-vh80) - 8px);
+
+  /* --- layout ------------------------------------------------------------ */
+  --gl-padding-lr: clamp(1.25rem, 4vw, 4.5rem);
+  --gl-padding-tb: clamp(2.5rem, 8vw, 7rem);
+  --grid-gap: clamp(1rem, 2.5vw, 2.5rem);
+  --max-width: 2200px;
+
+  /* --- marquee ----------------------------------------------------------- */
+  --offset: 20vw;
+  --marquee-width: var(--size-vw100);
+  --move-initial: calc(0 + var(--offset));
+  --move-final: calc(-48% + var(--offset));
+
+  /* Written by the scroll layer; drives parallax without a scroll listener
+     in every component. */
+  --scrollY: 0;
+  --m-pose: calc(var(--scrollY, 1vh) / 10);
+
+  /* --- motion ------------------------------------------------------------ */
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --dur-fast: 0.35s;
+  --dur-base: 0.7s;
+  --dur-slow: 1.2s;
+
+  --z-canvas: 0;
+  --z-content: 1;
+  --z-header: 40;
+  --z-menu: 60;
+  --z-curtain: 90;
+  --z-alert: 80;
+}
+
+/*
+  One switch for the whole motion system. The JS layer reads the same media
+  query, so a visitor who asks for less motion gets static frames rather than
+  a faster version of the same animation.
+*/
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --dur-fast: 0.01s;
+    --dur-base: 0.01s;
+    --dur-slow: 0.01s;
+  }
+}

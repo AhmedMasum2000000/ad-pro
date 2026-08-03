@@ -1,0 +1,35 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "useDefineForClassFields": true,
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "skipLibCheck": true,
+
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "isolatedModules": true,
+    "moduleDetection": "force",
+    "noEmit": true,
+
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUncheckedSideEffectImports": true,
+
+    "types": ["vite/client", "node"],
+
+    /*
+      @barba/core's `types` field points at dist/core/src/typings, which the
+      published package does not contain — the declarations actually sit two
+      directories deeper. Mapping the specifier at the type layer keeps real
+      types instead of falling back to a hand-written `any` shim. Vite resolves
+      the runtime import from `module` as usual and is unaffected.
+    */
+    "paths": {
+      "@barba/core": ["./node_modules/@barba/core/dist/core/src/src/index.d.ts"]
+    }
+  },
+  "include": ["src", "vite.config.ts"]
+}

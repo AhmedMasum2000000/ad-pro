@@ -1,0 +1,179 @@
+/*
+  Type.
+
+  Two families doing different jobs: a condensed display face for headings,
+  set tight and upper-case, against a variable humanist sans for everything
+  read at length. The contrast in width between them is what carries the
+  hierarchy — not weight, which is why headings are not bolded.
+*/
+
+h1, h2, h3, h4, h5, h6,
+.h1, .h2, .h3, .h4, .h5, .h6 {
+  font-family: var(--font-heading);
+  font-weight: 400;
+  text-transform: uppercase;
+  /* Condensed display faces have generous side bearings; pulling the tracking
+     in slightly stops large settings looking loose. */
+  letter-spacing: 0.01em;
+  line-height: 0.92;
+  margin: 0;
+  text-wrap: balance;
+}
+
+h1, .h1 { font-size: var(--h1-size); }
+h2, .h2 { font-size: var(--h2-size); }
+h3, .h3 { font-size: var(--h3-size); }
+h4, .h4 { font-size: var(--h4-size); }
+h5, .h5 { font-size: var(--h5-size); }
+h6, .h6 { font-size: var(--h6-size); }
+
+/* The oversized statement setting used once per page at most. */
+.h1-strong {
+  font-size: var(--h1-strong-size);
+  line-height: 0.82;
+}
+
+/* Small roman text set inside a display heading — a lowercase counterpoint
+   that keeps a long headline from reading as one undifferentiated block. */
+.h1-em {
+  display: block;
+  font-family: var(--font-main);
+  font-size: var(--h1em-size);
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: 0;
+  line-height: 1.5;
+  color: var(--grey-dark-color);
+  max-width: 46ch;
+}
+
+p {
+  font-size: var(--p-size);
+  line-height: 1.65;
+  margin: 0 0 1.2em;
+  max-width: 68ch;
+  text-wrap: pretty;
+}
+
+p:last-child { margin-bottom: 0; }
+
+.accent-text {
+  font-size: var(--accent-size);
+  line-height: 1.55;
+  color: var(--text-color);
+  max-width: 52ch;
+}
+
+.accent-title {
+  font-size: var(--accent-title-size);
+  font-family: var(--font-main);
+  font-weight: 500;
+  line-height: 1.3;
+  text-transform: none;
+  letter-spacing: -0.01em;
+}
+
+.sub-text {
+  font-size: var(--sub-size);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--grey-dark-color);
+}
+
+.mtitle { font-size: var(--mtitle-size); }
+
+.text-muted { color: var(--grey-dark-color); }
+.text-light { color: var(--lightalpha-color); }
+
+/* --- links ---------------------------------------------------------------- */
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+/*
+  Underline that draws from the left on hover and, on the way out, retracts to
+  the right rather than reversing — the line reads as passing through rather
+  than rewinding. `transform-origin` is what switches direction; it flips at
+  the moment hover ends.
+*/
+.text-link {
+  position: relative;
+  display: inline-block;
+  font-size: var(--menu-size);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding-block: 0.25em;
+}
+
+.text-link::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: 1px;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: right center;
+  transition: transform var(--dur-fast) var(--ease-out);
+}
+
+.text-link:hover::after,
+.text-link:focus-visible::after {
+  transform: scaleX(1);
+  transform-origin: left center;
+}
+
+/* --- buttons -------------------------------------------------------------- */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.7em;
+  padding: 0.95em 1.9em;
+  border: 1px solid var(--line-color);
+  border-radius: 999px;
+  font-size: var(--menu-size);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-color);
+  background: transparent;
+  cursor: pointer;
+  overflow: hidden;
+  position: relative;
+  isolation: isolate;
+  transition: color var(--dur-fast) var(--ease-out),
+              border-color var(--dur-fast) var(--ease-out);
+}
+
+/* The fill wipes up from the bottom edge and, on exit, continues off the top
+   instead of sinking back down. */
+.btn::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: var(--lightalpha-color);
+  transform: translateY(101%);
+  transition: transform var(--dur-base) var(--ease-out);
+}
+
+.btn:hover,
+.btn:focus-visible {
+  color: var(--bg-color);
+  border-color: var(--lightalpha-color);
+}
+
+.btn:hover::before,
+.btn:focus-visible::before {
+  transform: translateY(0);
+}
+
+.btn-wrapper {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 2rem;
+}

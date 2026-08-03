@@ -1,0 +1,123 @@
+/*
+  The layout system.
+
+  A 100-column grid rather than the usual 12. It reads oddly at first, but it
+  means a class name states a percentage directly — `grid-50` is half,
+  `grid-33` is a third — so a layout can be read off the markup without
+  consulting a scale. Breakpoint prefixes override downward:
+  `grid-50 xsm-grid-100` is half on desktop, full on small screens.
+*/
+
+/*
+  `minmax(0, 1fr)` rather than the shorthand `1fr`.
+
+  A bare `1fr` is `minmax(auto, 1fr)`, so every track is at least as wide as
+  the min-content of whatever sits in it. With the display-sized menu links
+  that floor is enormous, and 100 tracks each holding their own floor pushes
+  the grid several thousand pixels past the viewport. Flooring the minimum at
+  zero is what makes the columns behave as pure fractions.
+*/
+.css-grid-wrapper {
+  display: grid;
+  grid-template-columns: repeat(100, minmax(0, 1fr));
+  width: 100%;
+
+  /*
+    `column-gap` MUST stay zero here.
+
+    A gap applies between every track, not between the items you can see. On a
+    100-column grid that is 99 gutters — at a 36px gap the grid is 3.5k pixels
+    wider than its container before any content is placed, and the whole page
+    scrolls sideways. Horizontal gutters therefore come from item padding
+    below, which lives inside the track and costs nothing.
+  */
+  column-gap: 0;
+  row-gap: var(--grid-gap);
+}
+
+.grid-item {
+  grid-column: span 100;
+  min-width: 0; /* the item's own floor, for long unbroken words */
+}
+
+/* The gutter. Full-width items are excluded so their edges stay aligned with
+   the section padding rather than sitting one gutter short of it. */
+.grid-item:not(.grid-100) {
+  padding-inline-end: var(--grid-gap);
+}
+
+/* Base (desktop-first) spans. */
+.grid-100 { grid-column: span 100; }
+.grid-75  { grid-column: span 75; }
+.grid-66  { grid-column: span 66; }
+.grid-60  { grid-column: span 60; }
+.grid-50  { grid-column: span 50; }
+.grid-40  { grid-column: span 40; }
+.grid-33  { grid-column: span 33; }
+.grid-25  { grid-column: span 25; }
+
+/* Extra-large refinements — used where a section wants a different rhythm on
+   wide screens only. */
+@media (min-width: 1441px) {
+  .xl-grid-100 { grid-column: span 100; }
+  .xl-grid-50  { grid-column: span 50; }
+  .xl-grid-33  { grid-column: span 33; }
+  .xl-grid-25  { grid-column: span 25; }
+}
+
+/* Tablet. */
+@media (max-width: 1024px) {
+  .md-grid-100 { grid-column: span 100; }
+  .md-grid-50  { grid-column: span 50; }
+}
+
+/* Phone. Most two-up layouts collapse here. */
+@media (max-width: 767px) {
+  .xsm-grid-100 { grid-column: span 100; }
+  .xsm-grid-50  { grid-column: span 50; }
+
+  /* An empty spacer cell earns its keep only on wide screens. */
+  .grid-item.empty { display: none; }
+
+  /* Items are stacked full-width here, so a trailing gutter would just pull
+     their right edge in from the section padding. */
+  .grid-item:not(.grid-100) { padding-inline-end: 0; }
+}
+
+/* --- flex helpers --------------------------------------------------------- */
+
+.flex-wrapper {
+  display: flex;
+  align-items: center;
+}
+
+.flex-wrapper.flex-column { flex-direction: column; }
+.flex-wrapper.flex-stretch { align-items: stretch; }
+.flex-wrapper.flex-start { align-items: flex-start; }
+.flex-wrapper.flex-end { align-items: flex-end; }
+.flex-wrapper.flex-center { align-items: center; justify-content: center; }
+.flex-wrapper.space-between { justify-content: space-between; }
+.flex-wrapper.wrap { flex-wrap: wrap; }
+
+.margin-left-auto { margin-left: auto; }
+.margin-auto { margin-inline: auto; }
+.text-right { text-align: right; }
+.w-100 { width: 100%; }
+
+/* --- global padding ------------------------------------------------------- */
+
+/* Both axes. */
+.gl-padding {
+  padding: var(--gl-padding-tb) var(--gl-padding-lr);
+}
+
+/* Horizontal only — for sections that manage their own vertical rhythm. */
+.gl-padding_lr {
+  padding-inline: var(--gl-padding-lr);
+}
+
+.gl-padding_tb {
+  padding-block: var(--gl-padding-tb);
+}
+
+.z-on-top { z-index: var(--z-curtain); }
