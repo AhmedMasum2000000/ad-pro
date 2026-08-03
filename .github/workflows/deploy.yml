@@ -1,18 +1,17 @@
 name: Deploy to GitHub Pages
 
-# Manual-only, on purpose.
-#
-# Pages for this repository is set to "Deploy from a branch", which serves
-# the branch contents verbatim — so the built site is committed at the
-# repository root (see scripts/publish-root.mjs) and no workflow is needed
-# to publish. Leaving a `push` trigger here would fail on every commit,
-# because a repository whose Actions token is read-only cannot create or
-# deploy a Pages site.
-#
-# If you later switch Settings -> Pages -> Source to "GitHub Actions", run
-# this once from the Actions tab and it takes over from there; at that point
-# committing the built root becomes optional.
+# This is the live deploy path: Pages Source for this repository is "GitHub
+# Actions", so this workflow's upload-pages-artifact/deploy-pages steps are
+# what actually publishes — the repo root being pre-built (see
+# scripts/publish-root.mjs) only matters if Source is ever switched back to
+# "Deploy from a branch". Confirmed by the first successful run of this
+# workflow, which requires the site to already exist -- the earlier "Resource
+# not accessible by integration" failure was this same workflow being unable
+# to CREATE that site on a repo whose Actions token was still read-only, not
+# evidence Actions could never deploy here.
 on:
+  push:
+    branches: [main]
   workflow_dispatch:
 
 permissions:
@@ -53,6 +52,15 @@ jobs:
           # vite.config.ts normalises the trailing slash.
           BASE_PATH: ${{ steps.pages.outputs.base_path }}
         run: npm run build
+
+      # Sources live in pages/*.html (see README's "Repository layout"), so
+      # Rollup names the built HTML dist/pages/*.html — every route would
+      # otherwise deploy one level too deep, at /ad-pro/pages/x.html instead
+      # of /ad-pro/x.html.
+      - name: Flatten built pages to dist root
+        run: |
+          mv dist/pages/*.html dist/
+          rmdir dist/pages
 
       - uses: actions/upload-pages-artifact@v3
         with:
