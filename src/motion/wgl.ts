@@ -33,9 +33,15 @@ export interface FieldHandle {
   destroy: () => void;
 }
 
-// Cool blues from the palette, plus one warm accent so the field is not a
-// single flat wash.
-const COLORS = ['215, 213, 198', '90, 130, 200', '60, 80, 130', '200, 90, 70'];
+// The brand blues, spread light-to-dark so the field reads with depth rather
+// than as one flat wash. Raw RGB triples because each blob composes its own
+// alpha stops around them.
+const COLORS = [
+  '107, 163, 232', // --brand-sky
+  '44, 111, 198', // --brand-blue
+  '30, 58, 99', // --brand-navy
+  '78, 132, 210', // midpoint, keeps the gradient from banding
+];
 
 export function initField(): FieldHandle {
   const canvas = document.getElementById('wgl_canvas') as HTMLCanvasElement | null;

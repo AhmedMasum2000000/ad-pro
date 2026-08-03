@@ -1,29 +1,29 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" role="img" aria-label="Digital LED billboard glowing over a busy road at night">
   <defs>
     <linearGradient id="sky-night" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0%" stop-color="#0b0c11"/>
-      <stop offset="60%" stop-color="#12131a"/>
-      <stop offset="100%" stop-color="#15161b"/>
+      <stop offset="0%" stop-color="#080d16"/>
+      <stop offset="60%" stop-color="#0d1420"/>
+      <stop offset="100%" stop-color="#0e1420"/>
     </linearGradient>
     <linearGradient id="led-glow" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#e7edf7"/>
-      <stop offset="45%" stop-color="#9fb6d9"/>
-      <stop offset="100%" stop-color="#4d6690"/>
+      <stop offset="0%" stop-color="#eef4fd"/>
+      <stop offset="45%" stop-color="#8fb4e2"/>
+      <stop offset="100%" stop-color="#2c6fc6"/>
     </linearGradient>
     <radialGradient id="led-halo" cx="50%" cy="45%" r="65%">
-      <stop offset="0%" stop-color="#8fb0e0" stop-opacity="0.45"/>
-      <stop offset="100%" stop-color="#8fb0e0" stop-opacity="0"/>
+      <stop offset="0%" stop-color="#6ba3e8" stop-opacity="0.45"/>
+      <stop offset="100%" stop-color="#6ba3e8" stop-opacity="0"/>
     </radialGradient>
     <linearGradient id="pole-shade-2" x1="0" y1="0" x2="1" y2="0">
-      <stop offset="0%" stop-color="#454852"/>
-      <stop offset="100%" stop-color="#292b32"/>
+      <stop offset="0%" stop-color="#3a4557"/>
+      <stop offset="100%" stop-color="#242c38"/>
     </linearGradient>
   </defs>
 
   <rect width="800" height="600" fill="url(#sky-night)"/>
 
   <!-- distant skyline with a few lit windows -->
-  <g fill="#0a0a0d">
+  <g fill="#080d16">
     <rect x="0" y="320" width="55" height="140"/>
     <rect x="65" y="290" width="50" height="170"/>
     <rect x="130" y="350" width="60" height="110"/>
@@ -43,26 +43,26 @@
   </g>
 
   <!-- road -->
-  <rect x="0" y="460" width="800" height="140" fill="#0d0e12"/>
-  <g stroke="#24262d" stroke-width="6" stroke-dasharray="26 22">
+  <rect x="0" y="460" width="800" height="140" fill="#0a1018"/>
+  <g stroke="#1e2836" stroke-width="6" stroke-dasharray="26 22">
     <line x1="0" y1="530" x2="800" y2="530"/>
   </g>
 
   <!-- queued traffic, abstracted -->
   <g>
-    <rect x="50" y="498" width="70" height="32" rx="6" fill="#20222a"/>
+    <rect x="50" y="498" width="70" height="32" rx="6" fill="#1c2532"/>
     <circle cx="62" cy="530" r="4" fill="#ffe3a3"/>
     <circle cx="108" cy="530" r="4" fill="#ffe3a3"/>
 
-    <rect x="170" y="503" width="60" height="28" rx="6" fill="#2a1c22"/>
+    <rect x="170" y="503" width="60" height="28" rx="6" fill="#212b39"/>
     <circle cx="182" cy="531" r="4" fill="#ffe3a3"/>
     <circle cx="218" cy="531" r="4" fill="#ffe3a3"/>
 
-    <rect x="580" y="500" width="66" height="30" rx="6" fill="#1e2028"/>
+    <rect x="580" y="500" width="66" height="30" rx="6" fill="#1a2330"/>
     <circle cx="592" cy="530" r="4" fill="#ffe3a3"/>
     <circle cx="634" cy="530" r="4" fill="#ffe3a3"/>
 
-    <rect x="670" y="495" width="72" height="34" rx="6" fill="#231a1e"/>
+    <rect x="670" y="495" width="72" height="34" rx="6" fill="#1f2734"/>
     <circle cx="682" cy="529" r="4" fill="#ffe3a3"/>
     <circle cx="730" cy="529" r="4" fill="#ffe3a3"/>
   </g>
@@ -76,11 +76,11 @@
   <ellipse cx="400" cy="150" rx="220" ry="160" fill="url(#led-halo)"/>
 
   <!-- LED screen -->
-  <rect x="284" y="58" width="232" height="130" fill="#0a0a0d"/>
+  <rect x="284" y="58" width="232" height="130" fill="#080d16"/>
   <rect x="292" y="66" width="216" height="114" fill="url(#led-glow)"/>
 
   <!-- faint scanlines for an LED read -->
-  <g stroke="#0a0a0d" stroke-width="1" opacity="0.12">
+  <g stroke="#080d16" stroke-width="1" opacity="0.12">
     <line x1="292" y1="76" x2="508" y2="76"/>
     <line x1="292" y1="86" x2="508" y2="86"/>
     <line x1="292" y1="96" x2="508" y2="96"/>
@@ -94,8 +94,8 @@
   </g>
 
   <!-- abstract "content" blocks on the screen, not text -->
-  <rect x="306" y="86" width="88" height="46" rx="4" fill="#1c2536" opacity="0.55"/>
-  <rect x="404" y="86" width="90" height="20" rx="3" fill="#f4f7fc" opacity="0.85"/>
-  <rect x="404" y="112" width="60" height="20" rx="3" fill="#c94b3a" opacity="0.8"/>
-  <rect x="306" y="140" width="188" height="10" rx="3" fill="#0a0a0d" opacity="0.35"/>
+  <rect x="306" y="86" width="88" height="46" rx="4" fill="#16283f" opacity="0.55"/>
+  <rect x="404" y="86" width="90" height="20" rx="3" fill="#eef4fd" opacity="0.85"/>
+  <rect x="404" y="112" width="60" height="20" rx="3" fill="#2c6fc6" opacity="0.8"/>
+  <rect x="306" y="140" width="188" height="10" rx="3" fill="#080d16" opacity="0.35"/>
 </svg>

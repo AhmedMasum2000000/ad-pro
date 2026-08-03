@@ -13,15 +13,32 @@
 */
 
 :root {
+  /*
+    --- brand ---------------------------------------------------------------
+    Taken from the APCL mark: the bright foresail blue and the deep navy
+    body. Everything else in the palette is derived from these two rather
+    than picked independently, which is what keeps the UI reading as one
+    brand instead of a neutral shell with a logo dropped into it.
+  */
+  --brand-blue: #2c6fc6;
+  --brand-navy: #1e3a63;
+  /* Lifted toward the light end: the mark's own blue is too dark to carry
+     text or thin strokes against the near-black ground. */
+  --brand-sky: #6ba3e8;
+
   /* --- colour ------------------------------------------------------------ */
-  --bg-color: #15161b;
-  --text-color: #d7d9dc;
-  --grey-dark-color: #656565;
-  --lightalpha-color: #d7d5c6;
-  --darkalpha-color: rgba(21, 22, 27, 0.75);
-  --darkalphasolid-color: #d1d2d6;
-  --line-color: rgba(215, 217, 220, 0.16);
-  --accent-color: #d7d5c6;
+  /* Near-black, but pulled toward the navy rather than neutral grey — the
+     difference is subtle in isolation and obvious beside the mark. */
+  --bg-color: #0e1420;
+  --bg-raised: #141d2c;
+  --text-color: #dbe4f0;
+  --grey-dark-color: #7286a0;
+  /* The accent used for fills, rules and emphasis across the whole UI. */
+  --lightalpha-color: var(--brand-sky);
+  --darkalpha-color: rgba(14, 20, 32, 0.75);
+  --darkalphasolid-color: #c9d6e6;
+  --line-color: rgba(219, 228, 240, 0.16);
+  --accent-color: var(--brand-blue);
 
   /* --- type -------------------------------------------------------------- */
   --base-font-size: 16px;

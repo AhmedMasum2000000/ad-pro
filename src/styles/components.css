@@ -74,8 +74,8 @@
   position: absolute;
   inset: 0;
   background:
-    radial-gradient(120% 90% at 20% 15%, rgba(215, 213, 198, 0.16), transparent 60%),
-    linear-gradient(160deg, rgba(27, 29, 36, 0.82) 0%, rgba(21, 22, 27, 0.88) 55%, rgba(16, 17, 22, 0.94) 100%),
+    radial-gradient(120% 90% at 20% 15%, rgba(107, 163, 232, 0.18), transparent 60%),
+    linear-gradient(160deg, rgba(20, 29, 44, 0.82) 0%, rgba(14, 20, 32, 0.88) 55%, rgba(11, 17, 27, 0.94) 100%),
     var(--slide-img, none) center / cover no-repeat;
   transform: scale(1.06);
   transition: transform 6s var(--ease-out);
@@ -201,7 +201,7 @@
   position: relative;
   aspect-ratio: 4 / 3;
   overflow: hidden;
-  background: linear-gradient(150deg, #1d1f27, #131419);
+  background: linear-gradient(150deg, #16283f, #0d1420);
   border: 1px solid var(--line-color);
 }
 
@@ -221,7 +221,7 @@
   inset: 0;
   transition: transform var(--dur-slow) var(--ease-out);
   background:
-    radial-gradient(90% 70% at 70% 25%, rgba(215, 213, 198, 0.12), transparent 65%),
+    radial-gradient(90% 70% at 70% 25%, rgba(107, 163, 232, 0.14), transparent 65%),
     var(--card-img, none) center / cover no-repeat;
 }
 
@@ -629,14 +629,8 @@ body.menu-open .menu-link {
 }
 
 /* --- header utility --------------------------------------------------------
-   Two-line wordmark (name over a small descriptor) used across the fixed
-   header and the menu brand mark. */
-
-.brand {
-  display: inline-flex;
-  flex-direction: column;
-  line-height: 1;
-}
+   The `.brand` lockup itself (mark + stacked wordmark) lives in global.css.
+   Only the descriptor line is styled here. */
 
 .brand__sub {
   margin-top: 0.3em;
@@ -708,7 +702,7 @@ body.menu-open .menu-link {
   position: relative;
   aspect-ratio: 3 / 2;
   overflow: hidden;
-  background: linear-gradient(150deg, #1d1f27, #131419);
+  background: linear-gradient(150deg, #16283f, #0d1420);
 }
 
 .board-card__img {
@@ -729,7 +723,7 @@ body.menu-open .menu-link {
   position: absolute;
   inset: 0;
   background:
-    radial-gradient(90% 70% at 30% 20%, rgba(215, 213, 198, 0.12), transparent 65%),
+    radial-gradient(90% 70% at 30% 20%, rgba(107, 163, 232, 0.14), transparent 65%),
     var(--board-img, none) center / cover no-repeat;
 }
 
@@ -840,7 +834,7 @@ body.menu-open .menu-link {
   transition: background var(--dur-fast) var(--ease-out);
 }
 
-.client-tile:hover { background: #1a1c22; }
+.client-tile:hover { background: var(--bg-raised); }
 
 .client-tile__monogram {
   font-family: var(--font-heading);

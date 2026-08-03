@@ -131,7 +131,10 @@ export function buildShell(): string {
     <div class="main-navigation js-main-navigation" id="main_navigation_wrapper"
          role="dialog" aria-modal="true" aria-label="Main menu" data-lenis-prevent>
       <div class="menu-header">
-        <a class="brand" href="index.html">${esc(company.wordmark)}</a>
+        <a class="brand" href="index.html">
+          <img class="brand__mark" src="/logo-mark.svg" alt="" width="40" height="40" />
+          <span class="brand__name">${esc(company.wordmark)}</span>
+        </a>
         <button class="menu-close addHover" id="menu_close" type="button" aria-label="Close menu">
           <span class="menu-close__label">Close</span>
           <span class="menu-close__x" aria-hidden="true"></span>
@@ -151,7 +154,11 @@ export function buildShell(): string {
 
   <div class="main-nav-wrapper flex-wrapper space-between" id="main_nav_wrapper">
     <a class="brand" href="index.html">
-      ${esc(company.wordmark)}<span class="brand__sub">Communications Ltd.</span>
+      <img class="brand__mark" src="/logo-mark.svg" alt="" width="40" height="40" />
+      <span class="brand__text">
+        <span class="brand__name">${esc(company.wordmark)}</span>
+        <span class="brand__sub">Communications Ltd.</span>
+      </span>
     </a>
     <nav class="main-links-wrapper flex-wrapper" aria-label="Shortcuts">
       <a class="text-link nav-link hide-xsm" href="billboards.html">Billboards</a>
@@ -172,6 +179,7 @@ export function buildShell(): string {
       <div class="curtain-item" aria-hidden="true"></div>
     </div>
     <div class="intro_logo____wrapper" id="logo_wrapper" aria-hidden="true">
+      <img class="intro_logo____mark" src="/logo-mark.svg" alt="" width="128" height="128" />
       <div class="intro_logo____placeholder">${esc(company.wordmark)}</div>
     </div>
   </div>`;
