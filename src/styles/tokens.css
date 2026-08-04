@@ -79,13 +79,48 @@
   --size-vw4: calc(var(--vw, 1vw) * 4);
   --size-vw2: calc(var(--vw, 1vw) * 2);
 
-  --header-h: calc(var(--size-vh80) - 8px);
+  /*
+    The real height of the fixed header, not an estimate: 1.25rem of padding
+    top and bottom around a 2.25rem brand mark. Anything that scrolls under it
+    needs to clear `--header-safe`, which adds breathing room on top. Both are
+    plain rem, so they do not change with the viewport and a first section can
+    reserve the right space without measuring anything at runtime.
+  */
+  --header-h: 4.75rem;
+  --header-safe: calc(var(--header-h) + 1.5rem);
 
   /* --- layout ------------------------------------------------------------ */
   --gl-padding-lr: clamp(1.25rem, 4vw, 4.5rem);
   --gl-padding-tb: clamp(2.5rem, 8vw, 7rem);
   --grid-gap: clamp(1rem, 2.5vw, 2.5rem);
   --max-width: 2200px;
+
+  /*
+    The vertical rhythm between two adjacent sections that carry no component
+    of their own. Sections used to be spaced only by the side-by-side columns
+    inside them, which works on desktop and collapses to nothing the moment
+    those columns stack.
+  */
+  --section-gap: clamp(2.25rem, 7vw, 4.5rem);
+
+  /* The larger rhythm around a page's own heading block. */
+  --intro-gap: clamp(3rem, 14vw, 12rem);
+
+  /*
+    The page is edge-to-edge under `viewport-fit=cover`, so the horizontal
+    gutter has to be at least the notch inset or content slides under the
+    rounded corner in landscape. `env()` resolves to 0px where there is no
+    inset, which makes the `max()` a no-op on every other device.
+  */
+  --safe-l: env(safe-area-inset-left, 0px);
+  --safe-r: env(safe-area-inset-right, 0px);
+  --safe-b: env(safe-area-inset-bottom, 0px);
+  --edge-l: max(var(--gl-padding-lr), var(--safe-l));
+  --edge-r: max(var(--gl-padding-lr), var(--safe-r));
+
+  /* The smallest comfortable touch target. Applied on coarse pointers only,
+     so a mouse still gets the tighter, more typographic spacing. */
+  --tap: 44px;
 
   /* --- marquee ----------------------------------------------------------- */
   --offset: 20vw;

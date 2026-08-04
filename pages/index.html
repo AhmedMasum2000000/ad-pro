@@ -17,7 +17,10 @@
           <div class="slider-wrapper" id="slider">
             <div class="slider-track">
               <section class="slide is-active" aria-roledescription="slide" data-cursor="media" data-cursor-label="See sites">
-                <div class="slide__media" style="--slide-img:url('/images/hero-outdoor.svg')" aria-hidden="true"></div>
+                <!-- The junction illustration carries its two billboards at the
+                     far left and right, so a portrait crop has to be told to
+                     hold the lit one rather than the empty street between. -->
+                <div class="slide__media" style="--slide-img:url('/images/hero-outdoor.svg'); --slide-focus:80%" aria-hidden="true"></div>
                 <div class="slider-text gl-padding_lr">
                   <article class="slider-article">
                     <span class="sub-text">Outdoor advertising, Bangladesh</span>

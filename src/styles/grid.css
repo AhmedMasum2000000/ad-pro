@@ -108,16 +108,44 @@
 
 /* Both axes. */
 .gl-padding {
-  padding: var(--gl-padding-tb) var(--gl-padding-lr);
+  padding-block: var(--gl-padding-tb);
+  padding-inline: var(--edge-l) var(--edge-r);
 }
 
 /* Horizontal only — for sections that manage their own vertical rhythm. */
 .gl-padding_lr {
-  padding-inline: var(--gl-padding-lr);
+  padding-inline: var(--edge-l) var(--edge-r);
 }
 
 .gl-padding_tb {
   padding-block: var(--gl-padding-tb);
+}
+
+/*
+  Vertical rhythm for a section that carries no component of its own.
+
+  `.gl-padding_lr` alone leaves `padding-block: 0`, which reads fine on
+  desktop — adjacent sections are visually separated by the whitespace beside
+  their own columns. On a phone those columns stack full-width and that
+  separation disappears entirely, so headings run straight into the paragraph
+  of the section above. This is the class that gives them their own space.
+*/
+.gl-section {
+  padding-block: var(--section-gap);
+}
+
+/*
+  The first thing on a page sits under the fixed header, so it has to reserve
+  the header's height itself. Applied to the element rather than to `main` so
+  a full-bleed hero — which is *meant* to run under the header — can opt out
+  simply by not being one of these.
+*/
+.page-content > .intro-text-wrapper:first-child {
+  padding-top: max(var(--intro-gap), var(--header-safe));
+}
+
+.page-content > .gl-section:first-child {
+  padding-top: max(var(--section-gap), var(--header-safe));
 }
 
 .z-on-top { z-index: var(--z-curtain); }

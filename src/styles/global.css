@@ -207,7 +207,7 @@ body:not(.isLoading) .hideOnLoad {
   left: 0;
   width: 100%;
   z-index: var(--z-header);
-  padding: 1.25rem var(--gl-padding-lr);
+  padding: 1.25rem var(--edge-r) 1.25rem var(--edge-l);
   background: linear-gradient(to bottom, rgba(14, 20, 32, 0.9), rgba(14, 20, 32, 0));
   pointer-events: none; /* the bar is a scrim; only its controls take clicks */
 }
@@ -281,13 +281,46 @@ body.menu-open .menu-toggle__bars span:last-child {
   margin-top: clamp(4rem, 12vw, 10rem);
 }
 
+/*
+  The call to action, the three link columns and the platform row are three
+  separate bands, not one run of text. Without explicit spacing they had none
+  at all once the columns stacked — the CTA button ran straight into the word
+  "Pages".
+*/
+.footer-cta {
+  margin-bottom: clamp(2.5rem, 8vw, 5rem);
+}
+
 .footer-grid {
-  row-gap: var(--grid-gap);
+  row-gap: clamp(2rem, 6vw, 3rem);
 }
 
 .footer-heading {
   font-size: var(--h2-size);
   margin-bottom: 1.5rem;
+}
+
+/* `.sub-text` is an inline span, so it needs to be told to hold a line of its
+   own above each group. */
+.footer-grid .sub-text,
+.footer-platforms .sub-text {
+  display: block;
+  margin-bottom: 0.9rem;
+}
+
+.footer-links {
+  display: flex;
+  flex-direction: column;
+}
+
+.footer-platforms {
+  margin-top: clamp(2rem, 6vw, 3rem);
+  padding-top: clamp(1.5rem, 4vw, 2rem);
+  border-top: 1px solid var(--line-color);
+}
+
+.footer-platforms .social-links {
+  margin-top: 0;
 }
 
 .social-links {
@@ -314,8 +347,9 @@ body.menu-open .menu-toggle__bars span:last-child {
 
 .cookie-alert-wrapper {
   position: fixed;
-  left: var(--gl-padding-lr);
-  bottom: 1.5rem;
+  left: var(--edge-l);
+  right: var(--edge-r);
+  bottom: calc(1.5rem + var(--safe-b));
   z-index: var(--z-alert);
   max-width: 30rem;
   padding: 1.5rem;

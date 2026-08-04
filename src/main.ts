@@ -14,6 +14,8 @@ import './styles/grid.css';
 import './styles/typography.css';
 import './styles/global.css';
 import './styles/components.css';
+// Last, so the small-screen layer overrides the composition above it.
+import './styles/mobile.css';
 
 import { initViewport } from './lib/viewport';
 import { initBarba, mountPage } from './motion/barba';

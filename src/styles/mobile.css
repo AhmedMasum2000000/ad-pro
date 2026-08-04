@@ -1,0 +1,335 @@
+/*
+  The small-screen layer.
+
+  Everything above this file is written mobile-first where it can be — the
+  type scale is fluid, the grid collapses through `xsm-grid-100`, and the
+  gutters are `clamp()`ed. What could not be expressed that way lives here, in
+  one place, so the phone layout can be read and changed as a whole rather
+  than reconstructed from media queries scattered across five files.
+
+  Two axes, deliberately separate:
+
+  - `max-width: 767px` is about *space*. A layout that has to stack.
+  - `pointer: coarse` is about *reach*. A finger needs 44px whether it is
+    holding a phone or a 12in tablet, and a mouse on a 600px window does not.
+
+  Nothing here changes the desktop composition; the reference design is the
+  design, and this only makes it survive a 390px viewport.
+*/
+
+/* --- reach: touch targets --------------------------------------------------
+   Twenty links and buttons measured 29-36px tall. The rule is to grow the
+   padding box rather than the type, so the setting is unchanged and only the
+   hit area moves. */
+
+@media (pointer: coarse) {
+  /*
+    Half the difference between a comfortable target and the link's own line
+    box, in `em` so it tracks the link's font size. The underline has to move
+    down by the same amount or it detaches from the text and floats at the
+    bottom of the enlarged box.
+  */
+  .text-link {
+    --link-tap-pad: max(0.25em, calc((var(--tap) - 1.6em) / 2));
+    padding-block: var(--link-tap-pad);
+  }
+
+  .text-link::after {
+    bottom: var(--link-tap-pad);
+  }
+
+  .brand,
+  .menu-toggle,
+  .menu-close,
+  .slideshow-control {
+    min-height: var(--tap);
+  }
+
+  /* Buttons in a filter row are bare text, so their target is their line box
+     until it is padded out. */
+  .filter-btn {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--tap);
+    padding-inline: 0.15rem;
+  }
+
+  .menu-sublink {
+    display: flex;
+    align-items: center;
+    min-height: var(--tap);
+    padding-block: 0.2rem;
+  }
+
+  .checklist li,
+  .awards-list li {
+    padding-block: 0.75rem;
+  }
+}
+
+/* --- space: phone layout --------------------------------------------------- */
+
+@media (max-width: 767px) {
+  /*
+    The header keeps its 4.75rem total height — which `--header-safe` depends
+    on — while giving the brand lockup room to reach a 44px target: the bar
+    loses the padding the lockup gains.
+  */
+  .main-nav-wrapper {
+    padding-block: 1rem;
+  }
+
+  .brand {
+    font-size: 1.25rem;
+    gap: 0.55rem;
+  }
+
+  .brand__mark {
+    width: 2rem;
+    height: 2rem;
+  }
+
+  /* --- hero ---------------------------------------------------------------
+     Three separate collisions at 390x844: the play control sat on top of the
+     CTA button, the site caption ran into the bottom edge of the screen, and
+     the illustration was invisible. */
+
+  .slider-text {
+    /* Clears the home indicator on a notched phone; `--safe-b` is 0 elsewhere. */
+    padding-bottom: calc(1.75rem + var(--safe-b));
+  }
+
+  /*
+    The control moves out of the CTA's way and into the top-right, which is
+    otherwise the emptiest part of a portrait hero. It reads as a slideshow
+    index there, which is what it is.
+  */
+  .slider-nav {
+    top: var(--header-safe);
+    bottom: auto;
+  }
+
+  /*
+    A 1600x700 illustration inside a 390x844 box is scaled to fit the height
+    under `cover`, so only a 323px-wide window of the original is ever on
+    screen. Two things followed from that, and both read as "the hero is
+    empty":
+
+    1. The old scrim ran at 0.82-0.94 alpha, which blacked out the little that
+       was visible. It is a vertical ramp now — light across the top two
+       thirds where nothing is written, dark only behind the headline.
+
+    2. The default centre crop landed in the gap *between* the two billboards
+       in the illustration, so the window held nothing but sky. The crop can't
+       be avoided at this aspect ratio, so each slide names its own focal
+       point through `--slide-focus` instead; 50% still centres, which is
+       right for the two illustrations whose subject is already in the middle.
+  */
+  .slide__media {
+    background:
+      radial-gradient(130% 55% at 50% 6%, rgba(107, 163, 232, 0.2), transparent 62%),
+      linear-gradient(
+        180deg,
+        rgba(14, 20, 32, 0.28) 0%,
+        rgba(14, 20, 32, 0.4) 34%,
+        rgba(14, 20, 32, 0.84) 66%,
+        rgba(14, 20, 32, 0.96) 100%
+      ),
+      var(--slide-img, none) var(--slide-focus, 50%) center / cover no-repeat;
+  }
+
+  .slider-copyright-text {
+    margin-top: 1.1rem;
+  }
+
+  /* --- rhythm --------------------------------------------------------------
+     Stacked columns carry no whitespace beside them, so the gap between two
+     text blocks has to be explicit. */
+
+  .css-grid-wrapper > .grid-item + .grid-item {
+    margin-top: 0.35rem;
+  }
+
+  .service-block__title,
+  .grid-item > .accent-title {
+    margin-bottom: 0.75rem;
+  }
+
+  /* The text half of a media card is already inside a padded box; on mobile
+     that padding is doing the same job twice. */
+  .card-grid__text {
+    padding-inline: 0;
+    padding-block: 1.25rem 0;
+  }
+
+  /* --- client wall ---------------------------------------------------------
+     At `minmax(7.5rem, 1fr)` the wall resolved to two 174px squares per row —
+     3,666px of monograms for 40 names. Three narrower, shallower tiles put the
+     same roster in a third of the height, which is the point of a wall. */
+
+  .client-wall {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .client-tile {
+    aspect-ratio: 4 / 3;
+    gap: 0.3rem;
+    padding: 0.5rem 0.35rem;
+  }
+
+  .client-tile__monogram {
+    font-size: 1.15rem;
+  }
+
+  .client-tile__name {
+    font-size: 0.58rem;
+    /* Two lines maximum: a long name should not set the height of its row. */
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    overflow: hidden;
+  }
+
+  /* --- inventory ----------------------------------------------------------- */
+
+  .board-card__body {
+    padding: 1.1rem;
+  }
+
+  /* The two spec pairs fit side by side at 390px, but only just; stacking the
+     term above its value keeps both readable without shrinking the type. */
+  .board-card__specs {
+    gap: 0.5rem 1.25rem;
+    margin: 0.75rem 0;
+  }
+
+  /*
+    A table that scrolls sideways inside the page gives no sign it can. The
+    fade on the trailing edge is that sign — it disappears as the last column
+    arrives because it is painted on the scroll container, not the table.
+  */
+  .table-scroll {
+    -webkit-overflow-scrolling: touch;
+    mask-image: linear-gradient(to right, #000 88%, transparent 100%);
+  }
+
+  .table-scroll::after {
+    content: 'Scroll for the full table';
+    display: block;
+    padding-top: 0.85rem;
+    font-size: var(--sub-size);
+    color: var(--grey-dark-color);
+  }
+
+  /* --- menu ----------------------------------------------------------------
+     One column, so the three link groups need rules between them to stay
+     legible as separate groups rather than one long list. */
+
+  .main-navigation {
+    padding-bottom: var(--safe-b);
+  }
+
+  .menu-header {
+    padding-block: 1rem;
+  }
+
+  .main__nav {
+    padding-top: 1.25rem;
+    row-gap: 0;
+  }
+
+  .links_group + .links_group {
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--line-color);
+  }
+
+  .links_group__label {
+    margin-bottom: 0.9rem;
+  }
+
+  .menu-foot {
+    padding-bottom: calc(clamp(1.5rem, 4vw, 3rem) + var(--safe-b));
+  }
+
+  /* --- footer -------------------------------------------------------------- */
+
+  .footer-grid > .grid-item + .grid-item {
+    margin-top: 0;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--line-color);
+  }
+
+  .footer-meta {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  #footer .gl-padding {
+    padding-bottom: calc(var(--gl-padding-tb) + var(--safe-b));
+  }
+}
+
+/* --- short viewports --------------------------------------------------------
+   A phone held sideways, mostly — and this is the case the width-based layer
+   above cannot see.
+
+   The display scale is keyed to viewport *width*, which is exactly backwards
+   when an 844px-wide screen is only 390px tall: the headline sets at 100px,
+   the hero's copy, button and caption no longer fit, and `overflow: hidden`
+   on the header quietly cuts them off. Keying the hero headline to the height
+   instead, and letting the header grow past the fold, fixes both. */
+
+@media (orientation: landscape) and (max-height: 640px) {
+  /* The hero may now be taller than the screen. That is the point: a clipped
+     call to action is worse than one reached by a short scroll. */
+  .main-header {
+    min-height: max(var(--size-vh100), 26rem);
+  }
+
+  .slide h1 {
+    font-size: clamp(1.6rem, 7vh + 0.5rem, 4rem);
+  }
+
+  .slider-text {
+    /* A floor, for the case where the copy is long enough to reach the top. */
+    padding-top: var(--header-safe);
+    padding-bottom: clamp(1.5rem, 5vh, 3rem);
+  }
+
+  .slider-article .btn-wrapper {
+    margin-top: 1.1rem;
+  }
+
+  .slider-copyright-text {
+    margin-top: 0.85rem;
+  }
+
+  /* The intro block on every other page is sized off `vw` too, and runs to
+     12rem of padding on a landscape phone. */
+  .intro-text-wrapper {
+    padding-block: max(var(--header-safe), clamp(2rem, 12vh, 6rem));
+  }
+}
+
+/* --- very small phones ------------------------------------------------------
+   360px and below: the wall drops to two columns rather than squeezing three
+   into 100px each, and the buttons stop trying to sit side by side. */
+
+@media (max-width: 360px) {
+  /* 568px tall leaves the hero about 400px once the header and its own insets
+     are taken out — just enough for this headline at a slightly tighter
+     setting, and not enough at the full one. */
+  .slide h1 {
+    font-size: clamp(1.5rem, 8vw + 0.5rem, 3rem);
+  }
+
+  .client-wall {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .btn-wrapper .btn {
+    flex: 1 1 100%;
+    justify-content: center;
+  }
+}
