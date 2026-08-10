@@ -1116,14 +1116,25 @@ details[open] .faq__marker::after { transform: rotate(0deg); }
    objections that come up every time: how long, what is included, how do I
    know it ran. */
 
+/*
+  The gutter is on the outside, the panel is inside it. Written this way round
+  so the block lines up with the page whether it is dropped into a section or
+  straight into a template.
+*/
 .cta-block {
   margin-block: clamp(2rem, 6vw, 4rem);
-  border: 1px solid var(--line-color);
-  background: linear-gradient(150deg, rgba(44, 111, 198, 0.1), rgba(20, 29, 44, 0.35));
 }
 
 .cta-block__inner {
   padding: clamp(1.5rem, 4vw, 3rem);
+  border: 1px solid var(--line-color);
+  background: linear-gradient(150deg, rgba(44, 111, 198, 0.1), rgba(20, 29, 44, 0.35));
+}
+
+/* When the block is the last thing before the footer, the footer's own top
+   margin is doing the same job twice. */
+.cta-block + #footer {
+  margin-top: clamp(2rem, 6vw, 4rem);
 }
 
 .cta-block__line {
@@ -1419,4 +1430,221 @@ details[open] .faq__marker::after { transform: rotate(0deg); }
 .answer-list--compact .answer-list__a {
   flex: 1 1 16rem;
   -webkit-line-clamp: 2;
+}
+
+/* --- newsroom ---------------------------------------------------------------
+   The lead piece takes the full width and the rest fall into a grid, which is
+   the oldest news layout there is and still the fastest to scan. */
+
+.dateline {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 0.75rem;
+  margin-top: 1.5rem;
+  font-size: var(--sub-size);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--grey-dark-color);
+}
+
+.news-lead__link {
+  display: block;
+  padding: clamp(1.25rem, 3.5vw, 2.5rem);
+  border: 1px solid var(--line-color);
+  background: linear-gradient(150deg, rgba(44, 111, 198, 0.08), rgba(20, 29, 44, 0.3));
+  transition: border-color var(--dur-fast) var(--ease-out);
+}
+
+.news-lead__link:hover,
+.news-lead__link:focus-visible {
+  border-color: var(--lightalpha-color);
+}
+
+.news-lead__topic,
+.news-card__topic {
+  display: block;
+  font-size: var(--sub-size);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--lightalpha-color);
+  margin-bottom: 0.75rem;
+}
+
+.news-lead__title {
+  font-size: var(--h2-size);
+  max-width: 24ch;
+  margin-bottom: 1rem;
+}
+
+.news-lead__stand {
+  max-width: 62ch;
+  color: var(--text-color);
+}
+
+.news-lead__meta,
+.news-card__meta {
+  font-size: var(--sub-size);
+  color: var(--grey-dark-color);
+}
+
+.news-lead__meta {
+  margin-bottom: 1.25rem;
+}
+
+.news-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 20rem), 1fr));
+  gap: var(--grid-gap);
+  margin-top: var(--grid-gap);
+}
+
+.news-card__link {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  height: 100%;
+  padding: clamp(1rem, 2.5vw, 1.5rem);
+  border: 1px solid var(--line-color);
+  transition: border-color var(--dur-fast) var(--ease-out),
+              background var(--dur-fast) var(--ease-out);
+}
+
+.news-card__link:hover,
+.news-card__link:focus-visible {
+  border-color: var(--lightalpha-color);
+  background: var(--bg-raised);
+}
+
+.news-card__title {
+  font-family: var(--font-heading);
+  font-size: var(--h4-size);
+  text-transform: uppercase;
+  line-height: 1.1;
+}
+
+.news-card__stand {
+  font-size: var(--sub-size);
+  line-height: 1.55;
+  color: var(--grey-dark-color);
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  overflow: hidden;
+}
+
+.news-card__meta {
+  margin-top: auto;
+}
+
+/* --- scroll effects ---------------------------------------------------------
+   `--parallax` is written by src/motion/scrollfx.ts as a pixel offset. It is
+   consumed here rather than being applied as an inline transform, so an
+   element can combine its drift with whatever transform it already has —
+   the hero media, for instance, is also scaled. */
+
+[data-parallax] {
+  transform: translate3d(0, var(--parallax, 0px), 0);
+  will-change: transform;
+}
+
+/* The hero media already carries a scale for its slow zoom, so it composes
+   the two rather than letting the parallax overwrite it. */
+.slide__media[data-parallax] {
+  transform: translate3d(0, var(--parallax, 0px), 0) scale(1.06);
+}
+
+.slide.is-active .slide__media[data-parallax] {
+  transform: translate3d(0, var(--parallax, 0px), 0) scale(1);
+}
+
+/*
+  Reading position, pinned to the top edge. Painted with a scaled transform
+  rather than an animated width so it never triggers layout — this element
+  updates on every scroll frame, so it is the one that most needs to be free.
+*/
+.scroll-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: var(--z-header);
+  width: 100%;
+  height: 2px;
+  background: linear-gradient(90deg, var(--brand-blue), var(--lightalpha-color));
+  transform: scaleX(0);
+  transform-origin: left center;
+  pointer-events: none;
+}
+
+/* --- ASCII ------------------------------------------------------------------
+   Headings resolve out of noise. While a heading is mid-scramble the glyphs
+   are wider than the letters that replace them, so the line is held at a
+   stable width to stop the block reflowing on every frame. */
+
+[data-scramble] {
+  font-variant-ligatures: none;
+}
+
+/*
+  The character-rendered twin of a photograph, revealed on hover. It sits over
+  the image at full bleed; the image underneath is what a screen reader and a
+  crawler see, and the canvas is `aria-hidden` decoration.
+*/
+.ascii-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--dur-base) var(--ease-out);
+}
+
+.listing-figure.has-ascii,
+.article-figure.has-ascii {
+  position: relative;
+}
+
+.listing-figure.has-ascii:hover .ascii-canvas,
+.article-figure.has-ascii:hover .ascii-canvas,
+.article-figure.has-ascii:focus-within .ascii-canvas {
+  opacity: 1;
+}
+
+/* A quiet hint that the picture does something, shown only where the effect
+   actually exists. */
+.listing-figure.has-ascii::after,
+.article-figure.has-ascii::after {
+  content: 'Hover to decode';
+  position: absolute;
+  right: 0.75rem;
+  top: 0.75rem;
+  z-index: 2;
+  padding: 0.3em 0.7em;
+  font-size: var(--sub-size);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--lightalpha-color);
+  background: var(--darkalpha-color);
+  backdrop-filter: blur(6px);
+  opacity: 0.85;
+  transition: opacity var(--dur-fast) var(--ease-out);
+  pointer-events: none;
+}
+
+.listing-figure.has-ascii:hover::after,
+.article-figure.has-ascii:hover::after {
+  opacity: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-parallax] {
+    transform: none;
+    will-change: auto;
+  }
+
+  .scroll-progress,
+  .ascii-canvas {
+    display: none;
+  }
 }

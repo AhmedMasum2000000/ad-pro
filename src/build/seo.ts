@@ -17,6 +17,7 @@ import {
 } from '../data/site';
 import { boardFaqs, boardSummary } from './boardCopy';
 import { faqArticles, faqBySlug } from '../data/faq';
+import { articleBySlug } from '../data/articles';
 
 export interface PageMeta {
   title: string;
@@ -40,6 +41,8 @@ export interface PageMeta {
   question?: string;
   /** Emit the index of every question — the answers hub. */
   faqHub?: boolean;
+  /** Slug of the news article this page carries. */
+  article?: string;
 }
 
 const root = company.siteUrl.replace(/\/$/, '');
@@ -224,6 +227,29 @@ function questionNode(slug: string): Record<string, unknown> | null {
   };
 }
 
+/* An article is an Article: dated, bylined and about a subject rather than a
+   question. `datePublished` is the field that makes it eligible to be treated
+   as news rather than an undated page.                                     */
+function articleNode(slug: string): Record<string, unknown> | null {
+  const article = articleBySlug(slug);
+  if (!article) return null;
+
+  return {
+    '@type': 'Article',
+    '@id': `${abs(`news-${slug}.html`)}#article`,
+    headline: article.title,
+    description: article.standfirst,
+    datePublished: article.published,
+    dateModified: article.published,
+    author: { '@id': ORG_ID },
+    publisher: { '@id': ORG_ID },
+    inLanguage: 'en',
+    articleSection: article.topic,
+    keywords: article.keywords.join(', '),
+    mainEntityOfPage: { '@type': 'WebPage', '@id': `${abs(`news-${slug}.html`)}#webpage` },
+  };
+}
+
 function breadcrumbs(meta: PageMeta): Record<string, unknown> | null {
   if (!meta.breadcrumbs?.length) return null;
 
@@ -283,6 +309,11 @@ export function buildJsonLd(meta: PageMeta): string {
 
   if (meta.question) {
     const node = questionNode(meta.question);
+    if (node) graph.push(node);
+  }
+
+  if (meta.article) {
+    const node = articleNode(meta.article);
     if (node) graph.push(node);
   }
 

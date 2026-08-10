@@ -27,8 +27,8 @@ export const company = {
   tagline: 'Out-of-home that the whole city stops for',
   founded: 2019,
   email: 'info@adprobd.com',
-  phone: '+880 1316-743003',
-  phoneHref: '+8801316743003',
+  phone: '+880 1763-924619',
+  phoneHref: '+8801763924619',
   corporateAddress:
     'Flat A1, House 99 (1st floor), Road 10/2, Block D, Niketon, Gulshan 1, Dhaka',
   registeredAddress:
@@ -66,8 +66,11 @@ export const nav: NavGroup[] = [
   },
   {
     tag: 'learn',
-    label: 'Answers',
-    links: [{ label: 'How it works', href: 'faq.html' }],
+    label: 'Read',
+    links: [
+      { label: 'News', href: 'news.html' },
+      { label: 'How it works', href: 'faq.html' },
+    ],
   },
   {
     tag: 'company',
@@ -485,7 +488,7 @@ export interface Faq {
 export const faqs: Faq[] = [
   {
     q: 'How is a billboard priced in Bangladesh?',
-    a: 'A digital site is priced per minute of screen time, so what you pay depends on the location, the screen size, how many minutes a day you take and how long the campaign runs. Rates move with demand and season, which is why we quote rather than publish them — call +880 1316-743003 or send the cities and dates and you will have a written price, production and mounting included, within one working day.',
+    a: 'A digital site is priced per minute of screen time, so what you pay depends on the location, the screen size, how many minutes a day you take and how long the campaign runs. Rates move with demand and season, which is why we quote rather than publish them — call +880 1763-924619 or send the cities and dates and you will have a written price, production and mounting included, within one working day.',
   },
   {
     q: 'What is the difference between a static and a digital billboard?',

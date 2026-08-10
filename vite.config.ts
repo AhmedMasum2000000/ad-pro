@@ -4,6 +4,8 @@ import { billboards, cityGroups, company } from './src/data/site';
 import { boardMetaDescription, sizeWords } from './src/build/boardCopy';
 import { faqArticles } from './src/data/faq';
 import { buildCta, buildFaqArticle, buildFaqHub, faqPath } from './src/build/faqPages';
+import { articles } from './src/data/articles';
+import { buildArticle, buildNewsHub, newsPath } from './src/build/newsPages';
 import {
   buildBoards,
   buildCity,
@@ -156,6 +158,27 @@ for (const article of faqArticles) {
   };
 }
 
+meta.news = {
+  title: 'Outdoor Advertising News and Analysis — Bangladesh',
+  description:
+    'Seasonal planning, sector playbooks and what is changing in Bangladeshi out-of-home advertising, written by the operator of a 58-site LED network.',
+  path: 'news.html',
+  namespace: 'news',
+  priority: 0.85,
+};
+
+for (const article of articles) {
+  meta[`news-${article.slug}`] = {
+    title: article.title,
+    description: article.metaDescription,
+    path: newsPath(article.slug),
+    namespace: 'article',
+    breadcrumbs: [{ name: 'News', path: 'news.html' }],
+    article: article.slug,
+    priority: 0.7,
+  };
+}
+
 for (const group of cityGroups) {
   const sizes = group.boards.map((b) => sizeWords(b));
   meta[`billboards-${group.slug}`] = {
@@ -192,6 +215,8 @@ const shellPlugin = (): Plugin => ({
       if (page.citySlug) html = html.replace('<!--@CITY-->', buildCity(page.citySlug));
       if (page.question) html = html.replace('<!--@ANSWER-->', buildFaqArticle(page.question));
       if (page.faqHub) html = html.replace('<!--@ANSWERS-->', buildFaqHub());
+      if (page.article) html = html.replace('<!--@ARTICLE-->', buildArticle(page.article));
+      if (page.namespace === 'news') html = html.replace('<!--@NEWS-->', buildNewsHub());
 
       return html
         .replace('<!--@HEAD-->', buildHead(page))
@@ -209,6 +234,10 @@ const shellPlugin = (): Plugin => ({
         // to run after the body is in place — hence `replaceAll`.
         .replaceAll('<!--@MARQUEE-->', buildMarquee())
         .replace('<!--@BOARDS_ALL-->', buildBoards())
+        // The phone number appears in hand-written templates too. Tokens
+        // rather than literals, so it lives in exactly one place.
+        .replaceAll('@PHONE_HREF@', company.phoneHref)
+        .replaceAll('@PHONE@', company.phone)
         .replaceAll(
           '<!--@CTA-->',
           buildCta(

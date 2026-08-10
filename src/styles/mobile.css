@@ -332,3 +332,25 @@
     justify-content: center;
   }
 }
+
+/* --- motion on a phone ------------------------------------------------------
+   The effects stay, at lower amplitude (see scrollfx.ts), but the memory
+   hints do not: `will-change` on a dozen elements reserves a compositor layer
+   for each, which is a real cost on a mid-range device and buys very little
+   for a translation this small. */
+
+@media (max-width: 767px) {
+  [data-parallax] {
+    will-change: auto;
+  }
+
+  /* The decode hint is desktop-only — there is no hover to act on it. */
+  .listing-figure.has-ascii::after,
+  .article-figure.has-ascii::after {
+    display: none;
+  }
+
+  .scroll-progress {
+    height: 3px;
+  }
+}

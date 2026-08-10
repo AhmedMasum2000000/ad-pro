@@ -241,6 +241,7 @@ export function buildFooter(): string {
     { label: 'Clients', href: 'clients.html' },
     { label: 'About', href: 'about.html' },
     { label: 'Contact', href: 'contact.html' },
+    { label: 'News', href: 'news.html' },
     { label: 'Answers', href: FAQ_HUB },
   ]
     .map((l) => `<li><a class="text-link" href="${esc(l.href)}">${esc(l.label)}</a></li>`)
@@ -320,7 +321,7 @@ export function buildStats(): string {
     .map(
       (s) => `
       <div class="grid-item grid-25 xsm-grid-50 stat" data-reveal-item>
-        <span class="stat__value">${esc(s.value)}</span>
+        <span class="stat__value" data-count>${esc(s.value)}</span>
         <span class="stat__label">${esc(s.label)}</span>
         <span class="stat__detail">${esc(s.detail)}</span>
       </div>`,
@@ -467,7 +468,7 @@ export function buildListing(slug: string): string {
         <section class="intro-text-wrapper gl-padding_lr">
           <header class="intro-text" data-reveal>
             <span class="sub-text">LED billboard · ${esc(board.city)}</span>
-            <h1 class="listing-title">${esc(board.title)}</h1>
+            <h1 class="listing-title" data-scramble>${esc(board.title)}</h1>
             <p class="h1-em">${esc(boardIntro(board))}</p>
             <div class="btn-wrapper">
               <a class="btn addHover" href="tel:${esc(company.phoneHref)}">Call for price</a>
@@ -477,7 +478,7 @@ export function buildListing(slug: string): string {
         </section>
 
         <section class="gl-section gl-padding_lr" data-reveal>
-          <figure class="listing-figure">
+          <figure class="listing-figure" data-ascii>
             <img class="listing-figure__img" src="/${esc(board.image)}"
                  alt="${esc(board.title)} LED billboard in ${esc(board.city)}, facing ${esc(board.facing)}"
                  style="object-position:${focus}"
@@ -538,7 +539,7 @@ export function buildListing(slug: string): string {
         <section class="gl-section gl-padding_lr">
           <div class="intro-text" data-reveal>
             <span class="sub-text">${esc(board.city)} and the wider network</span>
-            <h2 class="mtitle">Other sites you might hold instead</h2>
+            <h2 class="mtitle" data-scramble>Other sites you might hold instead</h2>
           </div>
           <ul class="nearby" data-reveal>${nearby}</ul>
           <div class="btn-wrapper">
@@ -547,12 +548,10 @@ export function buildListing(slug: string): string {
           </div>
         </section>
 
-        <section class="gl-padding_lr">
-          ${buildCta(
+        ${buildCta(
             `Want ${esc(board.name)}? Ask us what it costs.`,
             'Screen time on this site is quoted per booking. Call and we will tell you what is open on this face and what it comes to — usually while you are still on the line.',
-          )}
-        </section>`;
+          )}`;
 }
 
 /* --- city index ----------------------------------------------------------- */
@@ -589,7 +588,7 @@ export function buildCity(slug: string): string {
         <section class="intro-text-wrapper gl-padding_lr">
           <header class="intro-text" data-reveal>
             <span class="sub-text">${group.boards.length} LED site${group.boards.length === 1 ? '' : 's'}</span>
-            <h1>LED billboards in ${esc(group.city)}</h1>
+            <h1 data-scramble>LED billboards in ${esc(group.city)}</h1>
             <p class="h1-em">
               Every AD PRO digital screen in ${esc(group.city)}, with the size, the facing and the
               on-air window for each. Rates are quoted per site — call
@@ -641,12 +640,10 @@ export function buildCity(slug: string): string {
           </div>
         </section>
 
-        <section class="gl-padding_lr">
-          ${buildCta(
+        ${buildCta(
             `Booking in ${esc(group.city)}?`,
             'Tell us the dates and we will come back with what is free across the city, with sizes, hours and an all-in cost.',
-          )}
-        </section>`;
+          )}`;
 }
 
 /** The city index used on the billboards hub. */

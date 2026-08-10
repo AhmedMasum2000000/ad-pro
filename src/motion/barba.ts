@@ -16,6 +16,8 @@ import { coverForTransition, revealAfterTransition } from './curtain';
 import { initFilter } from './flipFilter';
 import { initMagnetic } from './cursor';
 import { initMarquee } from './marquee';
+import { initHalftone, initScramble } from './ascii';
+import { initScrollFx } from './scrollfx';
 import { initReveals } from './reveal';
 import { initSlideshow } from './slideshow';
 import { scrollToTop, startScroll, stopScroll } from './scroll';
@@ -46,6 +48,11 @@ export function mountPage(scope: ParentNode = document): void {
     initReveals(scope),
     initFilter(scope),
     initMagnetic(scope),
+    // Scroll and ASCII effects are page-scoped: their observers point at nodes
+    // Barba is about to throw away, so they have to come down with the page.
+    initScrollFx(scope),
+    initScramble(scope),
+    initHalftone(scope),
   ];
   markCurrentNavLink();
 }

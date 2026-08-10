@@ -38,18 +38,24 @@ const citySlugs = [...new Set(boards.map((b) => b.citySlug))];
   first time somebody adds a question. If the shape of the data file changes,
   this throws rather than generating a short site.
 */
-const faqSource = readFileSync(join(root, 'src/data/faq.ts'), 'utf8');
-const faqSlugs = [...faqSource.matchAll(/^    slug: '([a-z0-9-]+)',$/gm)].map((m) => m[1]);
-if (faqSlugs.length === 0) {
-  throw new Error('generate-listing-pages: found no FAQ slugs in src/data/faq.ts');
-}
+const slugsFrom = (file) => {
+  const source = readFileSync(join(root, file), 'utf8');
+  const found = [...source.matchAll(/^    slug: '([a-z0-9-]+)',$/gm)].map((m) => m[1]);
+  if (found.length === 0) {
+    throw new Error(`generate-listing-pages: found no slugs in ${file}`);
+  }
+  return found;
+};
+
+const faqSlugs = slugsFrom('src/data/faq.ts');
+const newsSlugs = slugsFrom('src/data/articles.ts');
 
 mkdirSync(pagesDir, { recursive: true });
 
 // Clear the previous run first: a site renamed in the deck would otherwise
 // leave its old page behind, and a stale route is worse than a missing one.
 for (const file of readdirSync(pagesDir)) {
-  if (/^(led|billboards|faq)-.+\.html$/.test(file)) unlinkSync(join(pagesDir, file));
+  if (/^(led|billboards|faq|news)-.+\.html$/.test(file)) unlinkSync(join(pagesDir, file));
 }
 
 const skeleton = (namespace, placeholder) => `<!doctype html>
@@ -101,7 +107,12 @@ for (const slug of faqSlugs) {
   written += 1;
 }
 
+for (const slug of newsSlugs) {
+  writeFileSync(join(pagesDir, `news-${slug}.html`), skeleton('article', '<!--@ARTICLE-->'));
+  written += 1;
+}
+
 console.log(
-  `generate-listing-pages: ${written} routes ` +
-    `(${boards.length} sites, ${citySlugs.length} cities, ${faqSlugs.length} answers)`,
+  `generate-listing-pages: ${written} routes (${boards.length} sites, ` +
+    `${citySlugs.length} cities, ${faqSlugs.length} answers, ${newsSlugs.length} articles)`,
 );

@@ -30,7 +30,7 @@ import {
 } from '../data/faq';
 import { boardPath, cityPath } from './seo';
 
-const esc = (value: string): string =>
+export const esc = (value: string): string =>
   value
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
@@ -43,7 +43,7 @@ const esc = (value: string): string =>
  * the tags, so the small set that is allowed is escaped and then restored.
  * Anything else an author writes still comes out as literal text.
  */
-const rich = (value: string): string =>
+export const rich = (value: string): string =>
   esc(value)
     .replace(/&lt;(\/?)(strong|em)&gt;/g, '<$1$2>')
     .replace(/&lt;br \/&gt;/g, '<br />');
@@ -58,8 +58,12 @@ export const FAQ_HUB = 'faq.html';
    a reply they could have had in ninety seconds.                           */
 
 export function buildCta(line: string, context?: string): string {
+  // The block carries its own gutter. It is dropped into hand-written
+  // templates through a bare `<!--@CTA-->`, which has no section around it,
+  // and a component that only lines up when its caller remembers to wrap it
+  // is a component that will eventually not line up.
   return `
-        <aside class="cta-block" data-reveal>
+        <aside class="cta-block gl-padding_lr" data-reveal>
           <div class="cta-block__inner">
             <p class="cta-block__line">${rich(line)}</p>
             ${context ? `<p class="cta-block__context">${rich(context)}</p>` : ''}
@@ -87,7 +91,7 @@ function photoBlock(slug: string, caption: string): string {
   // The photograph links to the site it shows. An illustration in an article
   // that turns out to be bookable is a better call to action than a button.
   return `
-          <figure class="article-figure">
+          <figure class="article-figure" data-ascii>
             <a class="article-figure__link" href="${esc(boardPath(board))}">
               <img class="article-figure__img" src="/${esc(board.image)}"
                    alt="${esc(board.title)} LED billboard in ${esc(board.city)}, facing ${esc(board.facing)}"
@@ -101,7 +105,7 @@ function photoBlock(slug: string, caption: string): string {
           </figure>`;
 }
 
-function block(b: FaqBlock): string {
+export function renderBlock(b: FaqBlock): string {
   switch (b.kind) {
     case 'h2':
       return `<h2 class="article-h2">${rich(b.text)}</h2>`;
@@ -232,7 +236,7 @@ export function buildFaqArticle(slug: string): string {
         <section class="intro-text-wrapper gl-padding_lr">
           <header class="intro-text" data-reveal>
             <span class="sub-text">${esc(article.category)}</span>
-            <h1 class="listing-title">${esc(article.question)}</h1>
+            <h1 class="listing-title" data-scramble>${esc(article.question)}</h1>
             <p class="answer-lede">${rich(article.shortAnswer)}</p>
             <div class="btn-wrapper">
               <a class="btn btn--primary addHover" href="tel:${esc(company.phoneHref)}">Call for price</a>
@@ -243,7 +247,7 @@ export function buildFaqArticle(slug: string): string {
 
         <section class="gl-section gl-padding_lr">
           <article class="article" data-reveal>
-            ${article.body.map(block).join('\n')}
+            ${article.body.map(renderBlock).join('\n')}
           </article>
         </section>
 
@@ -287,7 +291,7 @@ export function buildFaqHub(): string {
         <section class="intro-text-wrapper gl-padding_lr">
           <header class="intro-text" data-reveal>
             <span class="sub-text">${faqArticles.length} questions answered</span>
-            <h1>Billboard advertising in Bangladesh, explained</h1>
+            <h1 data-scramble>Billboard advertising in Bangladesh, explained</h1>
             <p class="h1-em">
               What it costs, how it is priced, which format does which job, where the good sites
               are and how to tell whether any of it worked. Written by the people who own and run
