@@ -3,10 +3,11 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "AD PRO Communications Limited — outdoor advertising agency site, Dhaka, Bangladesh.",
+  "description": "AD PRO Communications Limited \u2014 outdoor advertising agency site, Dhaka, Bangladesh.",
   "scripts": {
-    "dev": "vite",
-    "build": "tsc -b && vite build",
+    "dev": "npm run prebuild && vite",
+    "prebuild": "node scripts/generate-listing-pages.mjs",
+    "build": "npm run prebuild && tsc -b && vite build",
     "build:pages": "BASE_PATH=/ad-pro/ npm run build && node scripts/publish-root.mjs",
     "preview": "vite preview",
     "typecheck": "tsc -b --noEmit"

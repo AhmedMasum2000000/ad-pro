@@ -6,7 +6,16 @@
  * sees cannot drift apart.
  */
 
-import { billboards, company, faqs, services } from '../data/site';
+import {
+  billboards,
+  boardBySlug,
+  cityGroups,
+  company,
+  faqs,
+  services,
+  type Billboard,
+} from '../data/site';
+import { boardFaqs, boardSummary } from './boardCopy';
 
 export interface PageMeta {
   title: string;
@@ -22,6 +31,10 @@ export interface PageMeta {
   service?: string;
   /** Priority hint for the sitemap. */
   priority?: number;
+  /** Slug of the single billboard this page is about. */
+  board?: string;
+  /** Slug of the city whose inventory this page lists. */
+  citySlug?: string;
 }
 
 const root = company.siteUrl.replace(/\/$/, '');
@@ -60,7 +73,9 @@ function localBusiness(): Record<string, unknown> {
     url: `${root}/`,
     telephone: company.phone,
     email: company.email,
-    priceRange: 'BDT 25,000 – BDT 300,000 per month',
+    // There is deliberately no priceRange. Screen time is quoted per site and
+    // the rates move; a band invented for structured data would be a claim
+    // nobody could stand behind.
     address: {
       '@type': 'PostalAddress',
       streetAddress: company.corporateAddress,
@@ -88,17 +103,90 @@ function serviceNode(slug: string): Record<string, unknown> | null {
     provider: { '@id': ORG_ID },
     areaServed: { '@type': 'Country', name: company.country },
     // The inventory doubles as the offer catalogue for billboard services.
-    hasOfferCatalog: {
-      '@type': 'OfferCatalog',
-      name: `${service.title} locations`,
-      itemListElement: billboards
-        .filter((b) => slug.startsWith(b.kind))
-        .map((b) => ({
-          '@type': 'Offer',
-          name: `${b.location}, ${b.city} — ${b.size}`,
-          areaServed: b.city,
-        })),
+    // Every site in it is an LED screen, so only the digital service carries
+    // the catalogue; the static page describes a format we build to order.
+    hasOfferCatalog:
+      slug === 'digital-billboards'
+        ? {
+            '@type': 'OfferCatalog',
+            name: `${service.title} locations`,
+            itemListElement: billboards.map((b) => ({
+              '@type': 'Offer',
+              name: `${b.name}, ${b.city} — ${b.dimension}`,
+              areaServed: b.city,
+              url: abs(boardPath(b)),
+              availability: 'https://schema.org/InStock',
+            })),
+          }
+        : undefined,
+  };
+}
+
+/* --- listings ---------------------------------------------------------------
+   A single screen is modelled as a Place with an Offer attached rather than a
+   Product: what is sold is time on a fixed structure at a fixed address, and
+   `Place` is what carries the geography a local search actually runs on.
+
+   The Offer states availability and nothing else. Schema.org would take a
+   `price`, but an invented one is worse than none, so it is left out and the
+   description says where a real number comes from.                         */
+
+export const boardPath = (board: Billboard): string => `led-${board.slug}.html`;
+export const cityPath = (slug: string): string => `billboards-${slug}.html`;
+
+function boardNode(board: Billboard): Record<string, unknown> {
+  return {
+    '@type': 'Place',
+    '@id': `${abs(boardPath(board))}#site`,
+    name: `${board.title} LED billboard`,
+    description: boardSummary(board),
+    address: {
+      '@type': 'PostalAddress',
+      addressLocality: board.city,
+      addressCountry: 'BD',
     },
+    photo: abs(board.image),
+    additionalProperty: [
+      { '@type': 'PropertyValue', name: 'Screen size', value: board.dimension },
+      { '@type': 'PropertyValue', name: 'Facing', value: board.facing },
+      { '@type': 'PropertyValue', name: 'Resolution', value: board.resolution },
+      board.ledModel
+        ? { '@type': 'PropertyValue', name: 'LED pitch', value: board.ledModel }
+        : null,
+      board.hours
+        ? { '@type': 'PropertyValue', name: 'Daily on-air hours', value: board.hours }
+        : null,
+    ].filter(Boolean),
+    makesOffer: {
+      '@type': 'Offer',
+      name: `Screen time on ${board.title}`,
+      availability: 'https://schema.org/InStock',
+      areaServed: board.city,
+      seller: { '@id': ORG_ID },
+      url: abs(boardPath(board)),
+      // No price and no priceSpecification. Screen time is quoted per site,
+      // so any figure here would be invented, and a currency band with no
+      // amount behind it tells a crawler nothing it can use.
+      description: 'Screen time quoted on request — call for price.',
+    },
+  };
+}
+
+function cityNode(slug: string): Record<string, unknown> | null {
+  const group = cityGroups.find((g) => g.slug === slug);
+  if (!group) return null;
+
+  return {
+    '@type': 'ItemList',
+    '@id': `${abs(cityPath(slug))}#inventory`,
+    name: `LED billboard sites in ${group.city}`,
+    numberOfItems: group.boards.length,
+    itemListElement: group.boards.map((b, index) => ({
+      '@type': 'ListItem',
+      position: index + 1,
+      name: b.title,
+      url: abs(boardPath(b)),
+    })),
   };
 }
 
@@ -121,10 +209,10 @@ function breadcrumbs(meta: PageMeta): Record<string, unknown> | null {
   };
 }
 
-function faqNode(): Record<string, unknown> {
+function faqNode(entries: { q: string; a: string }[] = faqs): Record<string, unknown> {
   return {
     '@type': 'FAQPage',
-    mainEntity: faqs.map((f) => ({
+    mainEntity: entries.map((f) => ({
       '@type': 'Question',
       name: f.q,
       acceptedAnswer: { '@type': 'Answer', text: f.a },
@@ -143,6 +231,19 @@ export function buildJsonLd(meta: PageMeta): string {
 
   if (meta.service) {
     const node = serviceNode(meta.service);
+    if (node) graph.push(node);
+  }
+
+  const board = meta.board ? boardBySlug(meta.board) : undefined;
+  if (board) {
+    graph.push(boardNode(board));
+    // Each listing answers its own questions from its own specs, so the FAQ
+    // block is unique per page rather than the site-wide set repeated 58 times.
+    graph.push(faqNode(boardFaqs(board)));
+  }
+
+  if (meta.citySlug) {
+    const node = cityNode(meta.citySlug);
     if (node) graph.push(node);
   }
 

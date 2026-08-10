@@ -8,6 +8,9 @@
 
     "moduleResolution": "bundler",
     "allowImportingTsExtensions": true,
+    // The billboard inventory is plain JSON so that both the TypeScript build
+    // and the page generator in scripts/ can read the one file.
+    "resolveJsonModule": true,
     "isolatedModules": true,
     "moduleDetection": "force",
     "noEmit": true,

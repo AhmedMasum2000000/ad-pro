@@ -65,19 +65,22 @@
 }
 
 /*
-  An original SVG illustration (set per slide via the --slide-img custom
-  property) sits under two gradients: a soft top-left highlight and a scrim
-  that keeps the overlaid text readable against whatever the art underneath
-  is doing. `--slide-img` defaults to `none` so a slide that doesn't set one
-  still renders the gradients alone.
+  The site photograph (set per slide via --slide-img) sits under two
+  gradients: a soft top-left highlight and a scrim that keeps the overlaid
+  text readable against whatever is in the frame. `--slide-img` defaults to
+  `none` so a slide that doesn't set one still renders the gradients alone.
+
+  `--slide-focus` is the horizontal point `cover` should hold on to — the
+  screen itself, worked out when the photograph was cropped. It matters most
+  on a phone, where a 3:2 photograph in a portrait hero is cropped hard.
 */
 .slide__media {
   position: absolute;
   inset: 0;
   background:
     radial-gradient(120% 90% at 20% 15%, rgba(107, 163, 232, 0.18), transparent 60%),
-    linear-gradient(160deg, rgba(20, 29, 44, 0.82) 0%, rgba(14, 20, 32, 0.88) 55%, rgba(11, 17, 27, 0.94) 100%),
-    var(--slide-img, none) center / cover no-repeat;
+    linear-gradient(160deg, rgba(20, 29, 44, 0.78) 0%, rgba(14, 20, 32, 0.84) 55%, rgba(11, 17, 27, 0.93) 100%),
+    var(--slide-img, none) var(--slide-focus, 50%) center / cover no-repeat;
   transform: scale(1.06);
   transition: transform 6s var(--ease-out);
 }
@@ -232,7 +235,7 @@
   transition: transform var(--dur-slow) var(--ease-out);
   background:
     radial-gradient(90% 70% at 70% 25%, rgba(107, 163, 232, 0.14), transparent 65%),
-    var(--card-img, none) center / cover no-repeat;
+    var(--card-img, none) var(--card-focus, 50% 50%) / cover no-repeat;
 }
 
 .grid-item-media__label {
@@ -909,4 +912,198 @@ details[open] .faq__marker::after { transform: rotate(0deg); }
 .faq__a {
   padding-bottom: 1.5rem;
   max-width: 60ch;
+}
+
+/* --- listing pages ----------------------------------------------------------
+   One page per billboard: photograph, specification, and the links out to the
+   rest of its city. The pattern is a property listing, because that is what a
+   visitor is doing here — comparing one site against the next. */
+
+/*
+  The whole card is the link, so the target is the photograph and the title
+  together rather than a small "view" line underneath. The old markup had a
+  bare `.text-link` inside; it is a span now, styled to match, since a link
+  inside a link is invalid.
+*/
+.board-card__link {
+  display: block;
+  color: inherit;
+}
+
+.board-card__link .text-link::after {
+  transform: scaleX(0);
+}
+
+.board-card:hover .text-link::after,
+.board-card__link:focus-visible .text-link::after {
+  transform: scaleX(1);
+  transform-origin: left center;
+}
+
+.listing-figure {
+  margin: 0;
+}
+
+.listing-figure__img {
+  width: 100%;
+  aspect-ratio: 3 / 2;
+  object-fit: cover;
+  border: 1px solid var(--line-color);
+}
+
+.listing-figure__caption {
+  margin-top: 0.85rem;
+  font-size: var(--sub-size);
+  color: var(--grey-dark-color);
+}
+
+/*
+  Specification rows. A two-column definition list rather than a table: there
+  is one subject, so the column headers a table would need are noise, and the
+  rows collapse to a stack on a phone without a scroll container.
+*/
+.spec-list {
+  margin: 0;
+  border-top: 1px solid var(--line-color);
+}
+
+.spec {
+  display: grid;
+  grid-template-columns: minmax(9rem, 34%) 1fr;
+  gap: 1rem;
+  padding-block: 0.9rem;
+  border-bottom: 1px solid var(--line-color);
+}
+
+.spec dt {
+  font-size: var(--sub-size);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--grey-dark-color);
+}
+
+.spec dd {
+  margin: 0;
+  font-size: var(--accent-size);
+}
+
+/* --- related sites ---------------------------------------------------------
+   The backlink layer. Every listing carries the rest of its city, so the
+   network is walkable in either direction and no page is a dead end. */
+
+.nearby {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 15rem), 1fr));
+  gap: var(--grid-gap);
+  padding-block: clamp(1.5rem, 4vw, 2.5rem);
+}
+
+.nearby__link {
+  display: block;
+  border: 1px solid var(--line-color);
+  transition: border-color var(--dur-fast) var(--ease-out);
+}
+
+.nearby__link:hover,
+.nearby__link:focus-visible {
+  border-color: var(--lightalpha-color);
+}
+
+.nearby__img {
+  width: 100%;
+  aspect-ratio: 3 / 2;
+  object-fit: cover;
+}
+
+.nearby__body {
+  display: block;
+  padding: 0.9rem 1rem 1.1rem;
+}
+
+.nearby__title {
+  display: block;
+  font-family: var(--font-heading);
+  font-size: var(--h4-size);
+  text-transform: uppercase;
+  line-height: 1.05;
+}
+
+.nearby__meta {
+  display: block;
+  margin-top: 0.35rem;
+  font-size: var(--sub-size);
+  color: var(--grey-dark-color);
+}
+
+/* --- city index ------------------------------------------------------------ */
+
+.city-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 16rem), 1fr));
+  gap: var(--grid-gap);
+  padding-block: clamp(1.5rem, 4vw, 2.5rem);
+}
+
+.city-card__link {
+  position: relative;
+  display: block;
+  overflow: hidden;
+  border: 1px solid var(--line-color);
+  transition: border-color var(--dur-fast) var(--ease-out);
+}
+
+.city-card__link:hover,
+.city-card__link:focus-visible {
+  border-color: var(--lightalpha-color);
+}
+
+.city-card__img {
+  width: 100%;
+  aspect-ratio: 3 / 2;
+  object-fit: cover;
+  transition: transform var(--dur-slow) var(--ease-out);
+}
+
+.city-card__link:hover .city-card__img {
+  transform: scale(1.04);
+}
+
+/* The label sits over the foot of the photograph, so it needs its own scrim
+   rather than relying on whatever happens to be in the frame. */
+.city-card__body {
+  position: absolute;
+  inset: auto 0 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  padding: 2.5rem 1rem 1rem;
+  background: linear-gradient(to top, rgba(14, 20, 32, 0.94), rgba(14, 20, 32, 0));
+}
+
+.city-card__name {
+  font-family: var(--font-heading);
+  font-size: var(--h3-size);
+  text-transform: uppercase;
+  line-height: 1;
+}
+
+.city-card__count {
+  font-size: var(--sub-size);
+  color: var(--lightalpha-color);
+}
+
+.city-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1.5rem;
+}
+
+/*
+  Listing headings are site names rather than marketing lines, and they are
+  long: at the full display size "Gulshan Circle-1, Upper" breaks at its own
+  hyphen on a phone and reads as two half-words. A step down the scale fits
+  the name on its own line at every width without touching the hero setting.
+*/
+.listing-title {
+  font-size: clamp(1.5rem, 7vw + 0.5rem, 5.5rem);
 }

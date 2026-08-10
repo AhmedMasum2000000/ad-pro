@@ -243,151 +243,88 @@ export const services: Service[] = [
   },
 ];
 
-/* --- billboard inventory -------------------------------------------------- */
+/* --- billboard inventory ---------------------------------------------------
+
+   The real network, read from src/data/boards.json — 58 LED sites lifted out
+   of the AD PRO proposal deck, one record per screen, each with the site
+   photograph that came with it.
+
+   Rates are deliberately absent. The deck quotes a per-minute cost for every
+   screen; those move, and a stale number on a public page is worse than no
+   number, so every listing asks the visitor to call instead.                */
+
+import boardData from './boards.json';
 
 export type BillboardKind = 'digital' | 'static';
 
 export interface Billboard {
   slug: string;
-  location: string;
+  /** The site as the deck names it, e.g. "Gulshan Circle-1, Upper". */
+  name: string;
+  /** Unique across the network — two sites share a name, so the page title
+      carries the facing as well. */
+  title: string;
   city: string;
-  kind: BillboardKind;
-  size: string;
-  /** Static boards read all day; digital boards have operating hours. */
-  hours: string;
+  citySlug: string;
+  /** As printed: W-30' x H-20'. */
+  dimension: string;
   facing: string;
-  note: string;
-  image?: string;
+  resolution: string;
+  format: string;
+  ledModel: string;
+  hours: string;
+  schedule: string;
+  minimum: string;
+  breakTime: string;
+  reporting: string;
+  image: string;
+  /** Where the screen sits in the cropped photo, 0-1 across and down, so
+      `object-position` can hold it in frame at any aspect ratio. */
+  focus: [number, number];
 }
 
-export const billboards: Billboard[] = [
-  {
-    slug: 'panthapath-digital',
-    location: 'Panthapath Signal',
-    city: 'Dhaka',
-    kind: 'digital',
-    size: '24ft × 32ft',
-    hours: '07:00 – 01:00',
-    facing: 'Karwan Bazar bound',
-    note: 'One of the heaviest signal queues in Dhaka. Long dwell in both peaks.',
-  },
-  {
-    slug: 'bashundhara-digital',
-    location: 'Bashundhara City',
-    city: 'Dhaka',
-    kind: 'digital',
-    size: '20ft × 30ft',
-    hours: '07:00 – 01:00',
-    facing: 'Panthapath bound',
-    note: 'Mall footfall plus signal traffic — the strongest weekend audience we hold.',
-  },
-  {
-    slug: 'gulshan-1-digital',
-    location: 'Gulshan 1 Circle',
-    city: 'Dhaka',
-    kind: 'digital',
-    size: '18ft × 24ft',
-    hours: '07:00 – 01:00',
-    facing: 'Gulshan 2 bound',
-    note: 'Corporate and diplomatic catchment. Highest-income audience in the network.',
-  },
-  {
-    slug: 'mohakhali-digital',
-    location: 'Mohakhali Flyover',
-    city: 'Dhaka',
-    kind: 'digital',
-    size: '20ft × 40ft',
-    hours: '07:00 – 01:00',
-    facing: 'Airport bound',
-    note: 'Read from the flyover approach — long sightline, low competition.',
-  },
-  {
-    slug: 'banani-static',
-    location: 'Banani 11',
-    city: 'Dhaka',
-    kind: 'static',
-    size: '20ft × 40ft',
-    hours: 'Lit 18:00 – 02:00',
-    facing: 'Kemal Ataturk Avenue',
-    note: 'Retail and restaurant strip. Evening dwell is the reason to take it.',
-  },
-  {
-    slug: 'uttara-static',
-    location: 'Uttara Sector 7',
-    city: 'Dhaka',
-    kind: 'static',
-    size: '20ft × 60ft',
-    hours: 'Lit 18:00 – 02:00',
-    facing: 'Airport Road, north bound',
-    note: 'The largest single face we operate on the airport corridor.',
-  },
-  {
-    slug: 'motijheel-static',
-    location: 'Motijheel Shapla Chattar',
-    city: 'Dhaka',
-    kind: 'static',
-    size: '15ft × 40ft',
-    hours: 'Lit 18:00 – 02:00',
-    facing: 'Dilkusha bound',
-    note: 'Banking district. Weekday commercial audience, quiet at weekends.',
-  },
-  {
-    slug: 'dhanmondi-static',
-    location: 'Dhanmondi 27',
-    city: 'Dhaka',
-    kind: 'static',
-    size: '12ft × 24ft',
-    hours: 'Lit 18:00 – 02:00',
-    facing: 'Mirpur Road',
-    note: 'Student and family catchment either side of the junction.',
-  },
-  {
-    slug: 'ctg-gec-digital',
-    location: 'GEC Circle',
-    city: 'Chattogram',
-    kind: 'digital',
-    size: '18ft × 24ft',
-    hours: '07:00 – 01:00',
-    facing: 'Agrabad bound',
-    note: 'The city’s central junction — our strongest board outside Dhaka.',
-  },
-  {
-    slug: 'ctg-agrabad-static',
-    location: 'Agrabad Commercial Area',
-    city: 'Chattogram',
-    kind: 'static',
-    size: '20ft × 40ft',
-    hours: 'Lit 18:00 – 02:00',
-    facing: 'Port bound',
-    note: 'Port and corporate traffic, heaviest in the morning peak.',
-  },
-  {
-    slug: 'sylhet-zindabazar-digital',
-    location: 'Zindabazar',
-    city: 'Sylhet',
-    kind: 'digital',
-    size: '16ft × 20ft',
-    hours: '07:00 – 01:00',
-    facing: 'Amberkhana bound',
-    note: 'Retail centre of the city. Strong reach into the remittance market.',
-  },
-  {
-    slug: 'sylhet-amberkhana-static',
-    location: 'Amberkhana Point',
-    city: 'Sylhet',
-    kind: 'static',
-    size: '15ft × 30ft',
-    hours: 'Lit 18:00 – 02:00',
-    facing: 'Airport Road',
-    note: 'On the airport approach — high visibility for arrivals.',
-  },
-];
+export const billboards: Billboard[] = (boardData as Billboard[]).map((b) => ({
+  ...b,
+  focus: [b.focus[0], b.focus[1]] as [number, number],
+}));
 
-export const digitalBoards = billboards.filter((b) => b.kind === 'digital');
-export const staticBoards = billboards.filter((b) => b.kind === 'static');
+/** Every screen in the deck is LED. Static formats are sold, but none of the
+    sites in this inventory are static, so the split is a constant. */
+export const kindOf = (_board: Billboard): BillboardKind => 'digital';
 
-/** Cities with inventory, derived so it can never drift from the list above. */
-export const cities = [...new Set(billboards.map((b) => b.city))];
+export const digitalBoards = billboards;
+export const staticBoards: Billboard[] = [];
+
+export interface CityGroup {
+  city: string;
+  slug: string;
+  boards: Billboard[];
+}
+
+/** Cities with inventory, largest network first — derived, so it can never
+    drift from the list above. */
+export const cityGroups: CityGroup[] = [...new Set(billboards.map((b) => b.citySlug))]
+  .map((slug) => {
+    const boards = billboards.filter((b) => b.citySlug === slug);
+    return { city: boards[0].city, slug, boards };
+  })
+  .sort((a, b) => b.boards.length - a.boards.length || a.city.localeCompare(b.city));
+
+export const cities = cityGroups.map((g) => g.city);
+
+export const boardBySlug = (slug: string): Billboard | undefined =>
+  billboards.find((b) => b.slug === slug);
+
+/** Sites a visitor would plausibly consider instead of this one: the rest of
+    its city first, then the next city along, which is what makes the network
+    navigable without going back to the hub every time. */
+export function relatedBoards(board: Billboard, limit = 6): Billboard[] {
+  const sameCity = billboards.filter(
+    (b) => b.citySlug === board.citySlug && b.slug !== board.slug,
+  );
+  const elsewhere = billboards.filter((b) => b.citySlug !== board.citySlug);
+  return [...sameCity, ...elsewhere].slice(0, limit);
+}
 
 /* --- format comparison, used on the billboards hub ------------------------ */
 
@@ -396,7 +333,7 @@ export const formatComparison = [
   { label: 'Creative changes', digital: 'Same day, unlimited', static: 'Reprint required' },
   { label: 'Day-part targeting', digital: 'Yes, by hour', static: 'No' },
   { label: 'Share of screen', digital: 'Rotating slots', static: 'Sole occupancy' },
-  { label: 'Typical monthly cost', digital: 'BDT 50,000 – 300,000', static: 'From BDT 25,000' },
+  { label: 'Rates', digital: 'On request — call for price', static: 'On request — call for price' },
   { label: 'Best for', digital: 'Launches, offers, dated messages', static: 'Always-on presence' },
 ];
 
@@ -542,8 +479,8 @@ export interface Faq {
 
 export const faqs: Faq[] = [
   {
-    q: 'How much does a billboard cost in Bangladesh?',
-    a: 'Digital LED billboards run roughly BDT 50,000 to BDT 300,000 per month depending on the location, the screen size and the share of loop you take. Static billboards start from about BDT 25,000 per month. Production and mounting are quoted on the same plan, so there is no separate invoice at the end.',
+    q: 'How is a billboard priced in Bangladesh?',
+    a: 'A digital site is priced per minute of screen time, so what you pay depends on the location, the screen size, how many minutes a day you take and how long the campaign runs. Rates move with demand and season, which is why we quote rather than publish them — call +880 1316-743003 or send the cities and dates and you will have a written price, production and mounting included, within one working day.',
   },
   {
     q: 'What is the difference between a static and a digital billboard?',
@@ -571,7 +508,7 @@ export const contact = {
   heading: 'Book a site',
   lede: 'Tell us the market and the dates. We will come back with what is available and what it delivers.',
   intro:
-    'The fastest route is a phone call — we can usually tell you availability while you are on the line. If you would rather write, include the cities you want, your campaign window and a budget range, and we will send a plan rather than a rate card.',
+    'The fastest route is a phone call — we can usually tell you availability and price while you are on the line. If you would rather write, include the cities you want, your campaign window and a budget range, and we will send a plan rather than a rate card.',
   checklistTitle: 'What helps in a first message',
   checklist: [
     'Cities or areas you want to reach',

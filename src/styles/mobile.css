@@ -110,32 +110,31 @@
   }
 
   /*
-    A 1600x700 illustration inside a 390x844 box is scaled to fit the height
-    under `cover`, so only a 323px-wide window of the original is ever on
-    screen. Two things followed from that, and both read as "the hero is
-    empty":
+    The hero stops cropping and starts framing.
 
-    1. The old scrim ran at 0.82-0.94 alpha, which blacked out the little that
-       was visible. It is a vertical ramp now — light across the top two
-       thirds where nothing is written, dark only behind the headline.
+    `cover` fills a 390x844 portrait hero from a 3:2 photograph by scaling it
+    until it is 1270px wide and showing the middle 31% — which is a wall, a
+    shopfront, anything but the screen the photograph is of. No focal point
+    rescues that: at this aspect ratio there is simply not enough of the
+    picture on screen.
 
-    2. The default centre crop landed in the gap *between* the two billboards
-       in the illustration, so the window held nothing but sky. The crop can't
-       be avoided at this aspect ratio, so each slide names its own focal
-       point through `--slide-focus` instead; 50% still centres, which is
-       right for the two illustrations whose subject is already in the middle.
+    So on a phone the photograph is laid in at its own proportions, full
+    width across the top, and the scrim ramps from nearly clear over the
+    image to solid below it. The whole site is visible, the band reads as
+    deliberate, and the headline sits on flat colour where it is most legible.
   */
   .slide__media {
     background:
-      radial-gradient(130% 55% at 50% 6%, rgba(107, 163, 232, 0.2), transparent 62%),
+      radial-gradient(130% 55% at 50% 6%, rgba(107, 163, 232, 0.18), transparent 62%),
       linear-gradient(
         180deg,
-        rgba(14, 20, 32, 0.28) 0%,
-        rgba(14, 20, 32, 0.4) 34%,
-        rgba(14, 20, 32, 0.84) 66%,
-        rgba(14, 20, 32, 0.96) 100%
+        rgba(14, 20, 32, 0.22) 0%,
+        rgba(14, 20, 32, 0.16) 18%,
+        rgba(14, 20, 32, 0.72) 30%,
+        rgba(14, 20, 32, 0.95) 40%,
+        rgba(14, 20, 32, 0.99) 100%
       ),
-      var(--slide-img, none) var(--slide-focus, 50%) center / cover no-repeat;
+      var(--slide-img, none) center top / 100% auto no-repeat;
   }
 
   .slider-copyright-text {

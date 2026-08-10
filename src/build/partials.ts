@@ -12,6 +12,8 @@
 
 import {
   billboards,
+  boardBySlug,
+  cityGroups,
   clients,
   company,
   faqs,
@@ -20,13 +22,22 @@ import {
   nav,
   platforms,
   process,
+  relatedBoards,
   services,
   socials,
   stats,
   type Billboard,
-  type BillboardKind,
 } from '../data/site';
-import { buildJsonLd, type PageMeta } from './seo';
+import {
+  areaOf,
+  boardAudience,
+  boardFaqs,
+  boardIntro,
+  boardTechnical,
+  parseDimension,
+  sizeWords,
+} from './boardCopy';
+import { boardPath, buildJsonLd, cityPath, type PageMeta } from './seo';
 
 export type { PageMeta };
 
@@ -294,50 +305,329 @@ export function buildStats(): string {
   </section>`;
 }
 
+/**
+ * One card in the inventory grid.
+ *
+ * The whole card links through to that site's own page — this is a listing
+ * index, and a visitor who taps a photograph expects the listing, not a
+ * contact form. `object-position` uses the focal point worked out when the
+ * photograph was cropped, so the screen stays in frame at any card shape.
+ */
 function boardCard(b: Billboard): string {
-  // A real photo (dropped into public/ and referenced via `image` in
-  // site.ts) always wins. Failing that, the kind-matched illustration
-  // stands in — never a flat gradient, since every board now has proper art.
-  const media = b.image
-    ? `<img class="board-card__img" src="/${esc(b.image)}" alt="${esc(b.location)} billboard in ${esc(b.city)}" loading="lazy" decoding="async" width="1200" height="800" />`
-    : `<div class="board-card__placeholder" style="--board-img:url('/images/board-${b.kind}.svg')" aria-hidden="true"></div>`;
+  const focus = `${(b.focus[0] * 100).toFixed(1)}% ${(b.focus[1] * 100).toFixed(1)}%`;
 
   return `
     <article class="board-card" data-reveal-item data-city="${esc(b.city)}">
-      <div class="board-card__media">
-        ${media}
-        <span class="board-card__kind">${b.kind === 'digital' ? 'Digital' : 'Static'}</span>
-      </div>
-      <div class="board-card__body">
-        <h3 class="board-card__title">${esc(b.location)}</h3>
-        <p class="sub-text">${esc(b.city)} · ${esc(b.size)}</p>
-        <dl class="board-card__specs">
-          <div><dt>Facing</dt><dd>${esc(b.facing)}</dd></div>
-          <div><dt>Hours</dt><dd>${esc(b.hours)}</dd></div>
-        </dl>
-        <p class="board-card__note">${esc(b.note)}</p>
-        <a class="text-link" href="contact.html">Check availability</a>
-      </div>
+      <a class="board-card__link" href="${esc(boardPath(b))}">
+        <div class="board-card__media">
+          <img class="board-card__img" src="/${esc(b.image)}"
+               alt="${esc(b.title)} LED billboard in ${esc(b.city)}, facing ${esc(b.facing)}"
+               style="object-position:${focus}"
+               loading="lazy" decoding="async" width="1400" height="933" />
+          <span class="board-card__kind">Digital LED</span>
+        </div>
+        <div class="board-card__body">
+          <h3 class="board-card__title">${esc(b.name)}</h3>
+          <p class="sub-text">${esc(b.city)} · ${esc(sizeWords(b))}</p>
+          <dl class="board-card__specs">
+            <div><dt>Facing</dt><dd>${esc(b.facing)}</dd></div>
+            <div><dt>On air</dt><dd>${esc(b.schedule || b.hours || 'Daily')}</dd></div>
+          </dl>
+          <p class="board-card__note">${esc(b.resolution)}${b.ledModel ? ` · ${esc(b.ledModel)} panel` : ''}</p>
+          <span class="text-link" aria-hidden="true">View this site</span>
+        </div>
+      </a>
     </article>`;
 }
 
-/** Inventory grid. Pass a kind to show only digital or only static sites. */
-export function buildBoards(kind?: BillboardKind): string {
-  const list = kind ? billboards.filter((b) => b.kind === kind) : billboards;
-  const cityFilters = [...new Set(list.map((b) => b.city))];
+/** Inventory grid with a city filter. Pass a city slug to scope it. */
+export function buildBoards(citySlug?: string): string {
+  const list = citySlug ? billboards.filter((b) => b.citySlug === citySlug) : billboards;
+  const groups = cityGroups.filter((g) => list.some((b) => b.citySlug === g.slug));
 
-  const filters = [
-    `<button class="filter-btn" type="button" data-filter="all" aria-pressed="true">All<span class="filter-btn__count">${list.length}</span></button>`,
-    ...cityFilters.map(
-      (c) =>
-        `<button class="filter-btn" type="button" data-filter="${esc(c)}" aria-pressed="false">${esc(c)}<span class="filter-btn__count">${list.filter((b) => b.city === c).length}</span></button>`,
-    ),
-  ].join('');
+  const filters =
+    groups.length > 1
+      ? [
+          `<button class="filter-btn" type="button" data-filter="all" aria-pressed="true">All<span class="filter-btn__count">${list.length}</span></button>`,
+          ...groups.map(
+            (g) =>
+              `<button class="filter-btn" type="button" data-filter="${esc(g.city)}" aria-pressed="false">${esc(g.city)}<span class="filter-btn__count">${g.boards.length}</span></button>`,
+          ),
+        ].join('')
+      : '';
+
+  const bar = filters
+    ? `<div class="filter-bar" role="group" aria-label="Filter sites by city">${filters}</div>
+  <p class="visually-hidden" id="filter_status" role="status" aria-live="polite">${list.length} sites shown.</p>`
+    : '';
 
   return `
-  <div class="filter-bar" role="group" aria-label="Filter sites by city">${filters}</div>
-  <p class="visually-hidden" id="filter_status" role="status" aria-live="polite">${list.length} sites shown.</p>
+  ${bar}
   <div class="board-grid" data-reveal>${list.map(boardCard).join('')}</div>`;
+}
+
+/* --- listing page ----------------------------------------------------------
+   The real-estate shape: one page per site, carrying its own photograph,
+   its own spec table, its own questions, and links out to the rest of its
+   city, its city index and the format hub. Every listing is therefore
+   reachable from every other listing in at most two clicks, and no page in
+   the set is a dead end.                                                   */
+
+function specRow(label: string, value: string): string {
+  return value ? `<div class="spec"><dt>${esc(label)}</dt><dd>${esc(value)}</dd></div>` : '';
+}
+
+export function buildListing(slug: string): string {
+  const board = boardBySlug(slug);
+  if (!board) throw new Error(`No billboard with slug "${slug}"`);
+
+  const focus = `${(board.focus[0] * 100).toFixed(1)}% ${(board.focus[1] * 100).toFixed(1)}%`;
+  const group = cityGroups.find((g) => g.slug === board.citySlug);
+  const related = relatedBoards(board);
+
+  const specs = [
+    specRow('Screen size', sizeWords(board)),
+    specRow('Facing', board.facing),
+    specRow('Resolution', board.resolution),
+    specRow('LED panel', board.ledModel),
+    specRow('On-air window', board.schedule),
+    specRow('Daily on-air hours', board.hours),
+    specRow('Minimum booking', board.minimum),
+    specRow('Maintenance break', /^n\/?a$/i.test(board.breakTime) ? '' : board.breakTime),
+    specRow('Artwork format', board.format),
+    specRow('Reporting', board.reporting),
+    specRow('City', board.city),
+    `<div class="spec"><dt>Rate</dt><dd><a class="text-link" href="tel:${esc(company.phoneHref)}">Call for price</a></dd></div>`,
+  ].join('');
+
+  const faq = boardFaqs(board)
+    .map(
+      (f) => `
+      <details class="faq__item" data-reveal-item>
+        <summary class="faq__q">${esc(f.q)}<span class="faq__marker" aria-hidden="true"></span></summary>
+        <div class="faq__a"><p>${esc(f.a)}</p></div>
+      </details>`,
+    )
+    .join('');
+
+  const nearby = related
+    .map(
+      (b) => `
+      <li class="nearby__item" data-reveal-item>
+        <a class="nearby__link" href="${esc(boardPath(b))}">
+          <img class="nearby__img" src="/${esc(b.image)}" alt=""
+               style="object-position:${(b.focus[0] * 100).toFixed(1)}% ${(b.focus[1] * 100).toFixed(1)}%"
+               loading="lazy" decoding="async" width="600" height="400" />
+          <span class="nearby__body">
+            <span class="nearby__title">${esc(b.name)}</span>
+            <span class="nearby__meta">${esc(b.city)} · ${esc(sizeWords(b))} · facing ${esc(b.facing)}</span>
+          </span>
+        </a>
+      </li>`,
+    )
+    .join('');
+
+  return `
+        <nav class="breadcrumb gl-padding_lr" aria-label="Breadcrumb" data-reveal>
+          <a class="text-link" href="billboards.html">Billboards</a>
+          <span aria-hidden="true">/</span>
+          <a class="text-link" href="${esc(cityPath(board.citySlug))}">${esc(board.city)}</a>
+          <span aria-hidden="true">/</span>
+          <span>${esc(board.name)}</span>
+        </nav>
+
+        <section class="intro-text-wrapper gl-padding_lr">
+          <header class="intro-text" data-reveal>
+            <span class="sub-text">LED billboard · ${esc(board.city)}</span>
+            <h1 class="listing-title">${esc(board.title)}</h1>
+            <p class="h1-em">${esc(boardIntro(board))}</p>
+            <div class="btn-wrapper">
+              <a class="btn addHover" href="tel:${esc(company.phoneHref)}">Call for price</a>
+              <a class="btn addHover" href="contact.html">Check availability</a>
+            </div>
+          </header>
+        </section>
+
+        <section class="gl-section gl-padding_lr" data-reveal>
+          <figure class="listing-figure">
+            <img class="listing-figure__img" src="/${esc(board.image)}"
+                 alt="${esc(board.title)} LED billboard in ${esc(board.city)}, facing ${esc(board.facing)}"
+                 style="object-position:${focus}"
+                 width="1400" height="933" decoding="async" />
+            <figcaption class="listing-figure__caption">
+              ${esc(board.title)} — ${esc(board.city)}, facing ${esc(board.facing)}
+            </figcaption>
+          </figure>
+        </section>
+
+        <section class="gl-section gl-padding_lr" data-reveal>
+          <div class="css-grid-wrapper">
+            <div class="grid-item grid-40 xsm-grid-100">
+              <h2 class="accent-title">Site specification</h2>
+              <p class="text-muted">Every figure here is the operator's own, not an estimate.</p>
+            </div>
+            <div class="grid-item grid-60 xsm-grid-100">
+              <dl class="spec-list">${specs}</dl>
+            </div>
+          </div>
+        </section>
+
+        <section class="gl-section gl-padding_lr" data-reveal>
+          <div class="css-grid-wrapper">
+            <div class="grid-item grid-40 xsm-grid-100">
+              <h2 class="accent-title">The screen</h2>
+            </div>
+            <div class="grid-item grid-60 xsm-grid-100">
+              <p>${esc(boardTechnical(board))}</p>
+            </div>
+          </div>
+        </section>
+
+        <section class="gl-section gl-padding_lr" data-reveal>
+          <div class="css-grid-wrapper">
+            <div class="grid-item grid-40 xsm-grid-100">
+              <h2 class="accent-title">Who it reaches</h2>
+            </div>
+            <div class="grid-item grid-60 xsm-grid-100">
+              <p>${esc(boardAudience(board))}</p>
+              <div class="btn-wrapper">
+                <a class="btn addHover" href="tel:${esc(company.phoneHref)}">Call for price</a>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!--@MARQUEE-->
+
+        <section class="intro-text-wrapper gl-padding_lr">
+          <div class="intro-text" data-reveal>
+            <span class="sub-text">About this site</span>
+            <h2>Frequently asked questions</h2>
+          </div>
+          <div class="faq" data-reveal>${faq}</div>
+        </section>
+
+        <section class="gl-section gl-padding_lr">
+          <div class="intro-text" data-reveal>
+            <span class="sub-text">${esc(board.city)} and the wider network</span>
+            <h2 class="mtitle">Other sites you might hold instead</h2>
+          </div>
+          <ul class="nearby" data-reveal>${nearby}</ul>
+          <div class="btn-wrapper">
+            <a class="btn addHover" href="${esc(cityPath(board.citySlug))}">All ${esc(board.city)} sites${group ? ` (${group.boards.length})` : ''}</a>
+            <a class="btn addHover" href="billboards.html">The full network</a>
+          </div>
+        </section>`;
+}
+
+/* --- city index ----------------------------------------------------------- */
+
+export function buildCity(slug: string): string {
+  const group = cityGroups.find((g) => g.slug === slug);
+  if (!group) throw new Error(`No city with slug "${slug}"`);
+
+  const others = cityGroups
+    .filter((g) => g.slug !== slug)
+    .map(
+      (g) =>
+        `<li><a class="text-link" href="${esc(cityPath(g.slug))}">${esc(g.city)} (${g.boards.length})</a></li>`,
+    )
+    .join('');
+
+  // Compare actual face area, not the printed string — "9ft × 16ft" sorts
+  // above "30ft × 20ft" alphabetically and that would be nonsense.
+  const face = (b: Billboard): number => {
+    const d = parseDimension(b.dimension);
+    return d && d.unit === 'ft' ? areaOf(d) : 0;
+  };
+  const ranked = [...group.boards].sort((a, b) => face(b) - face(a));
+  const largest = ranked[0];
+  const smallest = ranked[ranked.length - 1];
+
+  return `
+        <nav class="breadcrumb gl-padding_lr" aria-label="Breadcrumb" data-reveal>
+          <a class="text-link" href="billboards.html">Billboards</a>
+          <span aria-hidden="true">/</span>
+          <span>${esc(group.city)}</span>
+        </nav>
+
+        <section class="intro-text-wrapper gl-padding_lr">
+          <header class="intro-text" data-reveal>
+            <span class="sub-text">${group.boards.length} LED site${group.boards.length === 1 ? '' : 's'}</span>
+            <h1>LED billboards in ${esc(group.city)}</h1>
+            <p class="h1-em">
+              Every AD PRO digital screen in ${esc(group.city)}, with the size, the facing and the
+              on-air window for each. Rates are quoted per site — call
+              ${esc(company.phone)} and we will tell you what is open.
+            </p>
+            <div class="btn-wrapper">
+              <a class="btn addHover" href="tel:${esc(company.phoneHref)}">Call for price</a>
+              <a class="btn addHover" href="contact.html">Send a brief</a>
+            </div>
+          </header>
+        </section>
+
+        <section class="gl-section gl-padding_lr">
+          ${buildBoards(slug)}
+        </section>
+
+        <!--@MARQUEE-->
+
+        <section class="gl-section gl-padding_lr" data-reveal>
+          <div class="css-grid-wrapper">
+            <div class="grid-item grid-40 xsm-grid-100">
+              <h2 class="accent-title">Booking in ${esc(group.city)}</h2>
+            </div>
+            <div class="grid-item grid-60 xsm-grid-100">
+              <p>
+                Screen time is sold by the minute per day, with a minimum of
+                ${esc(group.boards[0].minimum || '60 min/day')}. Artwork is supplied as
+                ${esc(group.boards[0].format || 'MP4')} and can be changed the same day, so a
+                campaign can carry a different message in the morning and the evening without a
+                reprint. Every booking closes with a log summary showing when each spot played.
+              </p>
+              <p>
+                The largest face here is ${esc(sizeWords(largest))} at ${esc(largest.name)}.
+                ${ranked.length > 1 ? `The smallest is ${esc(sizeWords(smallest))} at ${esc(smallest.name)}, which is the one to take when the message is short and the traffic is close.` : ''}
+              </p>
+              <a class="text-link" href="digital-billboards.html">How digital billboards work</a>
+            </div>
+          </div>
+        </section>
+
+        <section class="gl-section gl-padding_lr" data-reveal>
+          <div class="css-grid-wrapper">
+            <div class="grid-item grid-40 xsm-grid-100">
+              <h2 class="accent-title">Other cities</h2>
+            </div>
+            <div class="grid-item grid-60 xsm-grid-100">
+              <ul class="city-links">${others}</ul>
+            </div>
+          </div>
+        </section>`;
+}
+
+/** The city index used on the billboards hub. */
+export function buildCityIndex(): string {
+  const cards = cityGroups
+    .map((g) => {
+      const lead = g.boards[0];
+      return `
+      <li class="city-card" data-reveal-item>
+        <a class="city-card__link" href="${esc(cityPath(g.slug))}">
+          <img class="city-card__img" src="/${esc(lead.image)}" alt=""
+               style="object-position:${(lead.focus[0] * 100).toFixed(1)}% ${(lead.focus[1] * 100).toFixed(1)}%"
+               loading="lazy" decoding="async" width="600" height="400" />
+          <span class="city-card__body">
+            <span class="city-card__name">${esc(g.city)}</span>
+            <span class="city-card__count">${g.boards.length} LED site${g.boards.length === 1 ? '' : 's'}</span>
+          </span>
+        </a>
+      </li>`;
+    })
+    .join('');
+
+  return `<ul class="city-grid" data-reveal>${cards}</ul>`;
 }
 
 export function buildComparison(): string {

@@ -1,13 +1,17 @@
 import { resolve } from 'node:path';
 import { defineConfig, type Plugin } from 'vite';
-import { company } from './src/data/site';
+import { billboards, cityGroups, company } from './src/data/site';
+import { boardSummary, sizeWords } from './src/build/boardCopy';
 import {
   buildBoards,
+  buildCity,
+  buildCityIndex,
   buildClientWall,
   buildComparison,
   buildFaq,
   buildFooter,
   buildHead,
+  buildListing,
   buildMarquee,
   buildProcess,
   buildServices,
@@ -15,7 +19,7 @@ import {
   buildStats,
   type PageMeta,
 } from './src/build/partials';
-import { buildRobots, buildSitemap } from './src/build/seo';
+import { boardPath, buildRobots, buildSitemap, cityPath } from './src/build/seo';
 
 /*
   A multi-page build rather than a client-side router.
@@ -23,26 +27,18 @@ import { buildRobots, buildSitemap } from './src/build/seo';
   Barba fetches real documents and swaps the `[data-barba="container"]` node
   out of the response, so every route has to exist as its own HTML file. That
   is also what keeps the site readable with JavaScript disabled: without the
-  transition layer, these are just eight ordinary pages.
+  transition layer, these are ordinary pages.
+
+  `meta` is the register of routes — the eight hand-written pages here, plus
+  one per billboard and per city appended below. Rollup's inputs and the
+  sitemap are both derived from its keys, so a route cannot be built without
+  being crawlable or listed without being built.
 */
-const pages = [
-  'index',
-  'billboards',
-  'static-billboards',
-  'digital-billboards',
-  'services',
-  'clients',
-  'about',
-  'contact',
-] as const;
-
-type PageName = (typeof pages)[number];
-
-const meta: Record<PageName, PageMeta> = {
+const meta: Record<string, PageMeta> = {
   index: {
     title: `${company.name} — ${company.descriptor}`,
     description:
-      'Digital and static billboards across Dhaka, Chattogram and Sylhet. AD PRO owns and operates its own out-of-home network — 400+ brands, 150+ digital locations.',
+      '58 digital LED billboard sites across ten cities in Bangladesh, owned and operated by AD PRO Communications Limited. Sizes, facings and on-air hours for every site — call for price.',
     path: '',
     namespace: 'home',
     priority: 1,
@@ -50,7 +46,7 @@ const meta: Record<PageName, PageMeta> = {
   billboards: {
     title: 'Billboards in Bangladesh',
     description:
-      'Digital and static billboard sites across Dhaka, Chattogram and Sylhet, with sizes, hours and traffic notes for every location.',
+      'Every AD PRO billboard site in Bangladesh — 58 digital LED screens across Dhaka, Chattogram, Sylhet and seven more cities, each with its own page, photograph and specification.',
     path: 'billboards.html',
     namespace: 'billboards',
     breadcrumbs: [],
@@ -59,7 +55,7 @@ const meta: Record<PageName, PageMeta> = {
   'static-billboards': {
     title: 'Static Billboards',
     description:
-      'Unipole, gantry and building-wrap billboards across Bangladesh, printed and mounted in-house, from BDT 25,000 a month.',
+      'Unipole, gantry and building-wrap billboards across Bangladesh, surveyed, fabricated and mounted in-house. Availability and rates on request — call for price.',
     path: 'static-billboards.html',
     namespace: 'static-billboards',
     breadcrumbs: [{ name: 'Billboards', path: 'billboards.html' }],
@@ -69,7 +65,7 @@ const meta: Record<PageName, PageMeta> = {
   'digital-billboards': {
     title: 'Digital Billboards',
     description:
-      'Full-motion LED billboards across Bangladesh, bookable by the day with same-day creative changes, from BDT 50,000 a month.',
+      '58 full-motion LED billboard sites across ten cities in Bangladesh, sold by the minute per day with same-day creative changes and a played-spot log. Call for price.',
     path: 'digital-billboards.html',
     namespace: 'digital-billboards',
     breadcrumbs: [{ name: 'Billboards', path: 'billboards.html' }],
@@ -111,6 +107,47 @@ const meta: Record<PageName, PageMeta> = {
   },
 };
 
+/*
+  One route per site and per city, on top of the eight hand-written pages.
+
+  These are what make the inventory searchable: a query for a specific
+  junction lands on that junction's own page rather than on a grid of 58
+  cards, and each page carries the address, the specification and its own
+  questions. The entry files are written by scripts/generate-listing-pages.mjs
+  before the build; the metadata below is derived from the same JSON, so a
+  route can neither exist without metadata nor be described by metadata that
+  points nowhere.
+*/
+for (const board of billboards) {
+  meta[`led-${board.slug}`] = {
+    title: `${board.title} LED Billboard, ${board.city}`,
+    description: boardSummary(board),
+    path: boardPath(board),
+    namespace: 'listing',
+    breadcrumbs: [
+      { name: 'Billboards', path: 'billboards.html' },
+      { name: board.city, path: cityPath(board.citySlug) },
+    ],
+    board: board.slug,
+    priority: 0.7,
+  };
+}
+
+for (const group of cityGroups) {
+  const sizes = group.boards.map((b) => sizeWords(b));
+  meta[`billboards-${group.slug}`] = {
+    title: `LED Billboards in ${group.city}`,
+    description: `${group.boards.length} digital LED billboard site${
+      group.boards.length === 1 ? '' : 's'
+    } in ${group.city}, from ${sizes[sizes.length - 1]} to ${sizes[0]}, with sizes, facings and on-air hours for each. Call ${company.phone} for availability and price.`,
+    path: cityPath(group.slug),
+    namespace: 'city',
+    breadcrumbs: [{ name: 'Billboards', path: 'billboards.html' }],
+    citySlug: group.slug,
+    priority: 0.8,
+  };
+}
+
 /**
  * Substitutes the shared shell into every page.
  *
@@ -123,17 +160,18 @@ const shellPlugin = (): Plugin => ({
   transformIndexHtml: {
     order: 'pre',
     handler(html, ctx) {
-      const name = (ctx.path.split('/').pop() ?? 'index.html').replace(
-        /\.html$/,
-        '',
-      ) as PageName;
+      const name = (ctx.path.split('/').pop() ?? 'index.html').replace(/\.html$/, '');
       const page = meta[name] ?? meta.index;
+
+      // Listing and city bodies are rendered from the slug in the filename,
+      // so 68 routes share one template each rather than 68 templates.
+      if (page.board) html = html.replace('<!--@LISTING-->', buildListing(page.board));
+      if (page.citySlug) html = html.replace('<!--@CITY-->', buildCity(page.citySlug));
 
       return html
         .replace('<!--@HEAD-->', buildHead(page))
         .replace('<!--@SHELL-->', buildShell())
         .replace('<!--@FOOTER-->', buildFooter())
-        .replace('<!--@MARQUEE-->', buildMarquee())
         .replace('<!--@STATS-->', buildStats())
         .replace('<!--@PROCESS-->', buildProcess())
         .replace('<!--@SERVICES-->', buildServices())
@@ -141,9 +179,11 @@ const shellPlugin = (): Plugin => ({
         .replace('<!--@FAQ-->', buildFaq())
         .replace('<!--@CLIENT_TEASER-->', buildClientWall(16))
         .replace('<!--@CLIENT_WALL-->', buildClientWall())
-        .replace('<!--@BOARDS_ALL-->', buildBoards())
-        .replace('<!--@BOARDS_DIGITAL-->', buildBoards('digital'))
-        .replace('<!--@BOARDS_STATIC-->', buildBoards('static'));
+        .replace('<!--@CITY_INDEX-->', buildCityIndex())
+        // A marquee appears inside generated listing bodies too, so this has
+        // to run after the body is in place — hence `replaceAll`.
+        .replaceAll('<!--@MARQUEE-->', buildMarquee())
+        .replace('<!--@BOARDS_ALL-->', buildBoards());
     },
   },
   // robots.txt and sitemap.xml are generated from the same page metadata
@@ -160,7 +200,7 @@ const shellPlugin = (): Plugin => ({
 });
 
 const input = Object.fromEntries(
-  pages.map((name) => [name, resolve(__dirname, `pages/${name}.html`)]),
+  Object.keys(meta).map((name) => [name, resolve(__dirname, `pages/${name}.html`)]),
 );
 
 // Root-relative by default, which is what any plain static host wants. A
