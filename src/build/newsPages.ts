@@ -162,6 +162,7 @@ export function buildArticle(slug: string): string {
         <section class="intro-text-wrapper gl-padding_lr">
           <header class="intro-text" data-reveal>
             <span class="sub-text">${esc(article.topic)}</span>
+            <div class="ascii-rule" data-ascii-rule aria-hidden="true"></div>
             <h1 class="listing-title" data-scramble>${esc(article.title)}</h1>
             <p class="answer-lede">${esc(article.standfirst)}</p>
             ${dateline(article)}
@@ -195,7 +196,7 @@ export function buildNewsHub(): string {
           <article class="news-lead" data-reveal>
             <a class="news-lead__link" href="${esc(newsPath(lead.slug))}">
               <span class="news-lead__topic">${esc(lead.topic)}</span>
-              <h2 class="news-lead__title">${esc(lead.title)}</h2>
+              <h2 class="news-lead__title" data-scramble>${esc(lead.title)}</h2>
               <p class="news-lead__stand">${esc(lead.standfirst)}</p>
               <p class="news-lead__meta">
                 <time datetime="${esc(lead.published)}">${esc(formatDate(lead.published))}</time>
@@ -226,6 +227,7 @@ export function buildNewsHub(): string {
         <section class="intro-text-wrapper gl-padding_lr">
           <header class="intro-text" data-reveal>
             <span class="sub-text">News and analysis</span>
+            <div class="ascii-rule" data-ascii-rule aria-hidden="true"></div>
             <h1 data-scramble>The newsroom</h1>
             <p class="h1-em">
               Seasonal planning, sector playbooks and what is actually changing in Bangladeshi

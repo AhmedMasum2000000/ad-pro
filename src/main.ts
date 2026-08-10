@@ -20,6 +20,7 @@ import './styles/mobile.css';
 import { initViewport } from './lib/viewport';
 import { initBarba, mountPage } from './motion/barba';
 import { initCursorFollower } from './motion/cursorFollower';
+import { initPointerTrail } from './motion/ascii';
 import { playIntro } from './motion/curtain';
 import { initMenu } from './motion/menu';
 import { initScroll } from './motion/scroll';
@@ -34,6 +35,9 @@ function boot(): void {
   // by Barba.
   initMenu();
   initCursorFollower();
+  // Shell-level: the trail follows the pointer across navigations rather than
+  // being torn down and rebuilt with each page.
+  initPointerTrail();
   initCookieNotice();
   initBarba();
 

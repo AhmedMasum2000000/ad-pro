@@ -16,7 +16,7 @@ import { coverForTransition, revealAfterTransition } from './curtain';
 import { initFilter } from './flipFilter';
 import { initMagnetic } from './cursor';
 import { initMarquee } from './marquee';
-import { initHalftone, initScramble } from './ascii';
+import { initAsciiRules, initHalftone, initHoverScramble, initScramble } from './ascii';
 import { initScrollFx } from './scrollfx';
 import { initReveals } from './reveal';
 import { initSlideshow } from './slideshow';
@@ -53,6 +53,8 @@ export function mountPage(scope: ParentNode = document): void {
     initScrollFx(scope),
     initScramble(scope),
     initHalftone(scope),
+    initHoverScramble(scope),
+    initAsciiRules(scope),
   ];
   markCurrentNavLink();
 }

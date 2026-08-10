@@ -330,6 +330,7 @@ export function buildStats(): string {
 
   return `
   <section class="stats-band gl-padding_lr" data-reveal aria-label="AD PRO by the numbers">
+    <div class="ascii-rule ascii-rule--full" data-ascii-rule aria-hidden="true"></div>
     <div class="css-grid-wrapper">${cells}</div>
   </section>`;
 }
@@ -348,7 +349,7 @@ function boardCard(b: Billboard): string {
   return `
     <article class="board-card" data-reveal-item data-city="${esc(b.city)}">
       <a class="board-card__link" href="${esc(boardPath(b))}">
-        <div class="board-card__media">
+        <div class="board-card__media" data-ascii>
           <img class="board-card__img" src="/${esc(b.image)}"
                alt="${esc(b.title)} LED billboard in ${esc(b.city)}, facing ${esc(b.facing)}"
                style="object-position:${focus}"
@@ -356,7 +357,7 @@ function boardCard(b: Billboard): string {
           <span class="board-card__kind">Digital LED</span>
         </div>
         <div class="board-card__body">
-          <h3 class="board-card__title">${esc(b.name)}</h3>
+          <h3 class="board-card__title" data-scramble>${esc(b.name)}</h3>
           <p class="sub-text">${esc(b.city)} · ${esc(sizeWords(b))}</p>
           <dl class="board-card__specs">
             <div><dt>Facing</dt><dd>${esc(b.facing)}</dd></div>
@@ -443,7 +444,7 @@ export function buildListing(slug: string): string {
     .map(
       (b) => `
       <li class="nearby__item" data-reveal-item>
-        <a class="nearby__link" href="${esc(boardPath(b))}">
+        <a class="nearby__link" href="${esc(boardPath(b))}" data-ascii>
           <img class="nearby__img" src="/${esc(b.image)}" alt=""
                style="object-position:${(b.focus[0] * 100).toFixed(1)}% ${(b.focus[1] * 100).toFixed(1)}%"
                loading="lazy" decoding="async" width="600" height="400" />
@@ -468,6 +469,7 @@ export function buildListing(slug: string): string {
         <section class="intro-text-wrapper gl-padding_lr">
           <header class="intro-text" data-reveal>
             <span class="sub-text">LED billboard · ${esc(board.city)}</span>
+            <div class="ascii-rule" data-ascii-rule aria-hidden="true"></div>
             <h1 class="listing-title" data-scramble>${esc(board.title)}</h1>
             <p class="h1-em">${esc(boardIntro(board))}</p>
             <div class="btn-wrapper">
@@ -588,6 +590,7 @@ export function buildCity(slug: string): string {
         <section class="intro-text-wrapper gl-padding_lr">
           <header class="intro-text" data-reveal>
             <span class="sub-text">${group.boards.length} LED site${group.boards.length === 1 ? '' : 's'}</span>
+            <div class="ascii-rule" data-ascii-rule aria-hidden="true"></div>
             <h1 data-scramble>LED billboards in ${esc(group.city)}</h1>
             <p class="h1-em">
               Every AD PRO digital screen in ${esc(group.city)}, with the size, the facing and the
@@ -653,7 +656,7 @@ export function buildCityIndex(): string {
       const lead = g.boards[0];
       return `
       <li class="city-card" data-reveal-item>
-        <a class="city-card__link" href="${esc(cityPath(g.slug))}">
+        <a class="city-card__link" href="${esc(cityPath(g.slug))}" data-ascii>
           <img class="city-card__img" src="/${esc(lead.image)}" alt=""
                style="object-position:${(lead.focus[0] * 100).toFixed(1)}% ${(lead.focus[1] * 100).toFixed(1)}%"
                loading="lazy" decoding="async" width="600" height="400" />

@@ -236,6 +236,7 @@ export function buildFaqArticle(slug: string): string {
         <section class="intro-text-wrapper gl-padding_lr">
           <header class="intro-text" data-reveal>
             <span class="sub-text">${esc(article.category)}</span>
+            <div class="ascii-rule" data-ascii-rule aria-hidden="true"></div>
             <h1 class="listing-title" data-scramble>${esc(article.question)}</h1>
             <p class="answer-lede">${rich(article.shortAnswer)}</p>
             <div class="btn-wrapper">
@@ -268,7 +269,7 @@ export function buildFaqHub(): string {
     .map(
       (group) => `
           <section class="answer-group" data-reveal>
-            <h2 class="answer-group__title">${esc(group.category)}</h2>
+            <h2 class="answer-group__title" data-scramble>${esc(group.category)}</h2>
             <ul class="answer-list">
               ${group.articles
                 .map(
@@ -291,6 +292,7 @@ export function buildFaqHub(): string {
         <section class="intro-text-wrapper gl-padding_lr">
           <header class="intro-text" data-reveal>
             <span class="sub-text">${faqArticles.length} questions answered</span>
+            <div class="ascii-rule" data-ascii-rule aria-hidden="true"></div>
             <h1 data-scramble>Billboard advertising in Bangladesh, explained</h1>
             <p class="h1-em">
               What it costs, how it is priced, which format does which job, where the good sites

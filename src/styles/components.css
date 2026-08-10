@@ -1648,3 +1648,113 @@ details[open] .faq__marker::after { transform: rotate(0deg); }
     display: none;
   }
 }
+
+/* --- ASCII furniture --------------------------------------------------------
+   A rule made of characters, shuffling slowly. Monospace and `nowrap` so the
+   count JavaScript works out from the element width actually fits it. */
+
+.ascii-rule {
+  display: block;
+  margin: 0.85rem 0 1.25rem;
+  max-width: 22rem;
+  overflow: hidden;
+  white-space: nowrap;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.7rem;
+  line-height: 1;
+  letter-spacing: 0.06em;
+  color: var(--brand-blue);
+  opacity: 0.55;
+  user-select: none;
+}
+
+.ascii-rule--full {
+  max-width: none;
+  margin-bottom: 2rem;
+}
+
+/*
+  The pointer trail. Fixed, non-interactive, and above the content but below
+  the header — a glyph that swallowed a click would be a genuine bug rather
+  than a decoration.
+*/
+.ascii-trail {
+  position: fixed;
+  inset: 0;
+  z-index: calc(var(--z-header) - 1);
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.ascii-trail__glyph {
+  position: absolute;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.75rem;
+  color: var(--lightalpha-color);
+  will-change: transform, opacity;
+  animation: trail-fade 900ms var(--ease-out) forwards;
+}
+
+@keyframes trail-fade {
+  from {
+    opacity: 0.65;
+    transform: translate(0, 0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translate(var(--drift, 0), -28px) scale(0.6);
+  }
+}
+
+/*
+  The decode control a touch device gets in place of hover. It is a real
+  button — focusable, labelled, and it reports its state — because the effect
+  is worth having on a phone and a hover-only version simply would not exist
+  there.
+*/
+.ascii-toggle {
+  position: absolute;
+  right: 0.6rem;
+  bottom: 0.6rem;
+  z-index: 3;
+  min-height: 36px;
+  padding: 0.35em 0.9em;
+  border: 1px solid var(--line-color);
+  border-radius: 999px;
+  background: var(--darkalpha-color);
+  backdrop-filter: blur(8px);
+  font-size: var(--sub-size);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--lightalpha-color);
+}
+
+/* Any element carrying a decodable twin needs to be a positioning context and
+   to clip the canvas to its own corners. */
+[data-ascii] {
+  position: relative;
+  overflow: hidden;
+}
+
+/* Tap-to-decode is a state rather than a hover, so it is held until tapped
+   off again. */
+[data-ascii].is-decoded .ascii-canvas {
+  opacity: 1;
+}
+
+.board-card__media.has-ascii:hover .ascii-canvas,
+.nearby__link.has-ascii:hover .ascii-canvas,
+.city-card__link.has-ascii:hover .ascii-canvas {
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ascii-trail,
+  .ascii-toggle {
+    display: none;
+  }
+
+  .ascii-rule {
+    opacity: 0.35;
+  }
+}

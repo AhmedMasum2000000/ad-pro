@@ -43,6 +43,28 @@ const COLORS = [
   '78, 132, 210', // midpoint, keeps the gradient from banding
 ];
 
+/* --- the character field ----------------------------------------------------
+   A grid of glyphs drifting over the wash, densest where the pointer is. It
+   shares this canvas rather than taking one of its own, because two
+   full-screen contexts is the kind of decision that reads fine on a desktop
+   and ruins a mid-range phone.
+
+   It also updates far more slowly than the wash underneath — twelve times a
+   second against sixty. That is not a compromise: a character field that
+   interpolates smoothly stops looking like a terminal and starts looking like
+   a screensaver. The discrete step is the effect.                          */
+
+const GLYPHS = '.:-=+*#%@';
+const ASCII_MS = 1000 / 12;
+
+/** Two octaves of sines. Cheaper than real noise and, at this density,
+    indistinguishable from it. */
+function fieldValue(x: number, y: number, t: number): number {
+  const a = Math.sin(x * 0.09 + t) * Math.cos(y * 0.11 - t * 0.7);
+  const b = Math.sin((x + y) * 0.05 - t * 1.4);
+  return (a * 0.6 + b * 0.4) * 0.5 + 0.5;
+}
+
 export function initField(): FieldHandle {
   const canvas = document.getElementById('wgl_canvas') as HTMLCanvasElement | null;
   const noop: FieldHandle = { destroy: () => {} };
@@ -60,11 +82,29 @@ export function initField(): FieldHandle {
   // the fill cost for no visible difference.
   const SCALE = 0.5;
 
+  // The glyph layer is drawn into its own buffer at the slow rate and then
+  // composited every frame — one `drawImage` instead of four thousand
+  // `fillText` calls sixty times a second.
+  const glyphs = document.createElement('canvas');
+  const gctx = glyphs.getContext('2d');
+  let cell = 18;
+  let cols = 0;
+  let rows = 0;
+  let lastGlyphs = 0;
+
   const build = (): void => {
     width = window.innerWidth;
     height = window.innerHeight;
     canvas.width = Math.max(1, Math.round(width * SCALE));
     canvas.height = Math.max(1, Math.round(height * SCALE));
+
+    // Coarser cells on a phone: fewer glyphs, and each one large enough to
+    // read as a character rather than as noise on a dense display.
+    cell = width < 768 ? 24 : 18;
+    cols = Math.ceil(width / cell) + 1;
+    rows = Math.ceil(height / cell) + 1;
+    glyphs.width = Math.max(1, Math.round(width * SCALE));
+    glyphs.height = Math.max(1, Math.round(height * SCALE));
 
     const count = width < 768 ? 3 : 5;
     blobs = Array.from({ length: count }, (_, i) => {
@@ -85,7 +125,45 @@ export function initField(): FieldHandle {
     });
   };
 
-  const draw = (): void => {
+  /**
+   * Repaints the glyph buffer.
+   *
+   * Only cells above the threshold are drawn at all, so a sparse field costs
+   * a few hundred `fillText` calls rather than one per cell. Density rises
+   * towards the pointer, which is what makes the field feel answerable rather
+   * than merely present.
+   */
+  const drawGlyphs = (t: number, px: number, py: number): void => {
+    if (!gctx) return;
+    gctx.setTransform(SCALE, 0, 0, SCALE, 0, 0);
+    gctx.clearRect(0, 0, width, height);
+    gctx.font = `${cell - 6}px ui-monospace, SFMono-Regular, Menlo, monospace`;
+    gctx.textBaseline = 'top';
+
+    const reach = Math.min(width, height) * 0.42;
+
+    for (let row = 0; row < rows; row++) {
+      const y = row * cell;
+      for (let col = 0; col < cols; col++) {
+        const x = col * cell;
+
+        // Distance to the pointer, 1 at the pointer and 0 beyond its reach.
+        const dx = x - px;
+        const dy = y - py;
+        const near = Math.max(0, 1 - Math.sqrt(dx * dx + dy * dy) / reach);
+
+        const v = fieldValue(col, row, t) + near * 0.55;
+        if (v < 0.72) continue;
+
+        const strength = Math.min(1, (v - 0.72) / 0.5);
+        const glyph = GLYPHS[Math.min(GLYPHS.length - 1, (strength * GLYPHS.length) | 0)];
+        gctx.fillStyle = `rgba(107, 163, 232, ${(0.06 + strength * 0.2).toFixed(3)})`;
+        gctx.fillText(glyph, x, y);
+      }
+    }
+  };
+
+  const draw = (now = 0, px = width / 2, py = height / 2): void => {
     ctx.setTransform(SCALE, 0, 0, SCALE, 0, 0);
     ctx.clearRect(0, 0, width, height);
     ctx.globalCompositeOperation = 'lighter';
@@ -100,6 +178,16 @@ export function initField(): FieldHandle {
       ctx.arc(b.x, b.y, b.radius, 0, Math.PI * 2);
       ctx.fill();
     }
+
+    if (now - lastGlyphs > ASCII_MS) {
+      drawGlyphs(now * 0.00035, px, py);
+      lastGlyphs = now;
+    }
+
+    // Composited in the canvas's own pixel space, so the transform is reset
+    // first — the buffer is already at SCALE.
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.drawImage(glyphs, 0, 0);
   };
 
   build();
@@ -151,7 +239,7 @@ export function initField(): FieldHandle {
       b.y = damp(b.y, b.baseY + wanderY + offsetY * 140 * b.depth, 1.6, dt);
     }
 
-    draw();
+    draw(now, smoothX, smoothY);
     if (running) frame = requestAnimationFrame(tick);
   };
 

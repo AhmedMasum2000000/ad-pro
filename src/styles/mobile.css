@@ -354,3 +354,19 @@
     height: 3px;
   }
 }
+
+/* The decode button is the touch replacement for hover, so on a phone it has
+   to clear the same 44px bar as everything else. */
+@media (pointer: coarse) {
+  .ascii-toggle {
+    min-height: var(--tap);
+    padding-inline: 1.1em;
+  }
+}
+
+@media (max-width: 767px) {
+  .ascii-rule {
+    max-width: 12rem;
+    margin-bottom: 1rem;
+  }
+}
