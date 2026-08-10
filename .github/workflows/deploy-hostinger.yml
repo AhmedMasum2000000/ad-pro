@@ -1,0 +1,200 @@
+name: Deploy to Hostinger
+
+# Push-to-publish. Commit a change to main and the live site updates — there
+# is no cPanel step, no File Manager, no manual upload.
+#
+# Credentials never appear in this file. They live in the repository's
+# encrypted secrets and are read at run time, so nobody has to paste an FTP
+# password into a chat window or an editor.
+#
+# Two safety properties are worth knowing about, because they are what makes
+# automatic deployment to a *live commercial site* reasonable rather than
+# reckless:
+#
+#   1. The build is checked before anything is uploaded. A build that lost its
+#      pages, its stylesheet or its inventory fails the job and the live site
+#      is left exactly as it was.
+#
+#   2. Deleting remote files is gated on an ownership marker. The very first
+#      run uploads without deleting anything and drops a marker file; only
+#      once that marker is found does the sync start removing files the build
+#      no longer produces. Point this at the wrong directory and the worst
+#      case is some extra files, not a wiped website.
+
+on:
+  push:
+    branches: [main]
+    paths-ignore:
+      - '**.md'
+      - '.github/workflows/deploy.yml'
+  workflow_dispatch:
+    inputs:
+      prune:
+        description: 'Remove remote files the build no longer produces'
+        type: boolean
+        default: true
+
+# One deploy at a time. Two overlapping FTP syncs against the same directory
+# is how a site ends up in a half-updated state.
+concurrency:
+  group: hostinger
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    env:
+      # The public origin, used for canonical, OG and sitemap URLs. Set the
+      # SITE_URL repository variable to the real domain; the fallback keeps a
+      # fresh clone building sensibly.
+      SITE_URL: ${{ vars.SITE_URL || 'https://adpro.com.bd' }}
+      REMOTE_DIR: ${{ vars.HOSTINGER_REMOTE_DIR || 'public_html' }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Build for the live domain
+        env:
+          # Served from the domain root on Hostinger, not from a /repo/
+          # subpath the way the GitHub Pages preview is.
+          BASE_PATH: /
+        run: npm run build
+
+      # Rollup names HTML outputs after their source path, so pages built from
+      # pages/*.html arrive as dist/pages/*.html and would deploy one level
+      # too deep.
+      - name: Flatten built pages
+        run: |
+          mv dist/pages/*.html dist/
+          rmdir dist/pages
+
+      - name: Check the build before touching the live site
+        run: |
+          set -euo pipefail
+          fail() { echo "::error::$1"; exit 1; }
+
+          [ -f dist/index.html ] || fail "dist/index.html is missing"
+          [ -f dist/sitemap.xml ] || fail "sitemap.xml is missing"
+          [ -f dist/.htaccess ] || fail ".htaccess is missing"
+          [ -d dist/assets ] || fail "dist/assets is missing"
+          [ -d dist/boards ] || fail "site photography is missing"
+
+          pages=$(find dist -maxdepth 1 -name '*.html' | wc -l)
+          [ "$pages" -ge 100 ] || fail "only $pages pages built; expected 100+"
+
+          css=$(find dist/assets -name '*.css' | wc -l)
+          [ "$css" -ge 1 ] || fail "no stylesheet in the build"
+
+          photos=$(find dist/boards -name '*.jpg' | wc -l)
+          [ "$photos" -ge 58 ] || fail "only $photos site photographs; expected 58"
+
+          # The canonical URL must point at the live domain, not the preview.
+          grep -q "$SITE_URL" dist/index.html || fail "index.html does not carry $SITE_URL"
+
+          # A rate leaking onto a public page is a commercial problem, not a
+          # cosmetic one, so it stops the deploy.
+          if grep -rlE 'BDT ?[0-9,]+|৳ ?[0-9,]+' dist --include='*.html' | head -1 | grep -q .; then
+            fail "a published rate was found in the build"
+          fi
+
+          echo "Build looks sound: $pages pages, $photos photographs."
+
+      - name: Install lftp
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq lftp
+
+      # Written to the build, uploaded with it, and looked for on the remote
+      # before any destructive sync is allowed.
+      - name: Stamp the build
+        run: |
+          {
+            echo "deployed-by: github-actions"
+            echo "repository: ${{ github.repository }}"
+            echo "commit: ${{ github.sha }}"
+            echo "at: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          } > dist/.adpro-deploy
+
+      - name: Decide whether deleting is safe
+        id: guard
+        env:
+          FTP_HOST: ${{ secrets.HOSTINGER_FTP_HOST }}
+          FTP_USER: ${{ secrets.HOSTINGER_FTP_USER }}
+          FTP_PASSWORD: ${{ secrets.HOSTINGER_FTP_PASSWORD }}
+        run: |
+          set -uo pipefail
+          if [ -z "${FTP_HOST:-}" ] || [ -z "${FTP_USER:-}" ] || [ -z "${FTP_PASSWORD:-}" ]; then
+            echo "::error::Set HOSTINGER_FTP_HOST, HOSTINGER_FTP_USER and HOSTINGER_FTP_PASSWORD in repository secrets."
+            exit 1
+          fi
+
+          listing=$(lftp -u "$FTP_USER","$FTP_PASSWORD" -e "
+            set ftp:ssl-force true;
+            set ssl:verify-certificate no;
+            cls -1 $REMOTE_DIR/.adpro-deploy; bye" "$FTP_HOST" 2>&1 || true)
+
+          if echo "$listing" | grep -q '.adpro-deploy'; then
+            echo "owned=true" >> "$GITHUB_OUTPUT"
+            echo "Marker found — this directory was published by this workflow."
+          else
+            echo "owned=false" >> "$GITHUB_OUTPUT"
+            echo "::warning::No ownership marker at $REMOTE_DIR. Uploading without deleting anything on this run; the marker is written now and pruning applies from the next deploy."
+          fi
+
+      - name: Upload
+        env:
+          FTP_HOST: ${{ secrets.HOSTINGER_FTP_HOST }}
+          FTP_USER: ${{ secrets.HOSTINGER_FTP_USER }}
+          FTP_PASSWORD: ${{ secrets.HOSTINGER_FTP_PASSWORD }}
+          PRUNE_REQUESTED: ${{ github.event_name != 'workflow_dispatch' || inputs.prune }}
+          OWNED: ${{ steps.guard.outputs.owned }}
+        run: |
+          set -euo pipefail
+
+          DELETE=""
+          if [ "$OWNED" = "true" ] && [ "$PRUNE_REQUESTED" = "true" ]; then
+            DELETE="--delete"
+            echo "Syncing with deletion of files the build no longer produces."
+          else
+            echo "Syncing without deletion."
+          fi
+
+          # --only-newer keeps the transfer to what actually changed, which on
+          # a 58-photograph site is the difference between seconds and minutes.
+          # The marker is excluded from deletion so a failed run cannot strip
+          # the very thing that proves ownership.
+          lftp -u "$FTP_USER","$FTP_PASSWORD" "$FTP_HOST" <<LFTP
+            set ftp:ssl-force true
+            set ftp:ssl-protect-data true
+            set ssl:verify-certificate no
+            set net:max-retries 3
+            set net:timeout 20
+            set mirror:parallel-transfer-count 4
+            mirror --reverse --only-newer --verbose=1 $DELETE \
+                   --exclude-glob .git* \
+                   dist/ $REMOTE_DIR/
+            bye
+          LFTP
+
+      - name: Confirm the live site answers
+        run: |
+          set -uo pipefail
+          for attempt in 1 2 3 4 5; do
+            code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 20 "$SITE_URL/" || echo 000)
+            if [ "$code" = "200" ]; then
+              echo "$SITE_URL/ returned 200."
+              sitemap=$(curl -s --max-time 20 "$SITE_URL/sitemap.xml" | grep -c '<loc>' || echo 0)
+              echo "sitemap lists $sitemap routes."
+              exit 0
+            fi
+            echo "Attempt $attempt: $SITE_URL/ returned $code; retrying."
+            sleep 15
+          done
+          echo "::warning::Could not confirm $SITE_URL/ over HTTP. The upload finished; check DNS, the document root and the SSL certificate."

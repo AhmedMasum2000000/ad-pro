@@ -39,7 +39,7 @@ import {
 } from './boardCopy';
 import { faqArticles } from '../data/faq';
 import { buildCta, faqPath, FAQ_HUB } from './faqPages';
-import { boardPath, buildJsonLd, cityPath, type PageMeta } from './seo';
+import { abs, boardPath, buildJsonLd, cityPath, type PageMeta } from './seo';
 
 export type { PageMeta };
 
@@ -50,8 +50,6 @@ const esc = (value: string): string =>
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;');
 
-const abs = (href: string): string =>
-  `${company.siteUrl.replace(/\/$/, '')}/${href.replace(/^\//, '')}`;
 
 /* --- head ----------------------------------------------------------------- */
 

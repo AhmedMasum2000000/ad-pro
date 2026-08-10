@@ -45,8 +45,23 @@ export interface PageMeta {
   article?: string;
 }
 
-const root = company.siteUrl.replace(/\/$/, '');
-const abs = (path: string): string => (path ? `${root}/${path.replace(/^\//, '')}` : `${root}/`);
+/*
+  The canonical origin.
+
+  `company.siteUrl` is the default, but the deploy workflow overrides it with
+  SITE_URL so the same source tree can publish to the GitHub Pages preview and
+  to the live domain with correct canonical, OG and sitemap URLs in each. This
+  file only ever runs in Node — src/data and src/build are build-time only,
+  and nothing in the browser bundle imports them — so reading process.env here
+  is safe.
+*/
+const root = (process.env.SITE_URL || company.siteUrl).replace(/\/$/, '');
+
+/** The absolute URL of a site-relative path. Exported so there is exactly one
+    origin in the build — a second copy is how canonical and sitemap end up
+    disagreeing. */
+export const abs = (path: string): string =>
+  path ? `${root}/${path.replace(/^\//, '')}` : `${root}/`;
 
 const ORG_ID = `${root}/#organization`;
 
@@ -345,7 +360,10 @@ export function buildJsonLd(meta: PageMeta): string {
 export function buildSitemap(pages: PageMeta[]): string {
   const today = new Date().toISOString().slice(0, 10);
 
+  // The error page is a real route with the full shell, but it is not a
+  // destination and listing it would invite a crawler to index a dead end.
   const urls = pages
+    .filter((p) => p.path !== '404.html')
     .map(
       (p) => `  <url>
     <loc>${abs(p.path)}</loc>

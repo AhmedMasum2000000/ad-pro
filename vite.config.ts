@@ -137,6 +137,17 @@ for (const board of billboards) {
   };
 }
 
+// Served by the host's ErrorDocument, so it needs the full shell and its own
+// route rather than being a bare HTML file. Marked noindex in the template.
+meta['404'] = {
+  title: 'Page Not Found',
+  description:
+    'That page is not on the network. Browse all 58 LED billboard sites across ten Bangladeshi cities, or call for availability.',
+  path: '404.html',
+  namespace: 'notfound',
+  priority: 0.1,
+};
+
 meta.faq = {
   title: 'Billboard Advertising in Bangladesh — Questions Answered',
   description: `What billboard advertising costs in Bangladesh, how LED sites are priced, which format does which job and how to book one. ${faqArticles.length} questions answered by the operator.`,
