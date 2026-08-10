@@ -179,6 +179,7 @@ body:not(.isLoading) .hideOnLoad {
 .intro_logo____mark {
   width: clamp(4.5rem, 12vw, 8rem);
   height: auto;
+  object-fit: contain;
   will-change: transform, opacity;
 }
 
@@ -231,6 +232,10 @@ body:not(.isLoading) .hideOnLoad {
   width: 2.25rem;
   height: 2.25rem;
   flex-shrink: 0;
+  /* The supplied artwork is a 312px square raster rather than the vector it
+     replaced, so it is fitted rather than stretched, and rendered at a size
+     it comfortably has the pixels for. */
+  object-fit: contain;
 }
 
 .brand__text {

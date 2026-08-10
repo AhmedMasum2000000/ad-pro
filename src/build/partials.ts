@@ -78,7 +78,12 @@ export function buildHead(meta: PageMeta): string {
     <meta name="geo.region" content="BD" />
     <meta name="geo.placename" content="Dhaka" />
 
-    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="icon" href="/favicon.png" type="image/png" sizes="256x256" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <meta property="og:image" content="${esc(abs('og-image.jpg'))}" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta name="twitter:image" content="${esc(abs('og-image.jpg'))}" />
 
     <script type="application/ld+json">${buildJsonLd(meta)}</script>`.trim();
 }
@@ -145,7 +150,7 @@ export function buildShell(): string {
          role="dialog" aria-modal="true" aria-label="Main menu" data-lenis-prevent>
       <div class="menu-header">
         <a class="brand" href="index.html">
-          <img class="brand__mark" src="/logo-mark.svg" alt="" width="40" height="40" />
+          <img class="brand__mark" src="/logo-mark-reversed.png" alt="" width="312" height="312" decoding="async" />
           <span class="brand__name">${esc(company.wordmark)}</span>
         </a>
         <button class="menu-close addHover" id="menu_close" type="button" aria-label="Close menu">
@@ -167,7 +172,7 @@ export function buildShell(): string {
 
   <div class="main-nav-wrapper flex-wrapper space-between" id="main_nav_wrapper">
     <a class="brand" href="index.html">
-      <img class="brand__mark" src="/logo-mark.svg" alt="" width="40" height="40" />
+      <img class="brand__mark" src="/logo-mark-reversed.png" alt="" width="312" height="312" decoding="async" />
       <span class="brand__text">
         <span class="brand__name">${esc(company.wordmark)}</span>
         <span class="brand__sub">Communications Ltd.</span>
@@ -192,7 +197,7 @@ export function buildShell(): string {
       <div class="curtain-item" aria-hidden="true"></div>
     </div>
     <div class="intro_logo____wrapper" id="logo_wrapper" aria-hidden="true">
-      <img class="intro_logo____mark" src="/logo-mark.svg" alt="" width="128" height="128" />
+      <img class="intro_logo____mark" src="/logo-mark-reversed.png" alt="" width="312" height="312" decoding="async" />
       <div class="intro_logo____placeholder">${esc(company.wordmark)}</div>
     </div>
   </div>`;
