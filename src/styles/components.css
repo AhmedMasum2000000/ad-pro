@@ -1107,3 +1107,316 @@ details[open] .faq__marker::after { transform: rotate(0deg); }
 .listing-title {
   font-size: clamp(1.5rem, 7vw + 0.5rem, 5.5rem);
 }
+
+/* --- conversion block -------------------------------------------------------
+   The one component that repeats across every page type. The phone is the
+   primary action rather than the form because availability is genuinely a
+   conversation here — a form makes the visitor wait for an answer they could
+   have had while still on the line. The three lines under the buttons are the
+   objections that come up every time: how long, what is included, how do I
+   know it ran. */
+
+.cta-block {
+  margin-block: clamp(2rem, 6vw, 4rem);
+  border: 1px solid var(--line-color);
+  background: linear-gradient(150deg, rgba(44, 111, 198, 0.1), rgba(20, 29, 44, 0.35));
+}
+
+.cta-block__inner {
+  padding: clamp(1.5rem, 4vw, 3rem);
+}
+
+.cta-block__line {
+  font-family: var(--font-heading);
+  font-size: var(--h3-size);
+  text-transform: uppercase;
+  line-height: 1.05;
+  margin-bottom: 0.75rem;
+  max-width: 28ch;
+}
+
+.cta-block__context {
+  color: var(--grey-dark-color);
+  max-width: 52ch;
+}
+
+.cta-block__trust {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem 1.75rem;
+  margin-top: 1.75rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--line-color);
+  font-size: var(--sub-size);
+  color: var(--grey-dark-color);
+}
+
+/* A tick built from a rotated border rather than an icon file — it is two
+   lines, and a request for two lines is not worth a round trip. */
+.cta-block__trust li {
+  position: relative;
+  padding-left: 1.4rem;
+}
+
+.cta-block__trust li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0.35em;
+  width: 5px;
+  height: 9px;
+  border-right: 1px solid var(--lightalpha-color);
+  border-bottom: 1px solid var(--lightalpha-color);
+  transform: rotate(45deg);
+}
+
+/* The one filled button on the page. Everything else is an outline, so the
+   primary action is unambiguous without shouting. */
+.btn--primary {
+  border-color: var(--lightalpha-color);
+  color: var(--bg-color);
+}
+
+.btn--primary::before {
+  transform: translateY(0);
+}
+
+.btn--primary:hover,
+.btn--primary:focus-visible {
+  color: var(--text-color);
+}
+
+.btn--primary:hover::before,
+.btn--primary:focus-visible::before {
+  transform: translateY(-101%);
+}
+
+/* --- long-form answers ------------------------------------------------------
+   The article layer used by the question pages. Measure is capped in `ch`
+   rather than `rem` so the line length stays readable as the type scale
+   changes with the viewport. */
+
+.answer-lede {
+  font-family: var(--font-main);
+  font-size: var(--accent-size);
+  line-height: 1.55;
+  color: var(--text-color);
+  max-width: 58ch;
+  padding-left: clamp(0.75rem, 2vw, 1.25rem);
+  border-left: 2px solid var(--lightalpha-color);
+}
+
+.article {
+  max-width: 68ch;
+}
+
+.article > * + * {
+  margin-top: 1.35rem;
+}
+
+.article-h2 {
+  font-size: var(--h3-size);
+  margin-top: clamp(2.25rem, 5vw, 3.5rem);
+}
+
+.article-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  padding-left: 1.5rem;
+  list-style: disc;
+}
+
+.article-list--numbered {
+  list-style: decimal;
+}
+
+.article-list li {
+  padding-left: 0.35rem;
+}
+
+.article-note {
+  padding: clamp(1rem, 3vw, 1.5rem);
+  border: 1px solid var(--line-color);
+  background: var(--bg-raised);
+}
+
+.article-note p {
+  margin: 0;
+  color: var(--text-color);
+}
+
+/* Figures inside an article break the measure deliberately — a photograph
+   constrained to 68ch reads as an afterthought. */
+.article-figure {
+  margin: clamp(2rem, 5vw, 3rem) 0;
+  width: min(100%, 46rem);
+}
+
+.article-figure__img {
+  width: 100%;
+  aspect-ratio: 3 / 2;
+  object-fit: cover;
+  border: 1px solid var(--line-color);
+  transition: border-color var(--dur-fast) var(--ease-out);
+}
+
+.article-figure__link:hover .article-figure__img {
+  border-color: var(--lightalpha-color);
+}
+
+.article-figure__caption {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  align-items: baseline;
+  margin-top: 0.75rem;
+  font-size: var(--sub-size);
+  color: var(--grey-dark-color);
+}
+
+.table-caption {
+  margin-top: 0.75rem;
+  font-size: var(--sub-size);
+  color: var(--grey-dark-color);
+}
+
+/* --- answers hub and rails --------------------------------------------------- */
+
+.answer-groups {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(2.5rem, 7vw, 4.5rem);
+}
+
+.answer-group__title {
+  font-size: var(--h3-size);
+  padding-bottom: 0.85rem;
+  margin-bottom: 1.5rem;
+  border-bottom: 1px solid var(--line-color);
+}
+
+.answer-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 22rem), 1fr));
+  gap: var(--grid-gap);
+}
+
+.answer-list__link {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  height: 100%;
+  padding: clamp(1rem, 2.5vw, 1.5rem);
+  border: 1px solid var(--line-color);
+  transition: border-color var(--dur-fast) var(--ease-out),
+              background var(--dur-fast) var(--ease-out);
+}
+
+.answer-list__link:hover,
+.answer-list__link:focus-visible {
+  border-color: var(--lightalpha-color);
+  background: var(--bg-raised);
+}
+
+.answer-list__q {
+  font-family: var(--font-heading);
+  font-size: var(--h4-size);
+  text-transform: uppercase;
+  line-height: 1.1;
+}
+
+.answer-list__a {
+  font-size: var(--sub-size);
+  line-height: 1.55;
+  color: var(--grey-dark-color);
+  /* Three lines of the answer is enough to choose by; the rest is the page. */
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  overflow: hidden;
+}
+
+.answer-list__link .text-link {
+  margin-top: auto;
+  color: var(--lightalpha-color);
+}
+
+.related-q {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 17rem), 1fr));
+  gap: var(--grid-gap);
+  padding-block: clamp(1.5rem, 4vw, 2.5rem);
+}
+
+.related-q__link {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  height: 100%;
+  padding: 1.1rem;
+  border: 1px solid var(--line-color);
+  transition: border-color var(--dur-fast) var(--ease-out);
+}
+
+.related-q__link:hover,
+.related-q__link:focus-visible {
+  border-color: var(--lightalpha-color);
+}
+
+.related-q__question {
+  font-size: var(--accent-size);
+  line-height: 1.35;
+}
+
+.related-q__cat {
+  margin-top: auto;
+  font-size: var(--sub-size);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--grey-dark-color);
+}
+
+/* The topics this page covers, stated plainly. Useful to a reader deciding
+   whether they are in the right place, and honest about what the page is for. */
+.keyword-rail {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  padding-top: clamp(1.5rem, 4vw, 2.5rem);
+  border-top: 1px solid var(--line-color);
+}
+
+.keyword-rail__item {
+  padding: 0.35em 0.8em;
+  border: 1px solid var(--line-color);
+  border-radius: 999px;
+  font-size: var(--sub-size);
+  color: var(--grey-dark-color);
+}
+
+/* On the home page the answer cards sit beside a heading rather than filling
+   the width, so they drop to a single column at any size and lose the
+   read-more line — the whole card is the link. */
+.answer-list--compact {
+  grid-template-columns: 1fr;
+  gap: 0.75rem;
+}
+
+.answer-list--compact .answer-list__link {
+  flex-direction: row;
+  align-items: baseline;
+  gap: 1rem;
+  flex-wrap: wrap;
+  padding: 1rem 1.1rem;
+}
+
+.answer-list--compact .answer-list__q {
+  font-size: var(--h5-size);
+  flex: 1 1 14rem;
+}
+
+.answer-list--compact .answer-list__a {
+  flex: 1 1 16rem;
+  -webkit-line-clamp: 2;
+}

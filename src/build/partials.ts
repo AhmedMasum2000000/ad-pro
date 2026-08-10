@@ -37,6 +37,8 @@ import {
   parseDimension,
   sizeWords,
 } from './boardCopy';
+import { faqArticles } from '../data/faq';
+import { buildCta, faqPath, FAQ_HUB } from './faqPages';
 import { boardPath, buildJsonLd, cityPath, type PageMeta } from './seo';
 
 export type { PageMeta };
@@ -212,6 +214,25 @@ export function buildFooter(): string {
 
   // Internal links in the footer are how the billboard pages earn crawl depth
   // from every other page on the site.
+  // The five questions most likely to be somebody's entry point. Linking them
+  // from every page is what gets them crawled and what gives a visitor who
+  // landed on a listing somewhere to go that is not the contact form.
+  const answerLinks = faqArticles
+    .filter((a) =>
+      [
+        'billboard-advertising-cost-bangladesh',
+        'digital-vs-static-billboards',
+        'best-billboard-locations-in-dhaka',
+        'how-to-book-a-billboard-in-bangladesh',
+        'how-led-billboards-work',
+      ].includes(a.slug),
+    )
+    .map(
+      (a) =>
+        `<li><a class="text-link" href="${esc(faqPath(a.slug))}">${esc(a.shortTitle)}</a></li>`,
+    )
+    .join('');
+
   const sitemapLinks = [
     { label: 'Billboards', href: 'billboards.html' },
     { label: 'Static Billboards', href: 'static-billboards.html' },
@@ -220,6 +241,7 @@ export function buildFooter(): string {
     { label: 'Clients', href: 'clients.html' },
     { label: 'About', href: 'about.html' },
     { label: 'Contact', href: 'contact.html' },
+    { label: 'Answers', href: FAQ_HUB },
   ]
     .map((l) => `<li><a class="text-link" href="${esc(l.href)}">${esc(l.label)}</a></li>`)
     .join('');
@@ -238,12 +260,18 @@ export function buildFooter(): string {
       </div>
 
       <div class="css-grid-wrapper footer-grid">
-        <div class="grid-item grid-33 xsm-grid-100">
+        <div class="grid-item grid-25 xsm-grid-100">
           <span class="sub-text">Pages</span>
           <ul class="footer-links">${sitemapLinks}</ul>
         </div>
 
-        <div class="grid-item grid-33 xsm-grid-100">
+        <div class="grid-item grid-25 xsm-grid-100">
+          <span class="sub-text">Answers</span>
+          <ul class="footer-links">${answerLinks}</ul>
+          <p><a class="text-link" href="${FAQ_HUB}">All ${faqArticles.length} questions</a></p>
+        </div>
+
+        <div class="grid-item grid-25 xsm-grid-100">
           <span class="sub-text">Offices</span>
           <p class="text-muted">
             <strong>Corporate</strong><br />
@@ -252,7 +280,7 @@ export function buildFooter(): string {
           <p class="text-muted"><strong>Registered</strong><br />${esc(company.registeredAddress)}</p>
         </div>
 
-        <div class="grid-item grid-33 xsm-grid-100">
+        <div class="grid-item grid-25 xsm-grid-100">
           <span class="sub-text">Contact</span>
           <p>
             <a class="text-link" href="tel:${esc(company.phoneHref)}">${esc(company.phone)}</a><br />
@@ -517,6 +545,13 @@ export function buildListing(slug: string): string {
             <a class="btn addHover" href="${esc(cityPath(board.citySlug))}">All ${esc(board.city)} sites${group ? ` (${group.boards.length})` : ''}</a>
             <a class="btn addHover" href="billboards.html">The full network</a>
           </div>
+        </section>
+
+        <section class="gl-padding_lr">
+          ${buildCta(
+            `Want ${esc(board.name)}? Ask us what it costs.`,
+            'Screen time on this site is quoted per booking. Call and we will tell you what is open on this face and what it comes to — usually while you are still on the line.',
+          )}
         </section>`;
 }
 
@@ -604,6 +639,13 @@ export function buildCity(slug: string): string {
               <ul class="city-links">${others}</ul>
             </div>
           </div>
+        </section>
+
+        <section class="gl-padding_lr">
+          ${buildCta(
+            `Booking in ${esc(group.city)}?`,
+            'Tell us the dates and we will come back with what is free across the city, with sizes, hours and an all-in cost.',
+          )}
         </section>`;
 }
 

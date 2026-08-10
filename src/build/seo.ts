@@ -16,6 +16,7 @@ import {
   type Billboard,
 } from '../data/site';
 import { boardFaqs, boardSummary } from './boardCopy';
+import { faqArticles, faqBySlug } from '../data/faq';
 
 export interface PageMeta {
   title: string;
@@ -35,6 +36,10 @@ export interface PageMeta {
   board?: string;
   /** Slug of the city whose inventory this page lists. */
   citySlug?: string;
+  /** Slug of the single question this page answers. */
+  question?: string;
+  /** Emit the index of every question — the answers hub. */
+  faqHub?: boolean;
 }
 
 const root = company.siteUrl.replace(/\/$/, '');
@@ -190,6 +195,35 @@ function cityNode(slug: string): Record<string, unknown> | null {
   };
 }
 
+/*
+   A page that answers one question is a QAPage, not a FAQPage — FAQPage is
+   for a list of them. Getting this right is the difference between being
+   eligible for a rich result and being quietly ignored.                    */
+function questionNode(slug: string): Record<string, unknown> | null {
+  const article = faqBySlug(slug);
+  if (!article) return null;
+
+  return {
+    '@type': 'QAPage',
+    '@id': `${abs(`faq-${slug}.html`)}#qa`,
+    mainEntity: {
+      '@type': 'Question',
+      name: article.question,
+      text: article.question,
+      answerCount: 1,
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: article.shortAnswer,
+        url: abs(`faq-${slug}.html`),
+        author: { '@id': ORG_ID },
+      },
+    },
+    about: article.keywords.map((k) => ({ '@type': 'Thing', name: k })),
+    author: { '@id': ORG_ID },
+    publisher: { '@id': ORG_ID },
+  };
+}
+
 function breadcrumbs(meta: PageMeta): Record<string, unknown> | null {
   if (!meta.breadcrumbs?.length) return null;
 
@@ -245,6 +279,19 @@ export function buildJsonLd(meta: PageMeta): string {
   if (meta.citySlug) {
     const node = cityNode(meta.citySlug);
     if (node) graph.push(node);
+  }
+
+  if (meta.question) {
+    const node = questionNode(meta.question);
+    if (node) graph.push(node);
+  }
+
+  // The hub is the one page where every short answer belongs in a single
+  // FAQPage block, because that is exactly what it is.
+  if (meta.faqHub) {
+    graph.push(
+      faqNode(faqArticles.map((a) => ({ q: a.question, a: a.shortAnswer }))),
+    );
   }
 
   if (meta.faq) graph.push(faqNode());

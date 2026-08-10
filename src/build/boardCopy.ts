@@ -101,11 +101,41 @@ const scaleLine = (board: Billboard): string => {
   return 'a compact face, close to the traffic rather than above it';
 };
 
-/** The one-sentence summary that becomes the meta description. */
+/** The one-sentence summary. Used as the Place description in schema. */
 export function boardSummary(board: Billboard): string {
   const size = sizeWords(board);
   const hours = board.hours ? `${board.hours} a day` : 'daily';
   return `${board.title} is a ${size} LED billboard in ${board.city} facing ${board.facing}, on air ${hours}. Call ${company.phone} for availability and price.`;
+}
+
+/**
+ * The meta description, written to a length budget.
+ *
+ * A snippet is cut somewhere around 155-160 characters, and several of these
+ * site names are long — "Akij House, GMG Circle, Gulshan-Tejgaon Road" alone
+ * is 44 of them. So the sentence is assembled from most to least useful and
+ * the tail is dropped once the budget is spent, rather than written out in
+ * full and truncated by the search engine mid-word.
+ */
+export function boardMetaDescription(board: Billboard): string {
+  const LIMIT = 158;
+  const size = sizeWords(board);
+
+  const head = `${board.title}: ${size} LED billboard in ${board.city}`;
+  const optional = [
+    board.facing ? `, facing ${board.facing}` : '',
+    board.schedule ? `, on air ${board.schedule}` : board.hours ? `, ${board.hours} a day` : '',
+    '. Photos, specs and availability — call for price.',
+  ];
+
+  let out = head;
+  for (const part of optional) {
+    if (!part) continue;
+    // The closing sentence is the one clause worth making room for, so it is
+    // taken whenever it fits at all rather than only when it fits in order.
+    if (out.length + part.length <= LIMIT) out += part;
+  }
+  return out.endsWith('.') ? out : `${out}. Call for price.`;
 }
 
 /** The opening paragraph on the listing page. */

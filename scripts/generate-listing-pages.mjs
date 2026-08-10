@@ -31,12 +31,25 @@ const pagesDir = existsSync(join(root, 'pages')) ? join(root, 'pages') : root;
 const boards = JSON.parse(readFileSync(join(root, 'src/data/boards.json'), 'utf8'));
 const citySlugs = [...new Set(boards.map((b) => b.citySlug))];
 
+/*
+  The question slugs are declared in TypeScript, which this plain Node script
+  cannot import. Reading them out of the source with a regex is the smaller
+  evil: the alternative is a second copy of the list that silently rots the
+  first time somebody adds a question. If the shape of the data file changes,
+  this throws rather than generating a short site.
+*/
+const faqSource = readFileSync(join(root, 'src/data/faq.ts'), 'utf8');
+const faqSlugs = [...faqSource.matchAll(/^    slug: '([a-z0-9-]+)',$/gm)].map((m) => m[1]);
+if (faqSlugs.length === 0) {
+  throw new Error('generate-listing-pages: found no FAQ slugs in src/data/faq.ts');
+}
+
 mkdirSync(pagesDir, { recursive: true });
 
 // Clear the previous run first: a site renamed in the deck would otherwise
 // leave its old page behind, and a stale route is worse than a missing one.
 for (const file of readdirSync(pagesDir)) {
-  if (/^(led|billboards)-.+\.html$/.test(file)) unlinkSync(join(pagesDir, file));
+  if (/^(led|billboards|faq)-.+\.html$/.test(file)) unlinkSync(join(pagesDir, file));
 }
 
 const skeleton = (namespace, placeholder) => `<!doctype html>
@@ -83,6 +96,12 @@ for (const slug of citySlugs) {
   written += 1;
 }
 
+for (const slug of faqSlugs) {
+  writeFileSync(join(pagesDir, `faq-${slug}.html`), skeleton('answer', '<!--@ANSWER-->'));
+  written += 1;
+}
+
 console.log(
-  `generate-listing-pages: ${written} routes (${boards.length} sites, ${citySlugs.length} cities)`,
+  `generate-listing-pages: ${written} routes ` +
+    `(${boards.length} sites, ${citySlugs.length} cities, ${faqSlugs.length} answers)`,
 );

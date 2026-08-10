@@ -65,6 +65,11 @@ export const nav: NavGroup[] = [
     ],
   },
   {
+    tag: 'learn',
+    label: 'Answers',
+    links: [{ label: 'How it works', href: 'faq.html' }],
+  },
+  {
     tag: 'company',
     label: 'Company',
     links: [

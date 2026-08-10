@@ -1,7 +1,9 @@
 import { resolve } from 'node:path';
 import { defineConfig, type Plugin } from 'vite';
 import { billboards, cityGroups, company } from './src/data/site';
-import { boardSummary, sizeWords } from './src/build/boardCopy';
+import { boardMetaDescription, sizeWords } from './src/build/boardCopy';
+import { faqArticles } from './src/data/faq';
+import { buildCta, buildFaqArticle, buildFaqHub, faqPath } from './src/build/faqPages';
 import {
   buildBoards,
   buildCity,
@@ -36,24 +38,24 @@ import { boardPath, buildRobots, buildSitemap, cityPath } from './src/build/seo'
 */
 const meta: Record<string, PageMeta> = {
   index: {
-    title: `${company.name} — ${company.descriptor}`,
+    title: `Billboard Advertising in Bangladesh — ${company.shortName}`,
     description:
-      '58 digital LED billboard sites across ten cities in Bangladesh, owned and operated by AD PRO Communications Limited. Sizes, facings and on-air hours for every site — call for price.',
+      'Billboard advertising in Bangladesh from the operator: 58 digital LED sites in ten cities, each with photographs, sizes and on-air hours. Call for price.',
     path: '',
     namespace: 'home',
     priority: 1,
   },
   billboards: {
-    title: 'Billboards in Bangladesh',
+    title: 'Billboards in Bangladesh — All 58 LED Sites',
     description:
-      'Every AD PRO billboard site in Bangladesh — 58 digital LED screens across Dhaka, Chattogram, Sylhet and seven more cities, each with its own page, photograph and specification.',
+      'Every billboard site we operate in Bangladesh: 58 LED screens across Dhaka, Sylhet, Chattogram and seven more cities, with sizes, facings and photographs.',
     path: 'billboards.html',
     namespace: 'billboards',
     breadcrumbs: [],
     priority: 0.9,
   },
   'static-billboards': {
-    title: 'Static Billboards',
+    title: 'Static Billboards in Bangladesh — Unipoles and Gantries',
     description:
       'Unipole, gantry and building-wrap billboards across Bangladesh, surveyed, fabricated and mounted in-house. Availability and rates on request — call for price.',
     path: 'static-billboards.html',
@@ -63,9 +65,9 @@ const meta: Record<string, PageMeta> = {
     priority: 0.85,
   },
   'digital-billboards': {
-    title: 'Digital Billboards',
+    title: 'Digital LED Billboards in Bangladesh — 58 Sites',
     description:
-      '58 full-motion LED billboard sites across ten cities in Bangladesh, sold by the minute per day with same-day creative changes and a played-spot log. Call for price.',
+      'Digital LED billboards across Bangladesh: 58 sites, sold by the minute per day, same-day creative changes and a played-spot log at close. Call for price.',
     path: 'digital-billboards.html',
     namespace: 'digital-billboards',
     breadcrumbs: [{ name: 'Billboards', path: 'billboards.html' }],
@@ -73,33 +75,33 @@ const meta: Record<string, PageMeta> = {
     priority: 0.85,
   },
   services: {
-    title: 'Outdoor Advertising Services',
+    title: 'Outdoor Advertising Services in Bangladesh',
     description:
-      'Digital and static billboards, portable LED, transit and airport branding, activation and in-house printing — one agency, start to finish.',
+      'Outdoor advertising services in Bangladesh: LED and static billboards, transit and airport branding, activation, printing and fabrication under one roof.',
     path: 'services.html',
     namespace: 'services',
     priority: 0.8,
   },
   clients: {
-    title: '400+ Brands We Have Advertised',
+    title: 'Our Clients — 400+ Brands Advertised in Bangladesh',
     description:
-      'Telecom, banking, FMCG, automotive and airline brands that have advertised on the AD PRO network across Bangladesh.',
+      'The brands that have run out-of-home with us in Bangladesh — telecom, banking, FMCG, automotive, airlines and more, across 2,000+ delivered campaigns.',
     path: 'clients.html',
     namespace: 'clients',
     priority: 0.7,
   },
   about: {
-    title: 'About AD PRO Communications Limited',
+    title: 'About AD PRO — Outdoor Advertising Agency in Dhaka',
     description:
-      'AD PRO Communications Limited is an outdoor advertising agency headquartered in Dhaka, operating its own digital and static billboard network.',
+      'AD PRO Communications Limited is an outdoor advertising agency in Dhaka that owns and runs its own LED billboard network, print shop and mounting crews.',
     path: 'about.html',
     namespace: 'about',
     priority: 0.7,
   },
   contact: {
-    title: 'Book a Billboard',
+    title: 'Book a Billboard in Bangladesh — Call for Price',
     description:
-      'Tell us the city and the dates. AD PRO replies within one working day with availability and an all-in cost.',
+      'Book a billboard in Bangladesh: send the city and the dates and get a written plan with sites, sizes and an all-in cost inside one working day.',
     path: 'contact.html',
     namespace: 'contact',
     faq: true,
@@ -121,7 +123,7 @@ const meta: Record<string, PageMeta> = {
 for (const board of billboards) {
   meta[`led-${board.slug}`] = {
     title: `${board.title} LED Billboard, ${board.city}`,
-    description: boardSummary(board),
+    description: boardMetaDescription(board),
     path: boardPath(board),
     namespace: 'listing',
     breadcrumbs: [
@@ -133,13 +135,34 @@ for (const board of billboards) {
   };
 }
 
+meta.faq = {
+  title: 'Billboard Advertising in Bangladesh — Questions Answered',
+  description: `What billboard advertising costs in Bangladesh, how LED sites are priced, which format does which job and how to book one. ${faqArticles.length} questions answered by the operator.`,
+  path: 'faq.html',
+  namespace: 'answers',
+  faqHub: true,
+  priority: 0.9,
+};
+
+for (const article of faqArticles) {
+  meta[`faq-${article.slug}`] = {
+    title: article.question,
+    description: article.metaDescription,
+    path: faqPath(article.slug),
+    namespace: 'answer',
+    breadcrumbs: [{ name: 'Answers', path: 'faq.html' }],
+    question: article.slug,
+    priority: 0.75,
+  };
+}
+
 for (const group of cityGroups) {
   const sizes = group.boards.map((b) => sizeWords(b));
   meta[`billboards-${group.slug}`] = {
     title: `LED Billboards in ${group.city}`,
     description: `${group.boards.length} digital LED billboard site${
       group.boards.length === 1 ? '' : 's'
-    } in ${group.city}, from ${sizes[sizes.length - 1]} to ${sizes[0]}, with sizes, facings and on-air hours for each. Call ${company.phone} for availability and price.`,
+    } in ${group.city}, from ${sizes[sizes.length - 1]} to ${sizes[0]}. Photographs, sizes and on-air hours for each — call for price.`,
     path: cityPath(group.slug),
     namespace: 'city',
     breadcrumbs: [{ name: 'Billboards', path: 'billboards.html' }],
@@ -167,6 +190,8 @@ const shellPlugin = (): Plugin => ({
       // so 68 routes share one template each rather than 68 templates.
       if (page.board) html = html.replace('<!--@LISTING-->', buildListing(page.board));
       if (page.citySlug) html = html.replace('<!--@CITY-->', buildCity(page.citySlug));
+      if (page.question) html = html.replace('<!--@ANSWER-->', buildFaqArticle(page.question));
+      if (page.faqHub) html = html.replace('<!--@ANSWERS-->', buildFaqHub());
 
       return html
         .replace('<!--@HEAD-->', buildHead(page))
@@ -183,7 +208,14 @@ const shellPlugin = (): Plugin => ({
         // A marquee appears inside generated listing bodies too, so this has
         // to run after the body is in place — hence `replaceAll`.
         .replaceAll('<!--@MARQUEE-->', buildMarquee())
-        .replace('<!--@BOARDS_ALL-->', buildBoards());
+        .replace('<!--@BOARDS_ALL-->', buildBoards())
+        .replaceAll(
+          '<!--@CTA-->',
+          buildCta(
+            'Tell us the city and the dates. We will tell you what is free and what it costs.',
+            'Most enquiries get a written plan — sites, sizes, minutes and an all-in cost — inside one working day.',
+          ),
+        );
     },
   },
   // robots.txt and sitemap.xml are generated from the same page metadata
