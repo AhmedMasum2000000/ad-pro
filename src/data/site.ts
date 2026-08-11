@@ -289,12 +289,24 @@ export interface Billboard {
   /** Where the screen sits in the cropped photo, 0-1 across and down, so
       `object-position` can hold it in frame at any aspect ratio. */
   focus: [number, number];
+  /**
+   * The dominant colour of whatever this screen was showing when it was
+   * photographed, lifted until it clears 3.5:1 on the page background.
+   * Sampled by scripts/sample-accents.py rather than chosen — it is what
+   * makes 58 pages off one template read as 58 places instead of one page
+   * repeated 58 times.
+   */
+  accent?: string;
 }
 
 export const billboards: Billboard[] = (boardData as Billboard[]).map((b) => ({
   ...b,
   focus: [b.focus[0], b.focus[1]] as [number, number],
 }));
+
+/** A site's accent, or the brand blue where its screen carried no usable
+    colour. One place, so a missing sample degrades the same way everywhere. */
+export const accentOf = (board: Billboard): string => board.accent || '#6ba3e8';
 
 /** Every screen in the deck is LED. Static formats are sold, but none of the
     sites in this inventory are static, so the split is a constant. */

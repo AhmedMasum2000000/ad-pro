@@ -8,6 +8,12 @@
 
 import '@fontsource/bebas-neue/400.css';
 import '@fontsource-variable/inter';
+// Two weights only. The mono face carries specifications — dimensions,
+// resolutions, on-air windows — where a figure has to line up with the figure
+// above it, and where the register should read as technical rather than
+// promotional. It is not used for prose anywhere.
+import '@fontsource/ibm-plex-mono/400.css';
+import '@fontsource/ibm-plex-mono/500.css';
 
 import './styles/tokens.css';
 import './styles/grid.css';

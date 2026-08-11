@@ -211,6 +211,34 @@ body:not(.isLoading) .hideOnLoad {
   padding: 1.25rem var(--edge-r) 1.25rem var(--edge-l);
   background: linear-gradient(to bottom, rgba(14, 20, 32, 0.9), rgba(14, 20, 32, 0));
   pointer-events: none; /* the bar is a scrim; only its controls take clicks */
+  border-bottom: 1px solid transparent;
+  transition:
+    background var(--dur-fast) var(--ease-out),
+    border-color var(--dur-fast) var(--ease-out);
+}
+
+/*
+  Below the hero the scrim stops working.
+
+  It fades from the page's own background colour to nothing, which is fine
+  over a photograph and invisible over the page itself — so the wordmark was
+  being painted straight onto body copy from the second section down. Past the
+  fold the bar takes a real background and a hairline, and the gradient is
+  dropped so the two do not stack into a smear.
+*/
+:root[data-scrolled='true'] .main-nav-wrapper {
+  background: rgba(14, 20, 32, 0.82);
+  border-bottom-color: var(--line-color);
+  backdrop-filter: blur(14px) saturate(1.3);
+  -webkit-backdrop-filter: blur(14px) saturate(1.3);
+}
+
+/* Where the backdrop filter is unavailable, translucency would let text show
+   through the bar; those browsers get an opaque one instead. */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  :root[data-scrolled='true'] .main-nav-wrapper {
+    background: rgb(14, 20, 32);
+  }
 }
 
 .main-nav-wrapper > * {

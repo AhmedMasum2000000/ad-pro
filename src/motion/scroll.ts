@@ -34,6 +34,7 @@ export function initScroll(): Lenis | null {
 
   lenis.on('scroll', ({ scroll }: { scroll: number }) => {
     document.documentElement.style.setProperty('--scrollY', String(Math.round(scroll)));
+    markScrolled(scroll);
   });
 
   const raf = (time: number): void => {
@@ -55,10 +56,26 @@ export function initScroll(): Lenis | null {
   return lenis;
 }
 
+/**
+ * Flags that the page has left the top of the document.
+ *
+ * The header is transparent over the hero, where a photograph is the
+ * background and a scrim is enough. Everywhere below that the page's own
+ * background is the same navy as the scrim, so the scrim is invisible and the
+ * wordmark ends up printed over body copy. Past the fold the header takes a
+ * real background instead.
+ */
+function markScrolled(scroll: number): void {
+  const past = scroll > 24;
+  if (past === (document.documentElement.dataset.scrolled === 'true')) return;
+  document.documentElement.dataset.scrolled = String(past);
+}
+
 /** Fallback --scrollY writer for when Lenis is not running. */
 function trackScrollProperty(): void {
   const update = (): void => {
     document.documentElement.style.setProperty('--scrollY', String(Math.round(window.scrollY)));
+    markScrolled(window.scrollY);
   };
   update();
   window.addEventListener('scroll', update, { passive: true });

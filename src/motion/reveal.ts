@@ -58,8 +58,15 @@ export function initReveals(scope: ParentNode = document): RevealHandle {
     {
       // Fires a little before the element reaches the fold, so the motion has
       // finished by the time it is properly in view.
-      rootMargin: '0px 0px -12% 0px',
-      threshold: 0.1,
+      //
+      // The threshold is 0, not a fraction. `threshold` is measured against
+      // the target's own height, so an element taller than the viewport can
+      // never reach one: the 58-card inventory grid runs to about 11,000px in
+      // a 900px window, which caps it at 8% visible, and at 0.1 it stayed
+      // faded out however far the page was scrolled. The negative bottom
+      // margin still holds the trigger back until the element is on screen.
+      rootMargin: '0px 0px -15% 0px',
+      threshold: 0,
     },
   );
 

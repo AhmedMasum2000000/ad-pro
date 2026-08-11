@@ -74,12 +74,33 @@
   screen itself, worked out when the photograph was cropped. It matters most
   on a phone, where a 3:2 photograph in a portrait hero is cropped hard.
 */
+/*
+  The scrim is directional, and that is the whole argument of the hero.
+
+  It used to be a flat wash at 78-93% opacity across the entire frame, laid
+  down so the headline would be legible anywhere. It worked, and it also
+  turned the one thing this company sells — a lit LED screen at a junction —
+  into grey concrete. The product was being dimmed to make room for a sentence
+  about the product.
+
+  So the darkness now goes where the text is and nowhere else: heavy along the
+  left edge under the headline, gone by two thirds across, where the billboard
+  itself sits. The photograph reaches the right-hand side at close to full
+  strength. A second, shallow scrim along the bottom carries the site caption.
+*/
 .slide__media {
   position: absolute;
   inset: 0;
   background:
-    radial-gradient(120% 90% at 20% 15%, rgba(107, 163, 232, 0.18), transparent 60%),
-    linear-gradient(160deg, rgba(20, 29, 44, 0.78) 0%, rgba(14, 20, 32, 0.84) 55%, rgba(11, 17, 27, 0.93) 100%),
+    linear-gradient(to top, rgba(11, 17, 27, 0.8) 0%, rgba(11, 17, 27, 0) 26%),
+    linear-gradient(
+      100deg,
+      rgba(11, 17, 27, 0.94) 0%,
+      rgba(11, 17, 27, 0.86) 26%,
+      rgba(12, 18, 29, 0.5) 52%,
+      rgba(12, 18, 29, 0.16) 74%,
+      rgba(12, 18, 29, 0.08) 100%
+    ),
     var(--slide-img, none) var(--slide-focus, 50%) center / cover no-repeat;
   transform: scale(1.06);
   transition: transform 6s var(--ease-out);
@@ -200,6 +221,81 @@
 
 .intro-text h2 {
   margin-bottom: 2rem;
+}
+
+/* --- network index ----------------------------------------------------------
+   The counterweight beside the home page's introduction. Ten cities, their
+   counts, and a way into each — content in a column that used to be empty for
+   its whole height. */
+
+.net-index {
+  border-top: 2px solid var(--lightalpha-color);
+}
+
+.net-index__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-block: 0.85rem;
+  border-bottom: 1px solid var(--line-color);
+}
+
+/* The whole inventory as one figure, at a size that answers the headline
+   opposite rather than sitting quietly beside it. */
+.net-index__total {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: clamp(2rem, 4vw, 3.25rem);
+  font-weight: 500;
+  line-height: 1;
+  color: var(--lightalpha-color);
+}
+
+.net-index__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.net-index__link {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-block: 0.6rem;
+  border-bottom: 1px solid var(--line-color);
+  color: var(--text-color);
+  transition: color var(--dur-fast) var(--ease-out);
+}
+
+.net-index__link:hover,
+.net-index__link:focus-visible {
+  color: var(--lightalpha-color);
+}
+
+.net-index__city {
+  font-size: var(--p-size);
+}
+
+/* Zero-padded so single-site cities line up under the double-digit ones —
+   the column reads as a tally rather than as ragged text. */
+.net-index__count {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 0.9rem;
+  color: var(--grey-dark-color);
+  transition: color var(--dur-fast) var(--ease-out);
+}
+
+.net-index__link:hover .net-index__count {
+  color: var(--lightalpha-color);
+}
+
+.net-index__all {
+  display: inline-block;
+  margin-top: 1.1rem;
+  font-size: var(--sub-size);
 }
 
 /* --- card grid ------------------------------------------------------------ */
@@ -702,12 +798,39 @@ body.menu-open .menu-link {
   padding-block: clamp(2rem, 5vw, 4rem);
 }
 
+/*
+  Each card carries the accent sampled from its own screen, set inline. On the
+  grid that turns 58 identical frames into 58 different places: the top rule
+  is the colour that site was showing, so the wall reads as inventory rather
+  than as a repeated component.
+*/
 .board-card {
+  position: relative;
   border: 1px solid var(--line-color);
   transition: border-color var(--dur-fast) var(--ease-out);
 }
 
-.board-card:hover { border-color: var(--lightalpha-color); }
+.board-card::before {
+  content: '';
+  position: absolute;
+  inset-inline: -1px;
+  top: -1px;
+  height: 2px;
+  background: var(--accent);
+  /* Collapsed until the card is wanted, so the grid stays quiet at rest and
+     the colour is a response rather than decoration. */
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform var(--dur-base) var(--ease-out);
+  z-index: 1;
+}
+
+.board-card:hover::before,
+.board-card:focus-within::before {
+  transform: scaleX(1);
+}
+
+.board-card:hover { border-color: var(--accent); }
 
 .board-card[hidden] { display: none; }
 
@@ -940,6 +1063,29 @@ details[open] .faq__marker::after { transform: rotate(0deg); }
   transform-origin: left center;
 }
 
+/*
+  The pixel-resolve overlay (see src/motion/pixelate.ts).
+
+  It sits exactly on top of the photograph rather than replacing it, so the
+  real image is in the document and visible from the first paint to anything
+  that does not run the script — a crawler, a reader with motion turned down,
+  a browser where the canvas failed. The overlay is removed the instant the
+  animation finishes.
+*/
+[data-pixelate] {
+  position: relative;
+}
+
+.pixelate-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  pointer-events: none;
+  z-index: 2;
+}
+
 .listing-figure {
   margin: 0;
 }
@@ -958,9 +1104,43 @@ details[open] .faq__marker::after { transform: rotate(0deg); }
 }
 
 /*
+  The one moment of scale on the page.
+
+  A billboard is the largest medium there is, and every photograph of one was
+  sitting inside the same gutter as the body copy at the same size as
+  everything else. Once per listing the frame runs the full width of the
+  viewport with the gutters removed, which is the only place on the site where
+  the photograph is allowed to be the size of its subject.
+*/
+.gl-section--bleed {
+  padding-inline: 0;
+}
+
+.listing-figure--bleed .listing-figure__img {
+  aspect-ratio: 21 / 9;
+  border-inline: 0;
+  /* A hairline in the site's own colour along the bottom edge — the join
+     between the photograph and the page, tinted by what the screen was
+     showing. */
+  border-bottom: 2px solid var(--accent);
+}
+
+@media (max-width: 767px) {
+  /* A 21:9 band is 180px tall on a phone, which is a stripe rather than a
+     photograph. Portrait screens keep the 3:2 frame. */
+  .listing-figure--bleed .listing-figure__img {
+    aspect-ratio: 3 / 2;
+  }
+}
+
+/*
   Specification rows. A two-column definition list rather than a table: there
   is one subject, so the column headers a table would need are noise, and the
   rows collapse to a stack on a phone without a scroll container.
+
+  Values are set in the mono face. This is the page where a media buyer
+  decides, and a column of figures that line up under one another reads as
+  measurement; the same figures in the prose face read as marketing.
 */
 .spec-list {
   margin: 0;
@@ -975,16 +1155,121 @@ details[open] .faq__marker::after { transform: rotate(0deg); }
   border-bottom: 1px solid var(--line-color);
 }
 
-.spec dt {
+.spec__label {
   font-size: var(--sub-size);
   letter-spacing: 0.05em;
   text-transform: uppercase;
   color: var(--grey-dark-color);
+  /* Optical alignment: the label sits on the same baseline as a mono value
+     one size larger than it. */
+  padding-top: 0.15em;
 }
 
-.spec dd {
+.spec__value {
   margin: 0;
-  font-size: var(--accent-size);
+  font-family: var(--font-mono);
+  font-size: 0.95rem;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+  color: var(--text-color);
+}
+
+/* The four figures a buyer scans for, set larger than the rows around them
+   so the sheet has a hierarchy rather than eleven equal lines. */
+.spec--numeric .spec__value {
+  font-size: 1.15rem;
+  font-weight: 500;
+}
+
+/* --- listing head ----------------------------------------------------------
+   The headline and the figures that answer it, side by side. The right-hand
+   half of this grid used to be empty for the full height of the
+   introduction. */
+
+/*
+  A listing opens tighter than a format page.
+
+  The breadcrumb reserves the header's height for everything under it, and the
+  introduction then added a full `--intro-gap` on top of that — 320px of
+  nothing above the headline at 1440px wide. A format page earns that opening
+  because the headline is the first thing on it; here the breadcrumb has
+  already announced the page.
+*/
+.listing .breadcrumb {
+  padding-top: max(clamp(3.5rem, 7vw, 5.5rem), var(--header-safe));
+}
+
+.listing .intro-text-wrapper {
+  padding-top: clamp(1.25rem, 3.5vw, 3rem);
+  padding-bottom: clamp(2.5rem, 6vw, 5rem);
+}
+
+/* The photograph should feel like it arrives rather than being placed. Its
+   own scale is the separation, so it needs far less space above it than a
+   text section would. */
+.gl-section--bleed {
+  padding-block: clamp(0.5rem, 1.5vw, 1.25rem) var(--section-gap);
+}
+
+.listing-head {
+  align-items: end;
+}
+
+.listing-head__aside {
+  padding-top: clamp(1.5rem, 4vw, 3rem);
+}
+
+.glance {
+  margin: 0;
+  border-top: 2px solid var(--accent);
+}
+
+.glance__row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1.5rem;
+  padding-block: 0.8rem;
+  border-bottom: 1px solid var(--line-color);
+}
+
+.glance__label {
+  font-size: var(--sub-size);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--grey-dark-color);
+}
+
+.glance__value {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 1rem;
+  text-align: right;
+}
+
+/* The screen's dimensions, at a size that can hold its own against the
+   headline opposite. */
+.glance__value--lead {
+  font-size: clamp(1.6rem, 3.2vw, 2.6rem);
+  font-weight: 500;
+  line-height: 1;
+  color: var(--accent);
+}
+
+/*
+  A figure set large in the margin beside a paragraph, in the site's own
+  colour. Decorative and marked aria-hidden — the same value is in the
+  specification sheet above, where a screen reader will meet it once.
+*/
+.pull-figure {
+  margin-top: 1rem;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: clamp(1.25rem, 2.4vw, 2rem);
+  line-height: 1.1;
+  color: var(--accent);
+  opacity: 0.85;
 }
 
 /* --- related sites ---------------------------------------------------------
@@ -1179,6 +1464,28 @@ details[open] .faq__marker::after { transform: rotate(0deg); }
   border-right: 1px solid var(--lightalpha-color);
   border-bottom: 1px solid var(--lightalpha-color);
   transform: rotate(45deg);
+}
+
+/*
+  The call-for-price button on a listing, in that site's own colour.
+
+  It is an outline, not a fill: the accent is sampled from a photograph, so
+  its exact value is unknown at authoring time and a filled button would need
+  a text colour chosen to suit it. A rule and a label in the accent are
+  legible against the background at any of the 55 colours, because the
+  sampler holds every one of them above 3.5:1.
+*/
+.btn--accent {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.btn--accent:hover,
+.btn--accent:focus-visible {
+  background: var(--accent);
+  /* The page background, not white: the accent's contrast floor is measured
+     against exactly this colour. */
+  color: var(--bg-color);
 }
 
 /* The one filled button on the page. Everything else is an outline, so the

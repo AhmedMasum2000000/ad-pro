@@ -10,6 +10,7 @@ import {
   buildBoards,
   buildCity,
   buildCityIndex,
+  buildNetworkIndex,
   buildClientWall,
   buildComparison,
   buildFaq,
@@ -241,6 +242,7 @@ const shellPlugin = (): Plugin => ({
         .replace('<!--@CLIENT_TEASER-->', buildClientWall(16))
         .replace('<!--@CLIENT_WALL-->', buildClientWall())
         .replace('<!--@CITY_INDEX-->', buildCityIndex())
+        .replace('<!--@NETWORK_INDEX-->', buildNetworkIndex())
         // A marquee appears inside generated listing bodies too, so this has
         // to run after the body is in place — hence `replaceAll`.
         .replaceAll('<!--@MARQUEE-->', buildMarquee())

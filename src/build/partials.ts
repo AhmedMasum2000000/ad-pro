@@ -11,6 +11,7 @@
  */
 
 import {
+  accentOf,
   billboards,
   boardBySlug,
   cityGroups,
@@ -350,9 +351,9 @@ function boardCard(b: Billboard): string {
   const focus = `${(b.focus[0] * 100).toFixed(1)}% ${(b.focus[1] * 100).toFixed(1)}%`;
 
   return `
-    <article class="board-card" data-reveal-item data-city="${esc(b.city)}">
+    <article class="board-card" data-reveal-item data-city="${esc(b.city)}" style="--accent:${esc(accentOf(b))}">
       <a class="board-card__link" href="${esc(boardPath(b))}">
-        <div class="board-card__media" data-ascii>
+        <div class="board-card__media" data-pixelate>
           <img class="board-card__img" src="/${esc(b.image)}"
                alt="${esc(b.title)} LED billboard in ${esc(b.city)}, facing ${esc(b.facing)}"
                style="object-position:${focus}"
@@ -406,8 +407,20 @@ export function buildBoards(citySlug?: string): string {
    reachable from every other listing in at most two clicks, and no page in
    the set is a dead end.                                                   */
 
-function specRow(label: string, value: string): string {
-  return value ? `<div class="spec"><dt>${esc(label)}</dt><dd>${esc(value)}</dd></div>` : '';
+/**
+ * One line of the specification sheet.
+ *
+ * The value is set in the mono face and the row carries its own hairline, so
+ * the sheet reads as a technical document rather than as a styled definition
+ * list. `numeric` marks the rows a buyer scans for — sizes, resolutions,
+ * hours — which are set larger than the prose rows beside them.
+ */
+function specRow(label: string, value: string, numeric = false): string {
+  if (!value) return '';
+  return `<div class="spec${numeric ? ' spec--numeric' : ''}">
+            <dt class="spec__label">${esc(label)}</dt>
+            <dd class="spec__value">${esc(value)}</dd>
+          </div>`;
 }
 
 export function buildListing(slug: string): string {
@@ -419,18 +432,20 @@ export function buildListing(slug: string): string {
   const related = relatedBoards(board);
 
   const specs = [
-    specRow('Screen size', sizeWords(board)),
+    specRow('Screen size', sizeWords(board), true),
+    specRow('Resolution', board.resolution, true),
+    specRow('Daily on-air hours', board.hours, true),
+    specRow('On-air window', board.schedule, true),
     specRow('Facing', board.facing),
-    specRow('Resolution', board.resolution),
     specRow('LED panel', board.ledModel),
-    specRow('On-air window', board.schedule),
-    specRow('Daily on-air hours', board.hours),
     specRow('Minimum booking', board.minimum),
     specRow('Maintenance break', /^n\/?a$/i.test(board.breakTime) ? '' : board.breakTime),
     specRow('Artwork format', board.format),
     specRow('Reporting', board.reporting),
     specRow('City', board.city),
-    `<div class="spec"><dt>Rate</dt><dd><a class="text-link" href="tel:${esc(company.phoneHref)}">Call for price</a></dd></div>`,
+    `<div class="spec"><dt class="spec__label">Rate</dt>
+       <dd class="spec__value"><a class="text-link" href="tel:${esc(company.phoneHref)}">Call for price</a></dd>
+     </div>`,
   ].join('');
 
   const faq = boardFaqs(board)
@@ -447,7 +462,7 @@ export function buildListing(slug: string): string {
     .map(
       (b) => `
       <li class="nearby__item" data-reveal-item>
-        <a class="nearby__link" href="${esc(boardPath(b))}" data-ascii>
+        <a class="nearby__link" href="${esc(boardPath(b))}" data-pixelate>
           <img class="nearby__img" src="/${esc(b.image)}" alt=""
                style="object-position:${(b.focus[0] * 100).toFixed(1)}% ${(b.focus[1] * 100).toFixed(1)}%"
                loading="lazy" decoding="async" width="600" height="400" />
@@ -460,7 +475,35 @@ export function buildListing(slug: string): string {
     )
     .join('');
 
+  // The counterweight to the headline: the three figures a buyer actually
+  // scans for, set in the mono face at a size that competes with the title.
+  // Before this the right-hand half of the grid was empty for the whole
+  // height of the introduction.
+  const glance = `
+            <dl class="glance">
+              <div class="glance__row">
+                <dt class="glance__label">Screen</dt>
+                <dd class="glance__value glance__value--lead">${esc(sizeWords(board))}</dd>
+              </div>
+              <div class="glance__row">
+                <dt class="glance__label">Resolution</dt>
+                <dd class="glance__value">${esc(board.resolution)}</dd>
+              </div>
+              <div class="glance__row">
+                <dt class="glance__label">On air</dt>
+                <dd class="glance__value">${esc(board.hours || board.schedule || 'Daily')}</dd>
+              </div>
+              <div class="glance__row">
+                <dt class="glance__label">Facing</dt>
+                <dd class="glance__value">${esc(board.facing)}</dd>
+              </div>
+            </dl>`;
+
+  // Everything below inherits this site's own accent. It is set once, on a
+  // wrapper, rather than repeated on each element that uses it — which also
+  // means a board without a sampled colour falls back exactly once.
   return `
+        <div class="listing" style="--accent:${esc(accentOf(board))}">
         <nav class="breadcrumb gl-padding_lr" aria-label="Breadcrumb" data-reveal>
           <a class="text-link" href="billboards.html">Billboards</a>
           <span aria-hidden="true">/</span>
@@ -470,25 +513,30 @@ export function buildListing(slug: string): string {
         </nav>
 
         <section class="intro-text-wrapper gl-padding_lr">
-          <header class="intro-text" data-reveal>
-            <span class="sub-text">LED billboard · ${esc(board.city)}</span>
-            <div class="ascii-rule" data-ascii-rule aria-hidden="true"></div>
-            <h1 class="listing-title" data-scramble>${esc(board.title)}</h1>
-            <p class="h1-em">${esc(boardIntro(board))}</p>
-            <div class="btn-wrapper">
-              <a class="btn addHover" href="tel:${esc(company.phoneHref)}">Call for price</a>
-              <a class="btn addHover" href="contact.html">Check availability</a>
+          <div class="css-grid-wrapper listing-head">
+            <header class="grid-item grid-55 xsm-grid-100 intro-text" data-reveal>
+              <span class="sub-text">LED billboard · ${esc(board.city)}</span>
+              <div class="ascii-rule" data-ascii-rule aria-hidden="true"></div>
+              <h1 class="listing-title" data-scramble>${esc(board.title)}</h1>
+              <p class="h1-em">${esc(boardIntro(board))}</p>
+              <div class="btn-wrapper">
+                <a class="btn btn--accent addHover" href="tel:${esc(company.phoneHref)}">Call for price</a>
+                <a class="btn addHover" href="contact.html">Check availability</a>
+              </div>
+            </header>
+            <div class="grid-item grid-45 xsm-grid-100 listing-head__aside" data-reveal data-reveal-delay="0.1">
+              ${glance}
             </div>
-          </header>
+          </div>
         </section>
 
-        <section class="gl-section gl-padding_lr" data-reveal>
-          <figure class="listing-figure" data-ascii>
+        <section class="gl-section gl-section--bleed" data-reveal>
+          <figure class="listing-figure listing-figure--bleed" data-pixelate>
             <img class="listing-figure__img" src="/${esc(board.image)}"
                  alt="${esc(board.title)} LED billboard in ${esc(board.city)}, facing ${esc(board.facing)}"
                  style="object-position:${focus}"
                  width="1400" height="933" decoding="async" />
-            <figcaption class="listing-figure__caption">
+            <figcaption class="listing-figure__caption gl-padding_lr">
               ${esc(board.title)} — ${esc(board.city)}, facing ${esc(board.facing)}
             </figcaption>
           </figure>
@@ -510,6 +558,7 @@ export function buildListing(slug: string): string {
           <div class="css-grid-wrapper">
             <div class="grid-item grid-40 xsm-grid-100">
               <h2 class="accent-title">The screen</h2>
+              <p class="pull-figure" aria-hidden="true">${esc(board.resolution)}</p>
             </div>
             <div class="grid-item grid-60 xsm-grid-100">
               <p>${esc(boardTechnical(board))}</p>
@@ -521,11 +570,12 @@ export function buildListing(slug: string): string {
           <div class="css-grid-wrapper">
             <div class="grid-item grid-40 xsm-grid-100">
               <h2 class="accent-title">Who it reaches</h2>
+              <p class="pull-figure" aria-hidden="true">${esc(board.hours || 'Daily')}</p>
             </div>
             <div class="grid-item grid-60 xsm-grid-100">
               <p>${esc(boardAudience(board))}</p>
               <div class="btn-wrapper">
-                <a class="btn addHover" href="tel:${esc(company.phoneHref)}">Call for price</a>
+                <a class="btn btn--accent addHover" href="tel:${esc(company.phoneHref)}">Call for price</a>
               </div>
             </div>
           </div>
@@ -556,7 +606,8 @@ export function buildListing(slug: string): string {
         ${buildCta(
             `Want ${esc(board.name)}? Ask us what it costs.`,
             'Screen time on this site is quoted per booking. Call and we will tell you what is open on this face and what it comes to — usually while you are still on the line.',
-          )}`;
+          )}
+        </div>`;
 }
 
 /* --- city index ----------------------------------------------------------- */
@@ -653,6 +704,43 @@ export function buildCity(slug: string): string {
 }
 
 /** The city index used on the billboards hub. */
+/**
+ * The network as a column of figures, for use beside a block of prose.
+ *
+ * The home page's introduction ran down the left half of a hundred-column
+ * grid with the right half empty for its whole height, which reads as an
+ * unfinished template rather than as restraint. This is the counterweight:
+ * the ten cities and what is in them, set in the mono face, each one a link
+ * into its own page.
+ *
+ * Text rather than photographs on purpose — `buildCityIndex` already renders
+ * the picture version, and putting it here would compete with the media
+ * modules directly below.
+ */
+export function buildNetworkIndex(): string {
+  const rows = cityGroups
+    .map(
+      (g) => `
+        <li class="net-index__row">
+          <a class="net-index__link" href="${esc(cityPath(g.slug))}">
+            <span class="net-index__city">${esc(g.city)}</span>
+            <span class="net-index__count">${String(g.boards.length).padStart(2, '0')}</span>
+          </a>
+        </li>`,
+    )
+    .join('');
+
+  return `
+        <div class="net-index">
+          <div class="net-index__head">
+            <span class="sub-text">The network</span>
+            <span class="net-index__total">${billboards.length}</span>
+          </div>
+          <ul class="net-index__list">${rows}</ul>
+          <a class="text-link net-index__all" href="billboards.html">Every site, with photographs</a>
+        </div>`;
+}
+
 export function buildCityIndex(): string {
   const cards = cityGroups
     .map((g) => {

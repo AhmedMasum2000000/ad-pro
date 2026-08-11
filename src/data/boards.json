@@ -19,7 +19,8 @@
     "focus": [
       0.5,
       0.5
-    ]
+    ],
+    "accent": "#3fa874"
   },
   {
     "slug": "dhaka-gulshan-circle-1-mid-island",
@@ -41,7 +42,8 @@
     "focus": [
       0.5,
       0.5
-    ]
+    ],
+    "accent": "#6ba3e8"
   },
   {
     "slug": "dhaka-gulshan-circle-1-mid-island-2",
@@ -63,7 +65,8 @@
     "focus": [
       0.461,
       0.274
-    ]
+    ],
+    "accent": "#d2ad5e"
   },
   {
     "slug": "dhaka-gulshan-circle-2-west-side-barun-bhaban",
@@ -85,7 +88,8 @@
     "focus": [
       0.522,
       0.5
-    ]
+    ],
+    "accent": "#fad970"
   },
   {
     "slug": "dhaka-gulshan-circle-2-east-side-rob-super-market",
@@ -107,7 +111,8 @@
     "focus": [
       0.5,
       0.499
-    ]
+    ],
+    "accent": "#e28a66"
   },
   {
     "slug": "dhaka-gulshan-circle-2-north-side-lower-screen",
@@ -129,7 +134,8 @@
     "focus": [
       0.501,
       0.5
-    ]
+    ],
+    "accent": "#62acda"
   },
   {
     "slug": "dhaka-gulshan-circle-2-east-side-amanullah-trade-center",
@@ -151,7 +157,8 @@
     "focus": [
       0.5,
       0.5
-    ]
+    ],
+    "accent": "#e46779"
   },
   {
     "slug": "dhaka-banani-chairmanbari-u-loop",
@@ -173,7 +180,8 @@
     "focus": [
       0.5,
       0.5
-    ]
+    ],
+    "accent": "#3fc1fa"
   },
   {
     "slug": "dhaka-police-plaza-south-side",
@@ -195,7 +203,8 @@
     "focus": [
       0.5,
       0.501
-    ]
+    ],
+    "accent": "#f125e3"
   },
   {
     "slug": "dhaka-police-plaza-gulshan-1-facing",
@@ -217,7 +226,8 @@
     "focus": [
       0.5,
       0.5
-    ]
+    ],
+    "accent": "#2160fe"
   },
   {
     "slug": "dhaka-police-plaza-front-side",
@@ -239,7 +249,8 @@
     "focus": [
       0.391,
       0.5
-    ]
+    ],
+    "accent": "#4869b8"
   },
   {
     "slug": "dhaka-police-plaza-front-side-2",
@@ -261,7 +272,8 @@
     "focus": [
       0.5,
       0.5
-    ]
+    ],
+    "accent": "#4cbad2"
   },
   {
     "slug": "dhaka-police-plaza-entry-gate-south-side",
@@ -283,7 +295,8 @@
     "focus": [
       0.457,
       0.47
-    ]
+    ],
+    "accent": "#50e3fa"
   },
   {
     "slug": "dhaka-police-plaza-entry-gate-north-side",
@@ -305,7 +318,8 @@
     "focus": [
       0.509,
       0.5
-    ]
+    ],
+    "accent": "#20d9fa"
   },
   {
     "slug": "dhaka-akij-house-gmg-circle-gulshan-tejgaon-road-dhaka",
@@ -326,8 +340,9 @@
     "image": "boards/dhaka-akij-house-gmg-circle-gulshan-tejgaon-road-dhaka.jpg",
     "focus": [
       0.5,
-      0.5
-    ]
+      0.571
+    ],
+    "accent": "#6ba3e8"
   },
   {
     "slug": "dhaka-airport-entrance-banani-facing",
@@ -349,7 +364,8 @@
     "focus": [
       0.5,
       0.5
-    ]
+    ],
+    "accent": "#c8755a"
   },
   {
     "slug": "dhaka-bijoy-saroni-mor",
@@ -371,7 +387,8 @@
     "focus": [
       0.501,
       0.5
-    ]
+    ],
+    "accent": "#f52f50"
   },
   {
     "slug": "dhaka-manik-mia-avenue-aarong-signal",
@@ -393,7 +410,8 @@
     "focus": [
       0.5,
       0.5
-    ]
+    ],
+    "accent": "#c76555"
   },
   {
     "slug": "dhaka-khamar-bari-moor",
@@ -415,7 +433,8 @@
     "focus": [
       0.5,
       0.501
-    ]
+    ],
+    "accent": "#fa4757"
   },
   {
     "slug": "dhaka-dhanmondi-27-opposite-of-rapa-plaza",
@@ -437,7 +456,8 @@
     "focus": [
       0.5,
       0.5
-    ]
+    ],
+    "accent": "#5c94cd"
   },
   {
     "slug": "dhaka-dhanmondi-27-mid-island-opposite-of-rapa-plaza",
@@ -459,7 +479,8 @@
     "focus": [
       0.5,
       0.5
-    ]
+    ],
+    "accent": "#f23224"
   },
   {
     "slug": "dhaka-dhanmondi-2",
@@ -481,7 +502,8 @@
     "focus": [
       0.5,
       0.5
-    ]
+    ],
+    "accent": "#e77466"
   },
   {
     "slug": "dhaka-dahnmondi-02-no-road-zigatola",
@@ -503,7 +525,8 @@
     "focus": [
       0.5,
       0.487
-    ]
+    ],
+    "accent": "#fab614"
   },
   {
     "slug": "dhaka-science-lab-circle",
@@ -525,7 +548,8 @@
     "focus": [
       0.5,
       0.5
-    ]
+    ],
+    "accent": "#b04f54"
   },
   {
     "slug": "dhaka-green-road-crossing-u-turn",
@@ -547,7 +571,8 @@
     "focus": [
       0.452,
       0.412
-    ]
+    ],
+    "accent": "#36eefa"
   },
   {
     "slug": "dhaka-shimanto-square-6-led-screens",
@@ -569,7 +594,8 @@
     "focus": [
       0.33,
       0.5
-    ]
+    ],
+    "accent": "#c06357"
   },
   {
     "slug": "dhaka-bashundhara-city-indoor",
@@ -591,7 +617,8 @@
     "focus": [
       0.5,
       0.5
-    ]
+    ],
+    "accent": "#4c73a8"
   },
   {
     "slug": "dhaka-karwan-bazar",
@@ -613,7 +640,8 @@
     "focus": [
       0.5,
       0.5
-    ]
+    ],
+    "accent": "#f42d39"
   },
   {
     "slug": "dhaka-mirpur-10-circle-4-screens",
@@ -635,7 +663,8 @@
     "focus": [
       0.5,
       0.5
-    ]
+    ],
+    "accent": "#c66959"
   },
   {
     "slug": "dhaka-mohakhali-rail-crossing",
@@ -657,7 +686,8 @@
     "focus": [
       0.5,
       0.405
-    ]
+    ],
+    "accent": "#fa142d"
   },
   {
     "slug": "dhaka-sks-tower-flyover-view-mohakhali",
@@ -679,7 +709,8 @@
     "focus": [
       0.5,
       0.499
-    ]
+    ],
+    "accent": "#589bc4"
   },
   {
     "slug": "dhaka-sks-tower-exit-gate-mohakhali",
@@ -701,7 +732,8 @@
     "focus": [
       0.444,
       0.469
-    ]
+    ],
+    "accent": "#faec70"
   },
   {
     "slug": "dhaka-sks-tower-entrance-mohakhali",
@@ -723,7 +755,8 @@
     "focus": [
       0.5,
       0.367
-    ]
+    ],
+    "accent": "#fa9f14"
   },
   {
     "slug": "dhaka-hotel-radisson-blu",
@@ -745,7 +778,8 @@
     "focus": [
       0.417,
       0.434
-    ]
+    ],
+    "accent": "#6ba3e8"
   },
   {
     "slug": "dhaka-sadarghat-launch-terminal",
@@ -767,7 +801,8 @@
     "focus": [
       0.5,
       0.5
-    ]
+    ],
+    "accent": "#5bb8ca"
   },
   {
     "slug": "dhaka-kamlapur-railway-station-entry-gate",
@@ -789,7 +824,8 @@
     "focus": [
       0.563,
       0.39
-    ]
+    ],
+    "accent": "#70effa"
   },
   {
     "slug": "dhaka-airport-railway-station-entry-gate",
@@ -811,7 +847,8 @@
     "focus": [
       0.527,
       0.5
-    ]
+    ],
+    "accent": "#5eb2d0"
   },
   {
     "slug": "dhaka-shohortoli-railway-station-chittagong-entry-gate",
@@ -831,9 +868,10 @@
     "citySlug": "dhaka",
     "image": "boards/dhaka-shohortoli-railway-station-chittagong-entry-gate.jpg",
     "focus": [
-      0.56,
-      0.5
-    ]
+      0.516,
+      0.659
+    ],
+    "accent": "#faaa2e"
   },
   {
     "slug": "chattogram-golpahar-moor",
@@ -855,7 +893,8 @@
     "focus": [
       0.5,
       0.501
-    ]
+    ],
+    "accent": "#6fc8f6"
   },
   {
     "slug": "chattogram-agrabad-circle-chittagong",
@@ -877,7 +916,8 @@
     "focus": [
       0.5,
       0.501
-    ]
+    ],
+    "accent": "#68c4e7"
   },
   {
     "slug": "coxs-bazar-sughondha-circle-coxs-bazar",
@@ -899,7 +939,8 @@
     "focus": [
       0.5,
       0.5
-    ]
+    ],
+    "accent": "#70b6fa"
   },
   {
     "slug": "coxs-bazar-sughondha-point-coxs-bazar",
@@ -921,7 +962,8 @@
     "focus": [
       0.5,
       0.5
-    ]
+    ],
+    "accent": "#629fd9"
   },
   {
     "slug": "coxs-bazar-dolphin-moor-coxs-bazar",
@@ -943,7 +985,8 @@
     "focus": [
       0.5,
       0.405
-    ]
+    ],
+    "accent": "#fab714"
   },
   {
     "slug": "cumilla-kandirpar-cumilla",
@@ -965,7 +1008,8 @@
     "focus": [
       0.5,
       0.424
-    ]
+    ],
+    "accent": "#df9964"
   },
   {
     "slug": "rajshahi-rajshahi-shaheb-bazar-2-screens-both-side",
@@ -987,7 +1031,8 @@
     "focus": [
       0.5,
       0.429
-    ]
+    ],
+    "accent": "#5590be"
   },
   {
     "slug": "rajshahi-rajshahi-new-market",
@@ -1009,7 +1054,8 @@
     "focus": [
       0.502,
       0.5
-    ]
+    ],
+    "accent": "#6ae1ec"
   },
   {
     "slug": "sylhet-sylhet-bondor-bazar",
@@ -1031,7 +1077,8 @@
     "focus": [
       0.5,
       0.5
-    ]
+    ],
+    "accent": "#ca9f5b"
   },
   {
     "slug": "sylhet-sylhet-uposohor",
@@ -1053,7 +1100,8 @@
     "focus": [
       0.5,
       0.5
-    ]
+    ],
+    "accent": "#a8874c"
   },
   {
     "slug": "sylhet-sylhet-nairpul-point",
@@ -1075,7 +1123,8 @@
     "focus": [
       0.5,
       0.5
-    ]
+    ],
+    "accent": "#b49751"
   },
   {
     "slug": "sylhet-sylhet-chowkideki-point",
@@ -1097,7 +1146,8 @@
     "focus": [
       0.5,
       0.5
-    ]
+    ],
+    "accent": "#a89d4c"
   },
   {
     "slug": "sylhet-sylhet-rikabi-bazar",
@@ -1119,7 +1169,8 @@
     "focus": [
       0.5,
       0.5
-    ]
+    ],
+    "accent": "#2fcafa"
   },
   {
     "slug": "sylhet-sylhet-jitu-miah-point",
@@ -1141,7 +1192,8 @@
     "focus": [
       0.496,
       0.396
-    ]
+    ],
+    "accent": "#d2a55e"
   },
   {
     "slug": "sylhet-sylhet-surma-point",
@@ -1163,7 +1215,8 @@
     "focus": [
       0.5,
       0.5
-    ]
+    ],
+    "accent": "#cb3648"
   },
   {
     "slug": "sylhet-sylhet-tilaghar-point",
@@ -1185,7 +1238,8 @@
     "focus": [
       0.472,
       0.5
-    ]
+    ],
+    "accent": "#a8744c"
   },
   {
     "slug": "rangpur-shapla-mor-rangpur",
@@ -1207,7 +1261,8 @@
     "focus": [
       0.5,
       0.5
-    ]
+    ],
+    "accent": "#e2a166"
   },
   {
     "slug": "bogura-police-plaza-bogura",
@@ -1229,7 +1284,8 @@
     "focus": [
       0.5,
       0.501
-    ]
+    ],
+    "accent": "#e7129e"
   },
   {
     "slug": "narayanganj-narayanganj",
@@ -1251,7 +1307,8 @@
     "focus": [
       0.5,
       0.5
-    ]
+    ],
+    "accent": "#da9662"
   },
   {
     "slug": "feni-feni",
@@ -1273,6 +1330,7 @@
     "focus": [
       0.5,
       0.5
-    ]
+    ],
+    "accent": "#6ba3e8"
   }
 ]

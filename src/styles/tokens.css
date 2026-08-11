@@ -44,6 +44,15 @@
   --base-font-size: 16px;
   --font-heading: 'Bebas Neue', Impact, system-ui, -apple-system, sans-serif;
   --font-main: 'Inter Variable', 'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  /* Specifications only — see main.ts. */
+  --font-mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+
+  /*
+    The per-site accent, overridden inline on anything that belongs to one
+    billboard. Declared here so every rule that uses it has a value on pages
+    that belong to no single site, rather than silently resolving to nothing.
+  */
+  --accent: var(--brand-sky);
 
   --h1-size: clamp(1.6rem, 10vw + 1rem, 7.32rem);
   --h1-strong-size: clamp(3rem, 15vw + 1rem, 15.32rem);

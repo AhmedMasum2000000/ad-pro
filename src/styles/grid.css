@@ -51,7 +51,12 @@
 .grid-75  { grid-column: span 75; }
 .grid-66  { grid-column: span 66; }
 .grid-60  { grid-column: span 60; }
+/* A deliberately uneven pair. A headline column with a narrower column of
+   figures beside it reads as one composition; a 50/50 split reads as two
+   things that happen to be adjacent. */
+.grid-55  { grid-column: span 55; }
 .grid-50  { grid-column: span 50; }
+.grid-45  { grid-column: span 45; }
 .grid-40  { grid-column: span 40; }
 .grid-33  { grid-column: span 33; }
 .grid-25  { grid-column: span 25; }
