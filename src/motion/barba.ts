@@ -21,6 +21,7 @@ import { initPixelate } from './pixelate';
 import { initScrollFx } from './scrollfx';
 import { initReveals } from './reveal';
 import { initSlideshow } from './slideshow';
+import { initWall } from './wall';
 import { scrollToTop, startScroll, stopScroll } from './scroll';
 
 type Handle = { destroy: () => void };
@@ -46,6 +47,7 @@ export function mountPage(scope: ParentNode = document): void {
   initMarquee(scope);
   active = [
     initSlideshow(scope),
+    initWall(scope),
     initReveals(scope),
     initFilter(scope),
     initMagnetic(scope),

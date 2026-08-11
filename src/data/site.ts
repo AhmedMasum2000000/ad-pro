@@ -297,6 +297,15 @@ export interface Billboard {
    * repeated 58 times.
    */
   accent?: string;
+  /**
+   * How much more lit the screen's crop is than the rest of its own frame,
+   * measured by scripts/score-crops.py. Around 1 means the crop missed — the
+   * photograph was shot wide enough that the middle of it is street — and
+   * anything above about 2 is a screen. The home-page wall reads this to
+   * decide which sites it can show, so a replaced photograph changes the wall
+   * without anyone maintaining a list of which ones look good.
+   */
+  wallScore?: number;
 }
 
 export const billboards: Billboard[] = (boardData as Billboard[]).map((b) => ({

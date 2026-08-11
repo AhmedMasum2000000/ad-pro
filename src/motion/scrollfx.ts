@@ -13,8 +13,10 @@
  *   per frame is the layout thrash that costs the frame budget.
  * - Only elements currently in view are in the active set. Everything else
  *   costs nothing.
- * - The loop stops itself when the active set is empty and restarts on the
- *   next scroll, so a stationary page runs no animation at all.
+ * - The loop stops itself the moment the scroll position stops changing, and
+ *   the next scroll or resize restarts it, so a parked page runs no animation
+ *   at all. Everything the loop computes is a function of `scrollY`; once that
+ *   holds still there is no further answer to produce.
  * - Nothing moves for a visitor who asked for reduced motion, and parallax
  *   depth is halved on coarse pointers, where a big translation reads as a
  *   rendering fault rather than as depth.
@@ -74,11 +76,18 @@ export function initScrollFx(scope: ParentNode = document): ScrollFxHandle {
 
   const active = new Set<ParallaxItem>();
 
+  // The last scroll position this loop answered. Everything the loop computes
+  // is a function of it, so when it stops changing there is nothing left to
+  // compute and the loop can end.
+  let lastY = -1;
+
   const frame = (): void => {
     const y = window.scrollY;
     const vh = window.innerHeight;
+    const moved = y !== lastY;
+    lastY = y;
 
-    if (progress) {
+    if (progress && moved) {
       const max = document.documentElement.scrollHeight - vh;
       progress.style.transform = `scaleX(${max > 0 ? clamp(y / max, 0, 1) : 0})`;
     }
@@ -92,7 +101,11 @@ export function initScrollFx(scope: ParentNode = document): ScrollFxHandle {
       item.el.style.setProperty('--parallax', `${(t * item.speed * depth).toFixed(2)}px`);
     }
 
-    raf = active.size > 0 || progress ? requestAnimationFrame(frame) : 0;
+    // Stop at rest rather than idling. A parked page with a screen wall on it
+    // would otherwise burn a style invalidation per tile per frame forever;
+    // `start()` is called from every event that can change the answer, so
+    // stopping here costs nothing but the frame it takes to restart.
+    raf = moved ? requestAnimationFrame(frame) : 0;
   };
 
   const start = (): void => {
@@ -177,10 +190,18 @@ export function initScrollFx(scope: ParentNode = document): ScrollFxHandle {
     start();
   }
 
+  // The loop now ends at rest, so something has to wake it. Lenis scrolls the
+  // real document, so the native event fires under smooth scrolling too.
+  const onScroll = (): void => start();
+  if (!reduced) window.addEventListener('scroll', onScroll, { passive: true });
+
   let resizeFrame = 0;
   const onResize = (): void => {
     cancelAnimationFrame(resizeFrame);
-    resizeFrame = requestAnimationFrame(measureAll);
+    resizeFrame = requestAnimationFrame(() => {
+      measureAll();
+      start();
+    });
   };
   window.addEventListener('resize', onResize, { passive: true });
 
@@ -189,6 +210,7 @@ export function initScrollFx(scope: ParentNode = document): ScrollFxHandle {
       observer.disconnect();
       cancelAnimationFrame(raf);
       cancelAnimationFrame(resizeFrame);
+      window.removeEventListener('scroll', onScroll);
       window.removeEventListener('resize', onResize);
       progress?.remove();
       parallax.forEach((p) => p.el.style.removeProperty('--parallax'));

@@ -20,12 +20,13 @@
       0.5,
       0.5
     ],
-    "accent": "#3fa874"
+    "accent": "#3fa874",
+    "wallScore": 3.43
   },
   {
     "slug": "dhaka-gulshan-circle-1-mid-island",
     "name": "Gulshan Circle-1 Mid Island",
-    "title": "Gulshan Circle-1 Mid Island — Gulshan 2 & Mohakhali facing",
+    "title": "Gulshan Circle-1 Mid Island \u2014 Gulshan 2 & Mohakhali facing",
     "city": "Dhaka",
     "dimension": "W-20' x H-10'",
     "facing": "Gulshan 2 & Mohakhali",
@@ -43,12 +44,13 @@
       0.5,
       0.5
     ],
-    "accent": "#6ba3e8"
+    "accent": "#6ba3e8",
+    "wallScore": 0.21
   },
   {
     "slug": "dhaka-gulshan-circle-1-mid-island-2",
     "name": "Gulshan Circle-1 Mid Island",
-    "title": "Gulshan Circle-1 Mid Island — Police Plaza facing",
+    "title": "Gulshan Circle-1 Mid Island \u2014 Police Plaza facing",
     "city": "Dhaka",
     "dimension": "W-20' x H-10'",
     "facing": "Police Plaza",
@@ -66,7 +68,8 @@
       0.461,
       0.274
     ],
-    "accent": "#d2ad5e"
+    "accent": "#d2ad5e",
+    "wallScore": 1.21
   },
   {
     "slug": "dhaka-gulshan-circle-2-west-side-barun-bhaban",
@@ -89,7 +92,8 @@
       0.522,
       0.5
     ],
-    "accent": "#fad970"
+    "accent": "#fad970",
+    "wallScore": 1.41
   },
   {
     "slug": "dhaka-gulshan-circle-2-east-side-rob-super-market",
@@ -112,7 +116,8 @@
       0.5,
       0.499
     ],
-    "accent": "#e28a66"
+    "accent": "#e28a66",
+    "wallScore": 0.75
   },
   {
     "slug": "dhaka-gulshan-circle-2-north-side-lower-screen",
@@ -135,7 +140,8 @@
       0.501,
       0.5
     ],
-    "accent": "#62acda"
+    "accent": "#62acda",
+    "wallScore": 0.86
   },
   {
     "slug": "dhaka-gulshan-circle-2-east-side-amanullah-trade-center",
@@ -158,7 +164,8 @@
       0.5,
       0.5
     ],
-    "accent": "#e46779"
+    "accent": "#e46779",
+    "wallScore": 1.55
   },
   {
     "slug": "dhaka-banani-chairmanbari-u-loop",
@@ -181,7 +188,8 @@
       0.5,
       0.5
     ],
-    "accent": "#3fc1fa"
+    "accent": "#3fc1fa",
+    "wallScore": 4.24
   },
   {
     "slug": "dhaka-police-plaza-south-side",
@@ -204,7 +212,8 @@
       0.5,
       0.501
     ],
-    "accent": "#f125e3"
+    "accent": "#f125e3",
+    "wallScore": 3.32
   },
   {
     "slug": "dhaka-police-plaza-gulshan-1-facing",
@@ -227,12 +236,13 @@
       0.5,
       0.5
     ],
-    "accent": "#2160fe"
+    "accent": "#2160fe",
+    "wallScore": 2.89
   },
   {
     "slug": "dhaka-police-plaza-front-side",
     "name": "Police Plaza, Front Side",
-    "title": "Police Plaza, Front Side — Gulshan-1 facing",
+    "title": "Police Plaza, Front Side \u2014 Gulshan-1 facing",
     "city": "Dhaka",
     "dimension": "W-10' x H-13'",
     "facing": "Gulshan-1",
@@ -250,12 +260,13 @@
       0.391,
       0.5
     ],
-    "accent": "#4869b8"
+    "accent": "#4869b8",
+    "wallScore": 3.61
   },
   {
     "slug": "dhaka-police-plaza-front-side-2",
     "name": "Police Plaza, Front Side",
-    "title": "Police Plaza, Front Side — Tejgaon & GMG Moor facing",
+    "title": "Police Plaza, Front Side \u2014 Tejgaon & GMG Moor facing",
     "city": "Dhaka",
     "dimension": "W-10' x H-13'",
     "facing": "Tejgaon & GMG Moor",
@@ -273,7 +284,8 @@
       0.5,
       0.5
     ],
-    "accent": "#4cbad2"
+    "accent": "#4cbad2",
+    "wallScore": 0.9
   },
   {
     "slug": "dhaka-police-plaza-entry-gate-south-side",
@@ -296,7 +308,8 @@
       0.457,
       0.47
     ],
-    "accent": "#50e3fa"
+    "accent": "#50e3fa",
+    "wallScore": 1.76
   },
   {
     "slug": "dhaka-police-plaza-entry-gate-north-side",
@@ -319,7 +332,8 @@
       0.509,
       0.5
     ],
-    "accent": "#20d9fa"
+    "accent": "#20d9fa",
+    "wallScore": 7.45
   },
   {
     "slug": "dhaka-akij-house-gmg-circle-gulshan-tejgaon-road-dhaka",
@@ -342,7 +356,8 @@
       0.5,
       0.571
     ],
-    "accent": "#6ba3e8"
+    "accent": "#6ba3e8",
+    "wallScore": 0.36
   },
   {
     "slug": "dhaka-airport-entrance-banani-facing",
@@ -365,7 +380,8 @@
       0.5,
       0.5
     ],
-    "accent": "#c8755a"
+    "accent": "#c8755a",
+    "wallScore": 0.43
   },
   {
     "slug": "dhaka-bijoy-saroni-mor",
@@ -388,7 +404,8 @@
       0.501,
       0.5
     ],
-    "accent": "#f52f50"
+    "accent": "#f52f50",
+    "wallScore": 2.76
   },
   {
     "slug": "dhaka-manik-mia-avenue-aarong-signal",
@@ -411,7 +428,8 @@
       0.5,
       0.5
     ],
-    "accent": "#c76555"
+    "accent": "#c76555",
+    "wallScore": 0.73
   },
   {
     "slug": "dhaka-khamar-bari-moor",
@@ -434,12 +452,13 @@
       0.5,
       0.501
     ],
-    "accent": "#fa4757"
+    "accent": "#fa4757",
+    "wallScore": 1.53
   },
   {
     "slug": "dhaka-dhanmondi-27-opposite-of-rapa-plaza",
-    "name": "Dhanmondi – 27, Opposite of Rapa Plaza",
-    "title": "Dhanmondi – 27, Opposite of Rapa Plaza",
+    "name": "Dhanmondi \u2013 27, Opposite of Rapa Plaza",
+    "title": "Dhanmondi \u2013 27, Opposite of Rapa Plaza",
     "city": "Dhaka",
     "dimension": "W-23' x H-12.5'",
     "facing": "Rapa plaza",
@@ -457,12 +476,13 @@
       0.5,
       0.5
     ],
-    "accent": "#5c94cd"
+    "accent": "#5c94cd",
+    "wallScore": 1.03
   },
   {
     "slug": "dhaka-dhanmondi-27-mid-island-opposite-of-rapa-plaza",
-    "name": "Dhanmondi – 27, Mid Island Opposite of Rapa Plaza",
-    "title": "Dhanmondi – 27, Mid Island Opposite of Rapa Plaza",
+    "name": "Dhanmondi \u2013 27, Mid Island Opposite of Rapa Plaza",
+    "title": "Dhanmondi \u2013 27, Mid Island Opposite of Rapa Plaza",
     "city": "Dhaka",
     "dimension": "W-10' x H-13'",
     "facing": "Asad Gate",
@@ -480,7 +500,8 @@
       0.5,
       0.5
     ],
-    "accent": "#f23224"
+    "accent": "#f23224",
+    "wallScore": 1.31
   },
   {
     "slug": "dhaka-dhanmondi-2",
@@ -503,7 +524,8 @@
       0.5,
       0.5
     ],
-    "accent": "#e77466"
+    "accent": "#e77466",
+    "wallScore": 3.67
   },
   {
     "slug": "dhaka-dahnmondi-02-no-road-zigatola",
@@ -526,7 +548,8 @@
       0.5,
       0.487
     ],
-    "accent": "#fab614"
+    "accent": "#fab614",
+    "wallScore": 0.99
   },
   {
     "slug": "dhaka-science-lab-circle",
@@ -549,7 +572,8 @@
       0.5,
       0.5
     ],
-    "accent": "#b04f54"
+    "accent": "#b04f54",
+    "wallScore": 0.65
   },
   {
     "slug": "dhaka-green-road-crossing-u-turn",
@@ -572,7 +596,8 @@
       0.452,
       0.412
     ],
-    "accent": "#36eefa"
+    "accent": "#36eefa",
+    "wallScore": 2.86
   },
   {
     "slug": "dhaka-shimanto-square-6-led-screens",
@@ -595,7 +620,8 @@
       0.33,
       0.5
     ],
-    "accent": "#c06357"
+    "accent": "#c06357",
+    "wallScore": 0.9
   },
   {
     "slug": "dhaka-bashundhara-city-indoor",
@@ -618,7 +644,8 @@
       0.5,
       0.5
     ],
-    "accent": "#4c73a8"
+    "accent": "#4c73a8",
+    "wallScore": 5.59
   },
   {
     "slug": "dhaka-karwan-bazar",
@@ -641,7 +668,8 @@
       0.5,
       0.5
     ],
-    "accent": "#f42d39"
+    "accent": "#f42d39",
+    "wallScore": 2.87
   },
   {
     "slug": "dhaka-mirpur-10-circle-4-screens",
@@ -664,7 +692,8 @@
       0.5,
       0.5
     ],
-    "accent": "#c66959"
+    "accent": "#c66959",
+    "wallScore": 0.74
   },
   {
     "slug": "dhaka-mohakhali-rail-crossing",
@@ -687,7 +716,8 @@
       0.5,
       0.405
     ],
-    "accent": "#fa142d"
+    "accent": "#fa142d",
+    "wallScore": 3.5
   },
   {
     "slug": "dhaka-sks-tower-flyover-view-mohakhali",
@@ -710,7 +740,8 @@
       0.5,
       0.499
     ],
-    "accent": "#589bc4"
+    "accent": "#589bc4",
+    "wallScore": 1.77
   },
   {
     "slug": "dhaka-sks-tower-exit-gate-mohakhali",
@@ -733,7 +764,8 @@
       0.444,
       0.469
     ],
-    "accent": "#faec70"
+    "accent": "#faec70",
+    "wallScore": 2.37
   },
   {
     "slug": "dhaka-sks-tower-entrance-mohakhali",
@@ -756,7 +788,8 @@
       0.5,
       0.367
     ],
-    "accent": "#fa9f14"
+    "accent": "#fa9f14",
+    "wallScore": 6.01
   },
   {
     "slug": "dhaka-hotel-radisson-blu",
@@ -779,7 +812,8 @@
       0.417,
       0.434
     ],
-    "accent": "#6ba3e8"
+    "accent": "#6ba3e8",
+    "wallScore": 1.06
   },
   {
     "slug": "dhaka-sadarghat-launch-terminal",
@@ -802,7 +836,8 @@
       0.5,
       0.5
     ],
-    "accent": "#5bb8ca"
+    "accent": "#5bb8ca",
+    "wallScore": 1.92
   },
   {
     "slug": "dhaka-kamlapur-railway-station-entry-gate",
@@ -825,7 +860,8 @@
       0.563,
       0.39
     ],
-    "accent": "#70effa"
+    "accent": "#70effa",
+    "wallScore": 1.22
   },
   {
     "slug": "dhaka-airport-railway-station-entry-gate",
@@ -848,7 +884,8 @@
       0.527,
       0.5
     ],
-    "accent": "#5eb2d0"
+    "accent": "#5eb2d0",
+    "wallScore": 2.46
   },
   {
     "slug": "dhaka-shohortoli-railway-station-chittagong-entry-gate",
@@ -871,7 +908,8 @@
       0.516,
       0.659
     ],
-    "accent": "#faaa2e"
+    "accent": "#faaa2e",
+    "wallScore": 0.42
   },
   {
     "slug": "chattogram-golpahar-moor",
@@ -894,7 +932,8 @@
       0.5,
       0.501
     ],
-    "accent": "#6fc8f6"
+    "accent": "#6fc8f6",
+    "wallScore": 1.78
   },
   {
     "slug": "chattogram-agrabad-circle-chittagong",
@@ -917,12 +956,13 @@
       0.5,
       0.501
     ],
-    "accent": "#68c4e7"
+    "accent": "#68c4e7",
+    "wallScore": 1.35
   },
   {
     "slug": "coxs-bazar-sughondha-circle-coxs-bazar",
-    "name": "Sughondha Circle, Cox’s Bazar",
-    "title": "Sughondha Circle, Cox’s Bazar",
+    "name": "Sughondha Circle, Cox\u2019s Bazar",
+    "title": "Sughondha Circle, Cox\u2019s Bazar",
     "city": "Cox's Bazar",
     "dimension": "W-17' x H-11'",
     "facing": "Main Road & Hotel -Motel",
@@ -940,12 +980,13 @@
       0.5,
       0.5
     ],
-    "accent": "#70b6fa"
+    "accent": "#70b6fa",
+    "wallScore": 1.06
   },
   {
     "slug": "coxs-bazar-sughondha-point-coxs-bazar",
-    "name": "Sughondha Point, Cox’s Bazar",
-    "title": "Sughondha Point, Cox’s Bazar",
+    "name": "Sughondha Point, Cox\u2019s Bazar",
+    "title": "Sughondha Point, Cox\u2019s Bazar",
     "city": "Cox's Bazar",
     "dimension": "W-17' x H-11'",
     "facing": "Shugondha Beach Road",
@@ -963,12 +1004,13 @@
       0.5,
       0.5
     ],
-    "accent": "#629fd9"
+    "accent": "#629fd9",
+    "wallScore": 2.74
   },
   {
     "slug": "coxs-bazar-dolphin-moor-coxs-bazar",
-    "name": "Dolphin Moor, Cox’s Bazar",
-    "title": "Dolphin Moor, Cox’s Bazar",
+    "name": "Dolphin Moor, Cox\u2019s Bazar",
+    "title": "Dolphin Moor, Cox\u2019s Bazar",
     "city": "Cox's Bazar",
     "dimension": "W-20' x H-13'",
     "facing": "Circle",
@@ -986,7 +1028,8 @@
       0.5,
       0.405
     ],
-    "accent": "#fab714"
+    "accent": "#fab714",
+    "wallScore": 8.74
   },
   {
     "slug": "cumilla-kandirpar-cumilla",
@@ -1009,7 +1052,8 @@
       0.5,
       0.424
     ],
-    "accent": "#df9964"
+    "accent": "#df9964",
+    "wallScore": 0.91
   },
   {
     "slug": "rajshahi-rajshahi-shaheb-bazar-2-screens-both-side",
@@ -1032,7 +1076,8 @@
       0.5,
       0.429
     ],
-    "accent": "#5590be"
+    "accent": "#5590be",
+    "wallScore": 1.16
   },
   {
     "slug": "rajshahi-rajshahi-new-market",
@@ -1055,7 +1100,8 @@
       0.502,
       0.5
     ],
-    "accent": "#6ae1ec"
+    "accent": "#6ae1ec",
+    "wallScore": 3.04
   },
   {
     "slug": "sylhet-sylhet-bondor-bazar",
@@ -1078,7 +1124,8 @@
       0.5,
       0.5
     ],
-    "accent": "#ca9f5b"
+    "accent": "#ca9f5b",
+    "wallScore": 1.13
   },
   {
     "slug": "sylhet-sylhet-uposohor",
@@ -1101,7 +1148,8 @@
       0.5,
       0.5
     ],
-    "accent": "#a8874c"
+    "accent": "#a8874c",
+    "wallScore": 2.04
   },
   {
     "slug": "sylhet-sylhet-nairpul-point",
@@ -1124,7 +1172,8 @@
       0.5,
       0.5
     ],
-    "accent": "#b49751"
+    "accent": "#b49751",
+    "wallScore": 1.37
   },
   {
     "slug": "sylhet-sylhet-chowkideki-point",
@@ -1147,7 +1196,8 @@
       0.5,
       0.5
     ],
-    "accent": "#a89d4c"
+    "accent": "#a89d4c",
+    "wallScore": 0.83
   },
   {
     "slug": "sylhet-sylhet-rikabi-bazar",
@@ -1170,7 +1220,8 @@
       0.5,
       0.5
     ],
-    "accent": "#2fcafa"
+    "accent": "#2fcafa",
+    "wallScore": 2.3
   },
   {
     "slug": "sylhet-sylhet-jitu-miah-point",
@@ -1193,7 +1244,8 @@
       0.496,
       0.396
     ],
-    "accent": "#d2a55e"
+    "accent": "#d2a55e",
+    "wallScore": 1.03
   },
   {
     "slug": "sylhet-sylhet-surma-point",
@@ -1216,7 +1268,8 @@
       0.5,
       0.5
     ],
-    "accent": "#cb3648"
+    "accent": "#cb3648",
+    "wallScore": 12.74
   },
   {
     "slug": "sylhet-sylhet-tilaghar-point",
@@ -1239,7 +1292,8 @@
       0.472,
       0.5
     ],
-    "accent": "#a8744c"
+    "accent": "#a8744c",
+    "wallScore": 6.48
   },
   {
     "slug": "rangpur-shapla-mor-rangpur",
@@ -1262,7 +1316,8 @@
       0.5,
       0.5
     ],
-    "accent": "#e2a166"
+    "accent": "#e2a166",
+    "wallScore": 0.75
   },
   {
     "slug": "bogura-police-plaza-bogura",
@@ -1285,7 +1340,8 @@
       0.5,
       0.501
     ],
-    "accent": "#e7129e"
+    "accent": "#e7129e",
+    "wallScore": 3.98
   },
   {
     "slug": "narayanganj-narayanganj",
@@ -1308,7 +1364,8 @@
       0.5,
       0.5
     ],
-    "accent": "#da9662"
+    "accent": "#da9662",
+    "wallScore": 3.76
   },
   {
     "slug": "feni-feni",
@@ -1331,6 +1388,7 @@
       0.5,
       0.5
     ],
-    "accent": "#6ba3e8"
+    "accent": "#6ba3e8",
+    "wallScore": 0.57
   }
 ]

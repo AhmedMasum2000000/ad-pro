@@ -115,6 +115,183 @@ function menuLink(link: ShellLink, index: number): string {
           </li>`;
 }
 
+/*
+  Where each screen hangs on the wall.
+
+  Hand-placed rather than generated, because a wall of screens is a
+  composition and a random scatter is not one. The values are percentages of
+  the hero box: x/y position the top-left corner, w sets the width, and depth
+  is how far back the screen is — it drives scale, brightness, blur and how
+  far the screen drifts under the pointer, all from the one number.
+
+  The middle is deliberately thin. The headline sits there, and a screen
+  directly behind a word is a screen you cannot read and a word you cannot
+  read either.
+*/
+const WALL_SLOTS: { x: number; y: number; w: number; depth: number }[] = [
+  // Left wall, near to far
+  { x: -3, y: 12, w: 16, depth: 0.4 },
+  { x: 3, y: 45, w: 19, depth: 0.15 },
+  { x: -2, y: 76, w: 15, depth: 0.55 },
+  { x: 14, y: 22, w: 12, depth: 0.75 },
+  { x: 11, y: 66, w: 14, depth: 0.9 },
+  // Along the top, above the headline
+  { x: 26, y: 3, w: 13, depth: 0.5 },
+  { x: 43, y: -2, w: 11, depth: 0.85 },
+  { x: 57, y: 4, w: 12, depth: 0.35 },
+  // Right wall
+  { x: 71, y: 9, w: 17, depth: 0.6 },
+  { x: 87, y: 32, w: 16, depth: 0.3 },
+  { x: 76, y: 50, w: 19, depth: 0.1 },
+  { x: 90, y: 74, w: 14, depth: 0.65 },
+  { x: 68, y: 81, w: 13, depth: 0.45 },
+  // Along the bottom, below the buttons
+  { x: 27, y: 84, w: 14, depth: 0.7 },
+  { x: 45, y: 88, w: 12, depth: 0.95 },
+];
+
+/**
+ * The hero: a wall of lit screens in a dark room.
+ *
+ * This is the inventory, not an illustration of it. Every rectangle is a real
+ * site photographed on a real junction, and the colour bleeding out from
+ * behind each one is the colour that screen was actually showing when the
+ * photograph was taken — sampled, not chosen.
+ *
+ * The photographs are of bright daylight streets, which is the opposite of
+ * what this composition needs. What rescues them is the crop convention
+ * scripts/sample-accents.py already relies on: the LED panel sits across
+ * roughly the middle half of every frame, centred on the stored focus point.
+ * So each tile zooms about that point until the street falls outside the box
+ * and only the lit screen is left. No re-cropping, no detection, no new data.
+ */
+export function buildScreenWall(): string {
+  /*
+    Which sites make the wall is measured, not chosen.
+
+    The crop convention holds for most of the 58 photographs and not for all —
+    a few were shot wide enough that the middle of the frame is street and the
+    screen is off to one side, and those put a bus on the wall instead of an
+    advertisement. `wallScore` (scripts/score-crops.py) is how much more lit
+    the crop is than the rest of its own frame: around 1 means the crop missed,
+    and anything above about 2 is a screen. Replace a photograph, rerun the
+    script, and the wall follows without anyone maintaining a list.
+  */
+  const scoreOf = (b: Billboard): number => b.wallScore ?? 0;
+  const usable = billboards.filter((b) => scoreOf(b) >= 1.6).sort((a, b) => scoreOf(b) - scoreOf(a));
+
+  // Best-scoring site per city first, so the wall is the whole country rather
+  // than fifteen views of Dhaka, then the next best fill what is left.
+  const seen = new Set<string>();
+  const spread = usable.filter((b) => {
+    if (seen.has(b.citySlug)) return false;
+    seen.add(b.citySlug);
+    return true;
+  });
+  const chosen = [...spread, ...usable.filter((b) => !spread.includes(b))].slice(
+    0,
+    WALL_SLOTS.length,
+  );
+
+  const tiles = chosen
+    .map((board, i) => {
+      const slot = WALL_SLOTS[i];
+      const [fx, fy] = board.focus;
+      return `
+      <figure class="wall-tile" style="--x:${slot.x}%; --y:${slot.y}%; --w:${slot.w}%; --depth:${slot.depth}; --fx:${(fx * 100).toFixed(1)}%; --fy:${(fy * 100).toFixed(1)}%; --accent:${accentOf(board)}">
+        <img class="wall-tile__img" src="/${esc(board.image)}" alt="" width="700" height="467"
+             loading="${i < 6 ? 'eager' : 'lazy'}" decoding="async" />
+        <figcaption class="wall-tile__tag">${esc(board.name)}</figcaption>
+      </figure>`;
+    })
+    .join('');
+
+  // The count is already in the chrome readout bottom-left, so it is not
+  // repeated on screen. It is still said once, for anyone who cannot see the
+  // wall the readout is describing.
+  return `
+    <div class="wall" data-wall aria-hidden="true">${tiles}</div>
+    <p class="visually-hidden">
+      Pictured: ${chosen.length} of ${billboards.length} LED billboard sites across
+      ${cityGroups.length} cities in Bangladesh.
+    </p>`;
+}
+
+/**
+ * The short label in the top-left readout — which frame you are looking at.
+ *
+ * Derived rather than listed, so a new route cannot ship without one.
+ */
+function chromeLabel(page: PageMeta): string {
+  if (page.board) return boardBySlug(page.board)?.name ?? 'SITE';
+  if (page.citySlug) return cityGroups.find((g) => g.slug === page.citySlug)?.city ?? 'CITY';
+  if (page.namespace === 'home') return 'Network';
+  // Titles are written for search, so they carry a trailing brand or a dash
+  // clause that would overrun the readout. The first clause is the subject.
+  return page.title.split(/\s+[—|]\s+/)[0];
+}
+
+/**
+ * The bottom-left readout — where this page sits in the inventory.
+ *
+ * On a single site it is that site's number in the network; on a city it is
+ * how much of the network is in that city; everywhere else it is the network
+ * itself. The point is that the number is always true, never decoration.
+ */
+function chromeIndex(page: PageMeta): string {
+  const total = String(billboards.length).padStart(2, '0');
+
+  if (page.board) {
+    const n = billboards.findIndex((b) => b.slug === page.board) + 1;
+    if (n > 0) return `Site ${String(n).padStart(2, '0')} / ${total}`;
+  }
+
+  if (page.citySlug) {
+    const group = cityGroups.find((g) => g.slug === page.citySlug);
+    if (group) return `${group.city} ${String(group.boards.length).padStart(2, '0')} / ${total}`;
+  }
+
+  return `${total} sites / ${cityGroups.length} cities`;
+}
+
+/**
+ * The viewfinder.
+ *
+ * A wall of screens is what this company sells, so the site is framed as
+ * something being watched rather than something being read: a hairline border
+ * with corner ticks, a focal reticle, and four readouts that all report
+ * something true — which site you are on, where it sits in the network,
+ * whether the screens are lit right now, and what time it is where they are.
+ *
+ * Two layers, deliberately at different depths. The frame and readouts sit
+ * above the page-transition curtain so the instrument stays put while the
+ * page behind it changes; the LED matrix and vignette sit below the menu so
+ * an open menu is read against clean ground. Both are inert to the pointer.
+ *
+ * Everything is gated behind `body.chrome-on`, set by src/motion/hud.ts. The
+ * markup ships to all 96 routes at once and there is no incremental rollout,
+ * so the escape hatch is one class name.
+ */
+export function buildChrome(page: PageMeta): string {
+  return `
+  <div class="chrome" aria-hidden="true">
+    <div class="chrome__frame">
+      <span class="chrome__tick chrome__tick--tl"></span>
+      <span class="chrome__tick chrome__tick--tr"></span>
+      <span class="chrome__tick chrome__tick--bl"></span>
+      <span class="chrome__tick chrome__tick--br"></span>
+    </div>
+    <span class="chrome__reticle"></span>
+    <p class="chrome__read chrome__read--tl">${esc(chromeLabel(page))}</p>
+    <p class="chrome__read chrome__read--tr" data-hud-state>
+      <span class="chrome__lamp"></span><span data-hud-label>On air</span>
+    </p>
+    <p class="chrome__read chrome__read--bl">${esc(chromeIndex(page))}</p>
+    <p class="chrome__read chrome__read--br"><span data-hud-clock>--:--:--</span> BST</p>
+  </div>
+  <div class="chrome-grain" aria-hidden="true"></div>`;
+}
+
 export function buildShell(): string {
   // A running index across every group drives the reveal stagger in CSS, so
   // the links cascade as one sequence rather than restarting per column.

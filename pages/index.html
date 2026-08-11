@@ -13,76 +13,30 @@
 
     <main class="all-content-wrapper hideOnLoad margin-auto" id="main">
       <div class="page-content" data-barba="container" data-barba-namespace="home">
+        <!--
+          The hero is the inventory itself: a dark room with the network
+          hanging in it, every rectangle a real site zoomed onto its own
+          screen. The wall is generated from boards.json — see buildScreenWall
+          in src/build/partials.ts — so it cannot drift from what is actually
+          on sale.
+        -->
         <header class="main-header" id="main_header">
-          <div class="slider-wrapper" id="slider">
-            <div class="slider-track">
-              <section class="slide is-active" aria-roledescription="slide" data-cursor="media" data-cursor-label="See sites">
-                <!-- Real site photography, already cropped onto the screen when
-                     it was pulled out of the proposal deck; --slide-focus holds
-                     that point in frame when `cover` crops for a portrait phone. -->
-                <div class="slide__media" data-parallax="70" style="--slide-img:url('/boards/dhaka-gulshan-circle-2-east-side-rob-super-market.jpg'); --slide-focus:50.0%" aria-hidden="true"></div>
-                <div class="slider-text gl-padding_lr">
-                  <article class="slider-article">
-                    <span class="sub-text">Outdoor advertising, Bangladesh</span>
-            <div class="ascii-rule" data-ascii-rule aria-hidden="true"></div>
-                    <h1 data-scramble>Be seen where the country actually is</h1>
-                    <p class="h1-em">
-                      Digital and static out-of-home across Dhaka, Chattogram and Sylhet — planned
-                      around traffic, not around what happens to be vacant.
-                    </p>
-                    <div class="btn-wrapper">
-                      <a class="btn addHover" href="billboards.html">See the inventory</a>
-                    </div>
-                  </article>
-                  <div class="slider-copyright-text">Gulshan 2 Circle, Dhaka — 40ft × 20ft digital</div>
-                </div>
-              </section>
+          <!--@WALL-->
 
-              <section class="slide" aria-roledescription="slide" data-cursor="media" data-cursor-label="See sites">
-                <div class="slide__media" data-parallax="70" style="--slide-img:url('/boards/dhaka-karwan-bazar.jpg'); --slide-focus:50.0%" aria-hidden="true"></div>
-                <div class="slider-text gl-padding_lr">
-                  <article class="slider-article">
-                    <span class="sub-text">Digital network</span>
-                    <h1>The largest LED network in the country</h1>
-                    <p class="h1-em">
-                      58 full-motion LED sites across ten cities, sold by the minute per day
-                      with same-day creative changes.
-                    </p>
-                    <div class="btn-wrapper">
-                      <a class="btn addHover" href="digital-billboards.html">Digital billboards</a>
-                    </div>
-                  </article>
-                  <div class="slider-copyright-text">Karwan Bazar, Dhaka — 22ft × 12.5ft digital</div>
-                </div>
-              </section>
-
-              <section class="slide" aria-roledescription="slide" data-cursor="media" data-cursor-label="See sites">
-                <div class="slide__media" data-parallax="70" style="--slide-img:url('/boards/dhaka-sks-tower-flyover-view-mohakhali.jpg'); --slide-focus:50.0%" aria-hidden="true"></div>
-                <div class="slider-text gl-padding_lr">
-                  <article class="slider-article">
-                    <span class="sub-text">Ten cities</span>
-                    <h1>The screens that hold a junction</h1>
-                    <p class="h1-em">
-                      Dhaka, Chattogram, Sylhet, Cox's Bazar and six more — every site with its
-                      own page, photograph and specification.
-                    </p>
-                    <div class="btn-wrapper">
-                      <a class="btn addHover" href="billboards.html">Browse by city</a>
-                    </div>
-                  </article>
-                  <div class="slider-copyright-text">SKS Tower, Mohakhali — flyover view</div>
-                </div>
-              </section>
-            </div>
-          </div>
-
-          <div class="slider-nav js-slider-nav" id="slider_nav">
-            <button class="slideshow-control js-slideshow-control isPlaying" type="button"
-                    aria-pressed="false">
-              <span class="slideshow-control__icon" aria-hidden="true"></span>
-              <span class="slideshow-control__label visually-hidden">Pause</span>
-            </button>
-            <span class="slideshow-control_num" role="status" aria-live="off">01 / 03</span>
+          <div class="wall-copy gl-padding_lr">
+            <article class="wall-copy__inner">
+              <span class="sub-text">Outdoor advertising, Bangladesh</span>
+              <div class="ascii-rule" data-ascii-rule aria-hidden="true"></div>
+              <h1 data-scramble>Be seen where the country actually is</h1>
+              <p class="h1-em">
+                Digital and static out-of-home across Dhaka, Chattogram and Sylhet — planned
+                around traffic, not around what happens to be vacant.
+              </p>
+              <div class="btn-wrapper">
+                <a class="btn btn--primary addHover" href="billboards.html">See the inventory</a>
+                <a class="btn addHover" href="contact.html">Book a site</a>
+              </div>
+            </article>
           </div>
         </header>
 

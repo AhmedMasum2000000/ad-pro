@@ -1,0 +1,294 @@
+/*
+  The viewfinder.
+
+  This company sells screens — 58 of them, lit, on junctions across the
+  country. So the site is framed as something being watched rather than
+  something being read: a hairline border with corner ticks, a focal reticle,
+  four readouts, and the texture of an LED panel over everything.
+
+  Nothing here is arbitrary dressing. Each readout reports something true, and
+  the "grain" is a pixel matrix rather than film dust — a P5 screen is a 5mm
+  grid of emitters, so the texture is the product's own, seen close up.
+
+  Two layers at different depths:
+
+  - `.chrome`      z 95 — above the page-transition curtain, so the instrument
+                   stays put while the page behind it changes. That is the
+                   whole conceit: you never stop looking through it.
+  - `.chrome-grain` z 46 — below the menu, so an open menu is read against
+                   clean ground rather than through the matrix.
+
+  Both are inert to the pointer. Everything is gated behind `body.chrome-on`
+  (set in src/motion/hud.ts): the markup lands on all 96 routes at once with
+  no incremental rollout, so the escape hatch has to be one class name.
+*/
+
+.chrome,
+.chrome-grain {
+  display: none;
+}
+
+body.chrome-on .chrome,
+body.chrome-on .chrome-grain {
+  display: block;
+}
+
+.chrome {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-chrome-top);
+  pointer-events: none;
+}
+
+/* --- the frame --------------------------------------------------------------
+   Inset from the viewport, but clamped to the content column. A viewport-fixed
+   frame on a 3440px display floats ~600px outside the text it is supposed to
+   be framing, which reads as a rendering fault rather than as an instrument. */
+
+.chrome__frame {
+  position: absolute;
+  /* Clears the fixed header rather than running underneath it. The header
+     already occupies the top 4.75rem with the brand at one end and the menu
+     control at the other; a frame drawn through that band puts its readouts
+     directly behind both. Starting below it also says the right thing — the
+     header is the site's furniture, the viewfinder frames the work. */
+  top: calc(var(--header-h) + 0.35rem);
+  bottom: clamp(0.5rem, 1.4vh, 1.15rem);
+  inset-inline: max(var(--edge-l), calc((100% - var(--max-width)) / 2 + 1rem))
+    max(var(--edge-r), calc((100% - var(--max-width)) / 2 + 1rem));
+  border: 1px solid var(--chrome-line);
+  opacity: 0.55;
+}
+
+/* Corner ticks read as a viewfinder in a way a continuous border does not, so
+   the border stays faint and the corners carry the weight. */
+.chrome__tick {
+  position: absolute;
+  width: 0.85rem;
+  height: 0.85rem;
+  border: 0 solid var(--chrome-line);
+  opacity: 0.9;
+}
+
+.chrome__tick--tl {
+  top: -1px;
+  left: -1px;
+  border-top-width: 2px;
+  border-left-width: 2px;
+}
+
+.chrome__tick--tr {
+  top: -1px;
+  right: -1px;
+  border-top-width: 2px;
+  border-right-width: 2px;
+}
+
+.chrome__tick--bl {
+  bottom: -1px;
+  left: -1px;
+  border-bottom-width: 2px;
+  border-left-width: 2px;
+}
+
+.chrome__tick--br {
+  bottom: -1px;
+  right: -1px;
+  border-bottom-width: 2px;
+  border-right-width: 2px;
+}
+
+/* --- focal reticle ----------------------------------------------------------
+   Dead centre, and very nearly invisible. Every photograph on this site stores
+   a focus point; this is where that point would land. */
+
+.chrome__reticle {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 13px;
+  height: 13px;
+  margin: -6.5px 0 0 -6.5px;
+  opacity: 0.32;
+}
+
+.chrome__reticle::before,
+.chrome__reticle::after {
+  content: '';
+  position: absolute;
+  background: var(--chrome-line);
+}
+
+.chrome__reticle::before {
+  top: 50%;
+  left: 0;
+  width: 100%;
+  height: 1px;
+}
+
+.chrome__reticle::after {
+  left: 50%;
+  top: 0;
+  width: 1px;
+  height: 100%;
+}
+
+/* --- readouts ---------------------------------------------------------------
+   Set in the mono face the specification tables already use, so the HUD and
+   the spec sheet are visibly the same register. Tabular figures because the
+   clock updates ten times a second and proportional digits would make it
+   jitter sideways as the numerals change width. */
+
+.chrome__read {
+  position: absolute;
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--grey-dark-color);
+  opacity: 0.78;
+  white-space: nowrap;
+  max-width: 42vw;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Bracketed, matching the `[ P5 ] [ 1920×1080 ]` convention the spec rows use. */
+.chrome__read::before {
+  content: '[ ';
+}
+
+.chrome__read::after {
+  content: ' ]';
+}
+
+.chrome__read--tl {
+  top: calc(var(--header-h) + 1.15rem);
+  left: max(var(--edge-l), calc((100% - var(--max-width)) / 2 + 1.9rem));
+}
+
+.chrome__read--tr {
+  top: calc(var(--header-h) + 1.15rem);
+  right: max(var(--edge-r), calc((100% - var(--max-width)) / 2 + 1.9rem));
+}
+
+.chrome__read--bl {
+  bottom: clamp(1.2rem, 2.6vh, 2rem);
+  left: max(var(--edge-l), calc((100% - var(--max-width)) / 2 + 1.9rem));
+}
+
+.chrome__read--br {
+  bottom: clamp(1.2rem, 2.6vh, 2rem);
+  right: max(var(--edge-r), calc((100% - var(--max-width)) / 2 + 1.9rem));
+}
+
+/* The on-air lamp. Lit while the network is running, dark outside its hours —
+   the state is real, read from the schedule in src/motion/hud.ts. */
+.chrome__lamp {
+  display: inline-block;
+  width: 0.42em;
+  height: 0.42em;
+  margin-right: 0.6em;
+  border-radius: 50%;
+  background: var(--grey-dark-color);
+  vertical-align: 0.06em;
+}
+
+body.is-onair .chrome__lamp {
+  background: #ff4d3d;
+  box-shadow: 0 0 6px rgba(255, 77, 61, 0.9);
+  animation: chrome-pulse 2.4s var(--ease-in-out) infinite;
+}
+
+@keyframes chrome-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.35;
+  }
+}
+
+/* --- the LED matrix ---------------------------------------------------------
+   Static, never animated. A per-frame full-viewport noise repaint is the most
+   expensive thing this design could do on a phone and it cannot be occluded or
+   culled, so the texture is painted once as a gradient pair and left alone:
+   a vertical scanline and a horizontal one, crossing into a dot grid.
+
+   The vignette rides on the same element — one compositing layer rather than
+   two for effects that always appear together. */
+
+.chrome-grain {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-grain);
+  pointer-events: none;
+  background-image:
+    repeating-linear-gradient(
+      0deg,
+      rgba(0, 0, 0, var(--scan-opacity)) 0 1px,
+      transparent 1px 3px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      rgba(0, 0, 0, calc(var(--scan-opacity) * 0.55)) 0 1px,
+      transparent 1px 3px
+    );
+}
+
+/* Vignette as its own pass so it can be soft while the matrix stays crisp. */
+.chrome-grain::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    118% 88% at 50% 45%,
+    transparent 34%,
+    rgba(4, 7, 12, calc(var(--vignette-strength) * 0.5)) 74%,
+    rgba(4, 7, 12, var(--vignette-strength)) 100%
+  );
+}
+
+/* --- small screens ----------------------------------------------------------
+   The frame closes in, the reticle goes (there is no pointer to aim), and two
+   of the four readouts drop — at 390px the remaining pair is already most of
+   the width. */
+
+@media (max-width: 767px) {
+  .chrome__frame {
+    inset-block: 0.4rem;
+    inset-inline: 0.4rem;
+  }
+
+  .chrome__reticle,
+  .chrome__read--tl {
+    display: none;
+  }
+
+  .chrome__read {
+    font-size: 0.55rem;
+    letter-spacing: 0.1em;
+    max-width: 46vw;
+  }
+
+  /* A 3px matrix at 3x device pixel ratio is invisible and still costs a
+     full-viewport layer, so the pitch opens up and the scan drops away. */
+  .chrome-grain {
+    background-image: repeating-linear-gradient(
+      0deg,
+      rgba(0, 0, 0, calc(var(--scan-opacity) * 0.6)) 0 1px,
+      transparent 1px 4px
+    );
+  }
+}
+
+/* Someone who asked for less motion still gets the instrument — it is the
+   design, not an animation — but the lamp stops pulsing. */
+@media (prefers-reduced-motion: reduce) {
+  body.is-onair .chrome__lamp {
+    animation: none;
+  }
+}

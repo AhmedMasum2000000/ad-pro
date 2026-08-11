@@ -152,9 +152,28 @@
   --z-canvas: 0;
   --z-content: 1;
   --z-header: 40;
+  /* The viewfinder furniture — frame, corner ticks, readouts, crosshair. Above
+     the header scrim, below the menu, so an open menu covers it. */
+  --z-chrome: 45;
+  /* The LED matrix and vignette, one step up, so the frame is never grained
+     over by its own texture. */
+  --z-grain: 46;
   --z-menu: 60;
-  --z-curtain: 90;
   --z-alert: 80;
+  --z-curtain: 90;
+  /* The one layer above the curtain. The conceit is that you are always
+     looking through a viewfinder, so the readouts keep ticking across a page
+     transition rather than blinking out with the rest of the page. */
+  --z-chrome-top: 95;
+
+  /* --- viewfinder intensity ------------------------------------------------
+     The whole cinematic treatment dials from these four. Raise them for more
+     weight, drop them toward 0 for a plain dark site — nothing else needs to
+     change, and nothing reads them but the chrome layer. */
+  --grain-opacity: 0.16;
+  --scan-opacity: 0.14;
+  --vignette-strength: 0.72;
+  --chrome-line: rgba(219, 228, 240, 0.28);
 }
 
 /*

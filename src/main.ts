@@ -20,6 +20,9 @@ import './styles/grid.css';
 import './styles/typography.css';
 import './styles/global.css';
 import './styles/components.css';
+// The viewfinder sits over the composition rather than inside it, so it loads
+// after the components it frames.
+import './styles/chrome.css';
 // Last, so the small-screen layer overrides the composition above it.
 import './styles/mobile.css';
 
@@ -28,6 +31,7 @@ import { initBarba, mountPage } from './motion/barba';
 import { initCursorFollower } from './motion/cursorFollower';
 import { initPointerTrail } from './motion/ascii';
 import { playIntro } from './motion/curtain';
+import { initHud } from './motion/hud';
 import { initMenu } from './motion/menu';
 import { initScroll } from './motion/scroll';
 import { initField } from './motion/wgl';
@@ -40,6 +44,9 @@ function boot(): void {
   // Shell-level modules live for the session; only page modules are remounted
   // by Barba.
   initMenu();
+  // The viewfinder and its two live readouts. Shell-level: the instrument does
+  // not blink out and rebuild on every navigation, which is the point of it.
+  initHud();
   initCursorFollower();
   // Shell-level: the trail follows the pointer across navigations rather than
   // being torn down and rebuilt with each page.

@@ -8,6 +8,7 @@ import { articles } from './src/data/articles';
 import { buildArticle, buildNewsHub, newsPath } from './src/build/newsPages';
 import {
   buildBoards,
+  buildChrome,
   buildCity,
   buildCityIndex,
   buildNetworkIndex,
@@ -19,6 +20,7 @@ import {
   buildListing,
   buildMarquee,
   buildProcess,
+  buildScreenWall,
   buildServices,
   buildShell,
   buildStats,
@@ -232,8 +234,9 @@ const shellPlugin = (): Plugin => ({
 
       return html
         .replace('<!--@HEAD-->', buildHead(page))
-        .replace('<!--@SHELL-->', buildShell())
+        .replace('<!--@SHELL-->', buildChrome(page) + buildShell())
         .replace('<!--@FOOTER-->', buildFooter())
+        .replace('<!--@WALL-->', buildScreenWall())
         .replace('<!--@STATS-->', buildStats())
         .replace('<!--@PROCESS-->', buildProcess())
         .replace('<!--@SERVICES-->', buildServices())
