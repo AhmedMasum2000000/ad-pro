@@ -21,12 +21,26 @@ name: Deploy to Hostinger
 #      no longer produces. Point this at the wrong directory and the worst
 #      case is some extra files, not a wiped website.
 
+# ---------------------------------------------------------------------------
+# PAUSED WHILE THE REDESIGN IS IN PROGRESS — restore before it ships.
+#
+# The push trigger below is commented out, so `main` no longer publishes to
+# the live site automatically. It was paused because the Pages preview can
+# only deploy from `main`, and putting unfinished work there would otherwise
+# have carried it onto the commercial domain at the same time.
+#
+# WHAT THIS MEANS RIGHT NOW: pushing to `main` updates the GitHub Pages
+# preview only. The live site does not change until someone runs this
+# workflow by hand — Actions tab, "Deploy to Hostinger", Run workflow.
+#
+# TO RESTORE: delete this comment block and uncomment the four lines below.
+# ---------------------------------------------------------------------------
 on:
-  push:
-    branches: [main]
-    paths-ignore:
-      - '**.md'
-      - '.github/workflows/deploy.yml'
+  # push:
+  #   branches: [main]
+  #   paths-ignore:
+  #     - '**.md'
+  #     - '.github/workflows/deploy.yml'
   workflow_dispatch:
     inputs:
       prune:
