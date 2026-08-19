@@ -33,19 +33,33 @@ SRC = Path(os.environ.get("ADPRO_LOGO_DIR", "./client-logos"))
 OUT = Path(__file__).resolve().parent
 OUT.mkdir(exist_ok=True)
 
-PAGE = (251, 250, 247)          # the profile's paper colour
-INK = (17, 28, 43)              # the chip a white-on-dark mark is given instead
+PAGE = (255, 253, 250)          # the profile's paper colour
+INK = (22, 18, 58)              # the chip a white-on-dark mark is given instead
 BOX_W, BOX_H = 260, 96          # the cell each mark is fitted into
 TARGET_AREA = 260 * 46          # optical weight: area, not height
 
-# Filenames that are hashes, camera dumps or placeholders — no brand recoverable.
-JUNK = re.compile(
-    r"^(\d+|logo|logog|blogo|mmk\w*|image[-_]?\d|thumbnail|media_\d+|"
-    r"[0-9a-f]{16,}|ex1\w+|\d+_\d+_\d+)", re.I
-)
+# Every supplied file is a client mark. Several arrived with hashes or
+# placeholder filenames, so they are identified by eye and named below rather
+# than dropped — an earlier filename filter discarded thirteen real brands.
 
 # Where the filename is not the brand's actual name.
 RENAME = {
+    # Supplied with hashes or placeholder filenames; identified from the mark.
+    "1211": "Bangladesh Ansar & VDP",
+    "273032559_434142691762419_7700235327177270037_n": "Sena Cement",
+    "3475997dba0375d159566c4bcfd68b31ca3fe25a7101c941": "Ministry of Planning",
+    "470921090d45c1f75879bdb88e05b630": "Praava Health",
+    "benchmark-stikar": "Benchmark Consulting",
+    "blogo": "Polar Ice Cream",
+    "ex1lqlovuqympbcsircsikfvkvj8rzixs6plerea": "Sailor",
+    "image-2-1024x542": "Solasta",
+    "logog": "Radio Foorti 88.0 FM",
+    "media_1694165084": "CEMS",
+    "mmkmkmkmk": "Dekko Foods",
+    "thumbnail_287dc576-76f8-4ed7-8c2d-820113f5b325": "Best Tycoon (BD) Enterprise",
+    "apple-icon-27": "Client",
+    "logo": "Client",
+
     "aci-group-logo-png_seeklogo-342185": "ACI Group",
     "apex-shoes-logo-png_seeklogo-289498": "Apex",
     "bangladesh-army-logo-f4d432f6c3-seeklogo.com": "Bangladesh Army",
@@ -129,8 +143,6 @@ RENAME = {
     "milvik": "Milvik",
     "pathao": "Pathao",
     "hatil": "Hatil",
-    "apple-icon-27": None,          # a UI icon, not a client mark
-    "benchmark-stikar": None,       # a sticker proof, not a logo
     "গ্রামীণ_ব্যাংকের_লোগো": "Grameen Bank",
 }
 
@@ -139,8 +151,6 @@ def display_name(stem: str) -> str | None:
     key = stem.strip().lower()
     if key in RENAME:
         return RENAME[key]
-    if JUNK.match(key):
-        return None
     name = re.sub(r"[-_]+", " ", stem)
     name = re.sub(r"\s*\b(logo|png|final|copy|full|primary|svg|bgwhite|white)\b\s*", " ", name, flags=re.I)
     name = re.sub(r"\s+", " ", name).strip(" .-")
@@ -224,7 +234,8 @@ def main() -> None:
         if not name:
             skipped.append(path.name)
             continue
-        if name.lower() in seen:            # one mark per brand
+        key = path.stem.lower() if name == "Client" else name.lower()
+        if key in seen:                     # one mark per brand
             continue
 
         try:
@@ -259,7 +270,7 @@ def main() -> None:
 
         buf = io.BytesIO()
         cell.save(buf, "WEBP", quality=88, method=6)
-        seen[name.lower()] = name
+        seen[key] = name
         out.append({"name": name, "uri": "data:image/webp;base64," + base64.b64encode(buf.getvalue()).decode()})
 
     out.sort(key=lambda d: d["name"].lower())
