@@ -292,6 +292,86 @@ src:url(data:font/woff2;base64,d09GMgABAAAAALyAABUAAAAB4CAAALwFAAEAAAAAAAAAAAAAA
 
   .wall img { max-width: 100%; max-height: 100%; height: auto; display: block; }
 
+
+  /* --- photography -------------------------------------------------------
+     A billboard company's profile should show billboards. The lead runs full
+     width directly under the cover, the network grid carries eight real sites
+     with their names, and each service takes one photograph of that service
+     being done. Nothing is decorative — every frame is work. */
+
+  .lead {
+    /* A <figure> carries a 40px side margin from the UA stylesheet, which a
+       full-bleed element inherits straight into horizontal overflow. */
+    margin: 0;
+    width: 100%;
+    display: block;
+    border-block: 1px solid var(--line);
+  }
+
+  .lead img { width: 100%; height: auto; display: block; }
+
+  .lead figcaption {
+    max-width: 68rem;
+    margin: 0 auto;
+    padding: 0.7rem var(--gutter) 0.9rem;
+    font-size: 0.6875rem;
+    font-weight: 500;
+    letter-spacing: 0.13em;
+    text-transform: uppercase;
+    color: var(--grey);
+  }
+
+  .net-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
+    background: var(--paper);
+    border-top: 1px solid var(--line);
+    border-left: 1px solid var(--line);
+    margin-top: 2rem;
+  }
+
+  .net-grid figure {
+    margin: 0;
+    background: var(--paper);
+    border-right: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+  }
+  .net-grid img {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 3 / 2;
+    object-fit: cover;
+    display: block;
+  }
+
+  .net-grid figcaption {
+    padding: 0.6rem 0.75rem 0.75rem;
+    font-size: 0.8125rem;
+    line-height: 1.4;
+    color: var(--navy);
+    font-weight: 500;
+  }
+
+  .net-grid figcaption span {
+    display: block;
+    font-weight: 400;
+    font-size: 0.6875rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--grey);
+    margin-top: 0.15rem;
+  }
+
+  /* The photograph sits above the card's text, edge to edge within it. */
+  .svc__img {
+    width: calc(100% + 3rem);
+    height: auto;
+    margin: -1.55rem -1.5rem 1.15rem;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+    display: block;
+  }
+
   /* --- contact ---------------------------------------------------------- */
 
   .contacts { display: grid; grid-template-columns: repeat(auto-fit, minmax(13.5rem, 1fr)); gap: 2rem 2.5rem; }
@@ -359,6 +439,8 @@ src:url(data:font/woff2;base64,d09GMgABAAAAALyAABUAAAAB4CAAALwFAAEAAAAAAAAAAAAAA
   </section>
 
 </div>
+
+<!--@LEAD-->
 
 <!-- Clients -------------------------------------------------------------- -->
 <div class="band">
@@ -525,7 +607,7 @@ src:url(data:font/woff2;base64,d09GMgABAAAAALyAABUAAAAB4CAAALwFAAEAAAAAAAAAAAAAA
         </p>
 
         <div class="services">
-          <div class="svc">
+          <div class="svc" data-photo="led">
             <span class="svc__tag">Digital OOH</span>
             <h3>LED advertising &amp; installation</h3>
             <p>
@@ -534,7 +616,7 @@ src:url(data:font/woff2;base64,d09GMgABAAAAALyAABUAAAAB4CAAALwFAAEAAAAAAAAAAAAAA
               screens at your own premises.
             </p>
           </div>
-          <div class="svc">
+          <div class="svc" data-photo="static">
             <span class="svc__tag">Classic OOH</span>
             <h3>Billboard &amp; static branding</h3>
             <p>
@@ -543,7 +625,7 @@ src:url(data:font/woff2;base64,d09GMgABAAAAALyAABUAAAAB4CAAALwFAAEAAAAAAAAAAAAAA
               Chattogram and Cox’s Bazar.
             </p>
           </div>
-          <div class="svc">
+          <div class="svc" data-photo="bus">
             <span class="svc__tag">Transit</span>
             <h3>Bus branding</h3>
             <p>
@@ -552,7 +634,7 @@ src:url(data:font/woff2;base64,d09GMgABAAAAALyAABUAAAAB4CAAALwFAAEAAAAAAAAAAAAAA
               buy.
             </p>
           </div>
-          <div class="svc">
+          <div class="svc" data-photo="car">
             <span class="svc__tag">Transit</span>
             <h3>Car branding</h3>
             <p>
@@ -560,7 +642,7 @@ src:url(data:font/woff2;base64,d09GMgABAAAAALyAABUAAAAB4CAAALwFAAEAAAAAAAAAAAAAA
               priced to the fleet you actually have.
             </p>
           </div>
-          <div class="svc">
+          <div class="svc" data-photo="van">
             <span class="svc__tag">Mobile</span>
             <h3>LED covered van</h3>
             <p>
@@ -569,7 +651,7 @@ src:url(data:font/woff2;base64,d09GMgABAAAAALyAABUAAAAB4CAAALwFAAEAAAAAAAAAAAAAA
               it brings full motion with it.
             </p>
           </div>
-          <div class="svc">
+          <div class="svc" data-photo="packaging">
             <span class="svc__tag">Production</span>
             <h3>Printing &amp; packaging</h3>
             <p>
@@ -577,7 +659,7 @@ src:url(data:font/woff2;base64,d09GMgABAAAAALyAABUAAAAB4CAAALwFAAEAAAAAAAAAAAAAA
               print and logistics costs down without losing the finish.
             </p>
           </div>
-          <div class="svc">
+          <div class="svc" data-photo="trade">
             <span class="svc__tag">Retail</span>
             <h3>Trade &amp; retail branding</h3>
             <p>
@@ -585,7 +667,7 @@ src:url(data:font/woff2;base64,d09GMgABAAAAALyAABUAAAAB4CAAALwFAAEAAAAAAAAAAAAAA
               customer picks up and holds while deciding.
             </p>
           </div>
-          <div class="svc">
+          <div class="svc" data-photo="events">
             <span class="svc__tag">Live</span>
             <h3>Events &amp; activation</h3>
             <p>
@@ -593,7 +675,7 @@ src:url(data:font/woff2;base64,d09GMgABAAAAALyAABUAAAAB4CAAALwFAAEAAAAAAAAAAAAAA
               design the idea, run the day and supply trained brand promoters.
             </p>
           </div>
-          <div class="svc">
+          <div class="svc" data-photo="outdoor">
             <span class="svc__tag">Brand</span>
             <h3>Outdoor &amp; indoor branding</h3>
             <p>
@@ -601,7 +683,7 @@ src:url(data:font/woff2;base64,d09GMgABAAAAALyAABUAAAAB4CAAALwFAAEAAAAAAAAAAAAAA
               works where digital and in-home advertising cannot reach.
             </p>
           </div>
-          <div class="svc">
+          <div class="svc" data-photo="digital">
             <span class="svc__tag">Digital</span>
             <h3>Digital marketing &amp; creative</h3>
             <p>
@@ -643,6 +725,8 @@ src:url(data:font/woff2;base64,d09GMgABAAAAALyAABUAAAAB4CAAALwFAAEAAAAAAAAAAAAAA
           campaign closes with a played-spot log.
         </p>
       </div>
+
+      <!--@NETWORK-->
 
       <div class="figures" style="margin-top: 2.5rem; grid-column: auto">
         <div>

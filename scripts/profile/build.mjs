@@ -64,6 +64,10 @@ function fontCss() {
 
 const template = readFileSync(resolve(HERE, 'template.html'), 'utf8');
 
+const photosPath = resolve(HERE, 'photos.json');
+const photos = existsSync(photosPath) ? JSON.parse(readFileSync(photosPath, 'utf8')) : null;
+if (!photos) console.warn('No photos.json — run: python3 scripts/profile/prepare-photos.py');
+
 const logosPath = resolve(HERE, 'logos.json');
 if (!existsSync(logosPath)) {
   console.error('No logos.json — run: python3 scripts/profile/prepare-logos.py');
@@ -80,6 +84,42 @@ const wall = logos
   .join('\n');
 
 let out = template.replace('<!--@LOGOS-->', wall);
+
+if (photos) {
+  // A lead photograph directly under the cover, so the first thing after the
+  // claim is evidence of it.
+  out = out.replace(
+    '<!--@LEAD-->',
+    photos.lead
+      ? `<figure class="lead"><img src="${photos.lead}" alt="An AD PRO LED billboard at Gulshan 2 Circle, Dhaka" width="1500" height="643" />` +
+        `<figcaption>Gulshan 2 Circle, Dhaka — 40ft × 20ft digital</figcaption></figure>`
+      : '',
+  );
+
+  out = out.replace(
+    '<!--@NETWORK-->',
+    photos.network?.length
+      ? `<div class="net-grid">${photos.network
+          .map(
+            (n) =>
+              `<figure><img src="${n.uri}" alt="${escapeHtml(n.name)}, ${escapeHtml(n.city)}" ` +
+              `loading="lazy" width="700" height="467" />` +
+              `<figcaption>${escapeHtml(n.name)}<span>${escapeHtml(n.city)}</span></figcaption></figure>`,
+          )
+          .join('')}</div>`
+      : '',
+  );
+
+  // Each service card takes the photograph named in its data-photo attribute.
+  out = out.replace(/<div class="svc" data-photo="([a-z]+)">/g, (whole, key) => {
+    const uri = photos.services?.[key];
+    if (!uri) return '<div class="svc">';
+    return (
+      `<div class="svc"><img class="svc__img" src="${uri}" alt="" loading="lazy" ` +
+      `width="560" height="315" />`
+    );
+  });
+}
 
 // The template keeps its faces in one place; if they are not already inlined
 // (a freshly edited template may still carry the CDN link), fold them in.
