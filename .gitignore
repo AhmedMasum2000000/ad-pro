@@ -14,3 +14,8 @@ tsconfig.tsbuildinfo
 # file per billboard and per city, derived from src/data/boards.json.
 pages/led-*.html
 pages/billboards-*.html
+
+# Built by scripts/inline-preview.mjs from dist/ — the whole home page folded
+# into one file for sharing a work-in-progress state without deploying it.
+# Derived output, and several megabytes of it.
+preview.html
