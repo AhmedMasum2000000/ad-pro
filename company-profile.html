@@ -401,15 +401,72 @@ src:url(data:font/woff2;base64,d09GMgABAAAAALyAABUAAAAB4CAAALwFAAEAAAAAAAAAAAAAA
      The form most readers will want: saved to PDF and attached to an email. */
 
   @media print {
-    @page { margin: 14mm; }
-    body { font-size: 10.5pt; line-height: 1.55; }
-    .band, .wall figure, .svc, .co {
+    @page { size: A4; margin: 14mm 15mm; }
+    body { font-size: 10pt; line-height: 1.5; }
+
+    .cover, .band, .wall figure, .svc, .co, .net-grid figure, .lead {
       -webkit-print-color-adjust: exact;
       print-color-adjust: exact;
     }
-    section { padding-block: 1.35rem; break-inside: avoid; }
+
+    /* A section that refuses to break has to start a fresh page whenever it
+       does not fit in what is left, which is how a nine-section document
+       turned into eighteen pages half of them blank. On paper a section is
+       just its label followed by its body, free to run over a page turn, and
+       only the small units — a service card, a company, a photograph —
+       refuse to be split. */
+    section { display: block; padding-block: 0.95rem 1.2rem; }
+    /* Two lines of colophon are not worth a sheet of paper on their own, so
+       it is asked to stay with the contact block and trimmed enough to fit
+       in what that page has left. */
+    .colophon { break-before: avoid; padding-block: 0.9rem 0.4rem; }
+    .contacts { gap: 1.2rem 2.5rem; }
+    .rail {
+      flex-direction: row;
+      align-items: baseline;
+      gap: 0.6rem;
+      margin-bottom: 0.6rem;
+    }
+    .body-col, .prose, .points { max-width: none; }
+
     .cover { break-after: page; }
-    h2, h3 { break-after: avoid; }
+    h2, h3 { break-after: avoid; break-inside: avoid; }
+    /* The rail is a section's number and name; left behind at the foot of a
+       page it reads as a heading for nothing. */
+    .rail { break-after: avoid; }
+    p { orphans: 3; widows: 3; }
+
+    /* A row of service cards is one line box and cannot be split, so a tall
+       row that will not fit pushes the whole grid to the next page and
+       leaves half a page of white behind it. Cropping the card photograph
+       flatter on paper is what buys the row its place. */
+    .svc__img { aspect-ratio: 2 / 1; object-fit: cover; }
+    .svc, .co, .points li, .net-grid figure, .lead { break-inside: avoid; }
+    /* A lede is two or three lines introducing what follows; split over a
+       page turn it strands a single word above the fold. */
+    .lede { break-inside: avoid; }
+
+    /* Grid is the one layout that fragments unpredictably across a page
+       boundary — tiles overlap the break or leave a band of white above it.
+       Inline layout has reflowed across pages since the first browser, so
+       the three tile grids become inline-block runs for print. font-size is
+       zeroed on the container to close the gaps between inline-blocks and
+       restored on each tile. */
+    .wall, .net-grid, .services {
+      display: block;
+      font-size: 0;
+      /* Each row of tiles is one line box, and the default orphans/widows of
+         2 means a page that has room for a single row is given none at all —
+         which is what left two thirds of the services opening page empty. A
+         row of pictures is not a paragraph; one of them alone at the foot of
+         a page reads perfectly well. */
+      orphans: 1;
+      widows: 1;
+    }
+    .wall figure { display: inline-grid; width: 20%; vertical-align: top; }
+    .net-grid figure { display: inline-block; width: 33.3333%; vertical-align: top; font-size: 10pt; }
+    .net-grid { margin-top: 1.2rem; }
+    .svc { display: inline-block; width: 50%; vertical-align: top; font-size: 10pt; }
   }
 </style>
 
