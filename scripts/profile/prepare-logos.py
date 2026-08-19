@@ -33,8 +33,8 @@ SRC = Path(os.environ.get("ADPRO_LOGO_DIR", "./client-logos"))
 OUT = Path(__file__).resolve().parent
 OUT.mkdir(exist_ok=True)
 
-PAGE = (255, 253, 250)          # the profile's paper colour
-INK = (22, 18, 58)              # the chip a white-on-dark mark is given instead
+PAGE = (255, 255, 255)          # the profile's paper colour
+INK = (30, 58, 99)              # brand navy — the chip a white-on-dark mark gets
 BOX_W, BOX_H = 260, 96          # the cell each mark is fitted into
 TARGET_AREA = 260 * 46          # optical weight: area, not height
 
