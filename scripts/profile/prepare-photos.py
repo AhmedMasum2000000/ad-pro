@@ -33,12 +33,11 @@ ROOT = HERE.parent.parent
 BOARDS = ROOT / "public" / "boards"
 SLIDES = Path(os.environ.get("ADPRO_SLIDE_DIR", HERE / "slides"))
 
-# Board photographs for the network grid: one per city where the city has a
-# strong frame, chosen for showing the site in its street rather than for the
-# screen content alone.
+# Board photographs for the network grid: six sites, six cities, printed large
+# enough to be looked at rather than counted. Gulshan 2 and Karwan Bazar are
+# deliberately absent — they carry the cover and the LED service card, and the
+# same photograph twice in one document reads as a mistake.
 NETWORK = [
-    ("dhaka-gulshan-circle-2-east-side-rob-super-market", "Gulshan 2 Circle", "Dhaka"),
-    ("dhaka-karwan-bazar", "Karwan Bazar", "Dhaka"),
     ("dhaka-sks-tower-flyover-view-mohakhali", "SKS Tower, Mohakhali", "Dhaka"),
     ("dhaka-mirpur-10-circle-4-screens", "Mirpur 10 Circle", "Dhaka"),
     ("chattogram-agrabad-circle-chittagong", "Agrabad Circle", "Chattogram"),
@@ -48,6 +47,16 @@ NETWORK = [
 ]
 
 LEAD = "dhaka-gulshan-circle-2-east-side-rob-super-market"
+
+# The cover photograph runs the full width of an A4 sheet, so it needs real
+# resolution behind it — 210mm at print density is a good deal more than the
+# 1500px the lead band inside the document gets away with.
+COVER = LEAD
+
+# The photograph the document closes on, opposite the contact details. A
+# different site from the cover, or the reader is looking at the same picture
+# twice and notices.
+CLOSE = "dhaka-bijoy-saroni-mor"
 
 # Work photographs, as regions of the slide they were flattened into.
 # (slide stem, x0, y0, x1, y1) in fractions of the slide.
@@ -94,11 +103,19 @@ def cover(img: Image.Image, ratio: float) -> Image.Image:
 
 
 def main() -> None:
-    out: dict = {"lead": None, "network": [], "services": {}}
+    out: dict = {"cover": None, "close": None, "lead": None, "network": [], "services": {}}
+
+    cover_path = BOARDS / f"{COVER}.jpg"
+    if cover_path.exists():
+        out["cover"] = encode(cover(Image.open(cover_path), 16 / 10), 2000, 80)
 
     lead_path = BOARDS / f"{LEAD}.jpg"
     if lead_path.exists():
         out["lead"] = encode(cover(Image.open(lead_path), 21 / 9), 1500, 78)
+
+    close_path = BOARDS / f"{CLOSE}.jpg"
+    if close_path.exists():
+        out["close"] = encode(cover(Image.open(close_path), 21 / 9), 1500, 80)
 
     for slug, name, city in NETWORK:
         p = BOARDS / f"{slug}.jpg"
@@ -106,7 +123,7 @@ def main() -> None:
             print(f"  missing board {slug}")
             continue
         out["network"].append(
-            {"name": name, "city": city, "uri": encode(cover(Image.open(p), 3 / 2), 700)}
+            {"name": name, "city": city, "uri": encode(cover(Image.open(p), 3 / 2), 900)}
         )
 
     led = BOARDS / "dhaka-karwan-bazar.jpg"
@@ -125,10 +142,11 @@ def main() -> None:
 
     (HERE / "photos.json").write_text(json.dumps(out))
 
-    total = len(out["lead"] or "") + sum(len(n["uri"]) for n in out["network"]) + sum(
+    total = len(out["cover"] or "") + len(out["close"] or "") + len(out["lead"] or "") + sum(len(n["uri"]) for n in out["network"]) + sum(
         len(v) for v in out["services"].values()
     )
-    print(f"lead: {'yes' if out['lead'] else 'no'}, network: {len(out['network'])}, "
+    print(f"cover: {'yes' if out['cover'] else 'no'}, "
+          f"lead: {'yes' if out['lead'] else 'no'}, network: {len(out['network'])}, "
           f"services: {len(out['services'])} — {total / 1024 / 1024:.2f} MB")
 
 

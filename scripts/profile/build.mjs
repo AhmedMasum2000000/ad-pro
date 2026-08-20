@@ -86,13 +86,20 @@ const wall = logos
 let out = template.replace('<!--@LOGOS-->', wall);
 
 if (photos) {
-  // A lead photograph directly under the cover, so the first thing after the
-  // claim is evidence of it.
+  // The cover photograph. It is the first thing anyone sees of a company that
+  // sells advertising space, so it is one of that company's screens.
   out = out.replace(
-    '<!--@LEAD-->',
-    photos.lead
-      ? `<figure class="lead"><img src="${photos.lead}" alt="An AD PRO LED billboard at Gulshan 2 Circle, Dhaka" width="1500" height="643" />` +
-        `<figcaption>Gulshan 2 Circle, Dhaka — 40ft × 20ft digital</figcaption></figure>`
+    '<!--@COVER-->',
+    photos.cover
+      ? `<img src="${photos.cover}" alt="An AD PRO LED billboard at Gulshan 2 Circle, Dhaka" width="2000" height="1250" />`
+      : '',
+  );
+
+  // The document closes on one more screen, above the phone numbers.
+  out = out.replace(
+    '<!--@CLOSE-->',
+    photos.close
+      ? `<img src="${photos.close}" alt="An AD PRO LED billboard at Bijoy Sarani, Dhaka" width="1500" height="643" />`
       : '',
   );
 
@@ -103,7 +110,7 @@ if (photos) {
           .map(
             (n) =>
               `<figure><img src="${n.uri}" alt="${escapeHtml(n.name)}, ${escapeHtml(n.city)}" ` +
-              `loading="lazy" width="700" height="467" />` +
+              `loading="lazy" width="900" height="600" />` +
               `<figcaption>${escapeHtml(n.name)}<span>${escapeHtml(n.city)}</span></figcaption></figure>`,
           )
           .join('')}</div>`

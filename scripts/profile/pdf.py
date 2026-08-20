@@ -29,10 +29,17 @@ import sys
 
 from PIL import Image
 from pypdf import PdfReader, PdfWriter
+from pypdf._page import PageObject
+from pypdf.generic import DecodedStreamObject, DictionaryObject, NameObject
 
 ROOT = Path(__file__).resolve().parent.parent.parent
 SRC = ROOT / "company-profile.html"
 OUT = ROOT / "company-profile.pdf"
+
+# The running line along the foot of every inside page. The cover and the
+# back cover are photographs to their edges and take neither.
+RUNNER = "AD PRO COMMUNICATIONS LTD.   \u2014   OUTDOOR ADVERTISING AGENCY IN BANGLADESH"
+MM = 72 / 25.4
 
 # What separates a photograph from a client mark here: the marks are all
 # 260x96, and every photograph is a landscape crop of 16:9 or wider. The
@@ -75,6 +82,64 @@ def render() -> None:
     )
 
 
+def esc(text: str) -> str:
+    return text.replace("\\", r"\\\\").replace("(", r"\(").replace(")", r"\)")
+
+
+def stamp(writer: PdfWriter) -> None:
+    """Draw the running line and the folio on every inside page.
+
+    Set in Helvetica rather than the document's own Inter: a base-14 font
+    needs no embedding, and at 6.5pt letterspaced small caps in grey the two
+    grotesques are not told apart. Everything above this line is real text
+    from the HTML, so the document stays searchable either way.
+    """
+    font = writer._add_object(
+        DictionaryObject({
+            NameObject("/Type"): NameObject("/Font"),
+            NameObject("/Subtype"): NameObject("/Type1"),
+            NameObject("/BaseFont"): NameObject("/Helvetica"),
+            NameObject("/Encoding"): NameObject("/WinAnsiEncoding"),
+        })
+    )
+
+    inside = writer.pages[1:-1]
+    total = len(writer.pages)
+
+    for n, page in enumerate(inside, start=2):
+        width = float(page.mediabox.width)
+        left, right, base = 15 * MM, width - 15 * MM, 11 * MM
+        folio = f"{n:02d} / {total:02d}"
+
+        ops = (
+            # the hairline the line sits under
+            f"q 0.78 0.80 0.84 RG 0.4 w {left} {base + 4 * MM} m "
+            f"{right} {base + 4 * MM} l S Q\n"
+            "q BT /ProfileRunner 6.5 Tf 0.48 0.53 0.60 rg 0.6 Tc "
+            f"1 0 0 1 {left} {base} Tm ({esc(RUNNER)}) Tj ET Q\n"
+            "q BT /ProfileRunner 6.5 Tf 0.48 0.53 0.60 rg 0.6 Tc "
+            f"1 0 0 1 {right - 17 * MM} {base} Tm ({folio}) Tj ET Q"
+        )
+
+        page.merge_page(_overlay(writer, ops, font, page))
+
+
+def _overlay(writer: PdfWriter, ops: str, font, page):
+    """A standalone page carrying just the stamp, to merge over the real one."""
+    sheet = PageObject.create_blank_page(
+        None, float(page.mediabox.width), float(page.mediabox.height)
+    )
+    content = DecodedStreamObject()
+    # WinAnsi, not latin-1: the em dash lives at 0x97 in the former and nowhere
+    # in the latter.
+    content.set_data(ops.encode("cp1252"))
+    sheet[NameObject("/Contents")] = writer._add_object(content)
+    sheet[NameObject("/Resources")] = DictionaryObject({
+        NameObject("/Font"): DictionaryObject({NameObject("/ProfileRunner"): font})
+    })
+    return sheet
+
+
 def shrink() -> tuple[int, int]:
     reader = PdfReader(OUT)
     writer = PdfWriter(clone_from=reader)
@@ -94,6 +159,8 @@ def shrink() -> tuple[int, int]:
                 continue
             img.replace(pil.convert("RGB"), quality=QUALITY, optimize=True)
             done += 1
+
+    stamp(writer)
 
     buf = io.BytesIO()
     writer.write(buf)
