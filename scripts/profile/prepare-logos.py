@@ -21,6 +21,7 @@ import io
 import json
 import re
 
+import numpy as np
 from PIL import Image
 
 import os
@@ -43,8 +44,7 @@ BOX_W, BOX_H = 260, 118         # the cell each mark is fitted into
 # shrunk to fit a cell built for logotypes. The U.S. Embassy seal was the one
 # that made it obvious.
 TARGET_AREA = 260 * 46          # optical weight: area, not height
-DENSITY_REF = 0.34              # how much of its box a typical mark inks
-DENSITY_BOOST_MAX = 1.30        # how far a sparse mark may be let up
+EVEN_MIN, EVEN_MAX = 0.86, 1.45  # how far a mark may be moved to even the wall
 
 # Every supplied file is a client mark. Several arrived with hashes or
 # placeholder filenames, so they are identified by eye and named below rather
@@ -229,25 +229,36 @@ def is_white_mark(path: Path) -> bool:
         return sum(ink) / len(ink) > 215 and coverage < 0.35
 
 
-def boost(img: Image.Image) -> float:
-    """How much extra area a mark earns for the ink it does not have.
+def render(img: Image.Image, ground: tuple[int, int, int], even: float) -> Image.Image:
+    """Place one mark in its cell at the area-normalised size times `even`."""
+    w, h = img.size
+    scale = even * (TARGET_AREA / (w * h)) ** 0.5
+    scale = min(scale, BOX_W / w, BOX_H / h)
+    sized = img.resize((max(1, int(w * scale)), max(1, int(h * scale))), Image.LANCZOS)
+    cell = Image.new("RGB", (BOX_W, BOX_H), ground)
+    cell.paste(sized, ((BOX_W - sized.width) // 2, (BOX_H - sized.height) // 2))
+    return cell
 
-    Measured against the corner colour rather than pure white, since a mark
-    trimmed from a tinted background still sits on that tint.
+
+def ink_mass(cell: Image.Image, ground: tuple[int, int, int]) -> float:
+    """How much the mark darkens (or lightens) its cell, in pixels of full ink.
+
+    This is the number that decides whether a mark reads as loud or quiet on
+    the page, and it is not the same as how big its bounding box is. A solid
+    logotype fills its box; an outline seal is mostly paper showing through
+    the middle of a circle. Measured against the cell's own ground so a white
+    mark on the navy chip counts its own strokes rather than the chip.
     """
-    small = img.convert("L").resize((64, 64), Image.LANCZOS)
-    px = list(small.getdata())  # noqa: FURB — get_flattened_data is Pillow 12+
-    ground = max(set(px), key=px.count)
-    inked = sum(1 for v in px if abs(v - ground) > 24) / len(px)
-    if inked <= 0:
-        return 1.0
-    return min(DENSITY_REF / inked, DENSITY_BOOST_MAX ** 2)
+    a = np.asarray(cell.convert("L"), dtype=np.float32)
+    g = Image.new("RGB", (1, 1), ground).convert("L").getpixel((0, 0))
+    return float(np.abs(a - g).sum() / 255.0)
 
 
 def main() -> None:
     seen: dict[str, str] = {}
     skipped: list[str] = []
     out: list[dict] = []
+    marks: list[dict] = []
 
     for path in sorted(SRC.rglob("*")):
         if not path.is_file() or path.suffix.lower() not in {".png", ".jpg", ".jpeg", ".webp"}:
@@ -272,33 +283,33 @@ def main() -> None:
             skipped.append(path.name)
             continue
 
-        # Scale by area so a long wordmark and a square emblem carry the same
-        # visual weight, corrected for how much of that area the mark actually
-        # inks, then capped to the cell. A solid logotype fills most of its
-        # box; an outline seal is mostly the paper showing through the middle
-        # of a circle, and at equal box area it reads as a pale disc next to
-        # the wordmark beside it.
-        scale = (TARGET_AREA * boost(img) / (w * h)) ** 0.5
-        scale = min(scale, BOX_W / w, BOX_H / h)
-        img = img.resize((max(1, int(w * scale)), max(1, int(h * scale))), Image.LANCZOS)
-
         ground = INK if is_white_mark(path) else PAGE
-
-        cell = Image.new("RGB", (BOX_W, BOX_H), ground)
         if ground == INK:
             # Re-flatten against the chip so the mark's own edges antialias
             # into the dark rather than into a white halo.
             img = trim(flatten(Image.open(path), INK))
-            scale = (TARGET_AREA * boost(img) / (img.width * img.height)) ** 0.5
-            scale = min(scale, BOX_W / img.width, BOX_H / img.height)
-            img = img.resize((max(1, int(img.width * scale)), max(1, int(img.height * scale))), Image.LANCZOS)
 
-        cell.paste(img, ((BOX_W - img.width) // 2, (BOX_H - img.height) // 2))
+        seen[key] = name
+        marks.append({"name": name, "img": img, "ground": ground})
 
+    # Pass one at the area-normalised size, to find out what each mark weighs.
+    for m in marks:
+        m["cell"] = render(m["img"], m["ground"], 1.0)
+        m["mass"] = ink_mass(m["cell"], m["ground"])
+
+    # Pass two: nudge each toward the middle of the set. Area-normalising alone
+    # leaves an outline seal a third lighter than the logotype beside it, and
+    # a wall where some marks whisper reads as a wall assembled carelessly.
+    target = float(np.median([m["mass"] for m in marks]))
+    for m in marks:
+        even = min(max((target / m["mass"]) ** 0.5, EVEN_MIN), EVEN_MAX)
+        cell = render(m["img"], m["ground"], even)
         buf = io.BytesIO()
         cell.save(buf, "WEBP", quality=88, method=6)
-        seen[key] = name
-        out.append({"name": name, "uri": "data:image/webp;base64," + base64.b64encode(buf.getvalue()).decode()})
+        out.append({
+            "name": m["name"],
+            "uri": "data:image/webp;base64," + base64.b64encode(buf.getvalue()).decode(),
+        })
 
     out.sort(key=lambda d: d["name"].lower())
     (OUT / "logos.json").write_text(json.dumps(out))

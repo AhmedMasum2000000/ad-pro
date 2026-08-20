@@ -139,8 +139,11 @@ src:url(data:font/woff2;base64,d09GMgABAAAAALyAABUAAAAB4CAAALwFAAEAAAAAAAAAAAAAA
 
   .cover {
     display: grid;
-    /* section sets a two-column rail grid; the cover is one column. */
+    /* section sets a two-column rail grid with a gap between the columns; the
+       cover is one column and no gap, or the gap prints as a white stripe
+       between the photograph and what follows it. */
     grid-template-columns: 1fr;
+    gap: 0;
     /* On screen the photograph takes a little over half the first view and
        the claim sits under it; on paper the rows are re-cut to the sheet. */
     grid-template-rows: 52vh auto auto;
@@ -214,6 +217,7 @@ src:url(data:font/woff2;base64,d09GMgABAAAAALyAABUAAAAB4CAAALwFAAEAAAAAAAAAAAAAA
   .closing {
     display: grid;
     grid-template-columns: 1fr;
+    gap: 0;
     grid-template-rows: minmax(12rem, 1fr) auto;
     min-height: 100vh;
     padding: 0;
@@ -226,6 +230,13 @@ src:url(data:font/woff2;base64,d09GMgABAAAAALyAABUAAAAB4CAAALwFAAEAAAAAAAAAAAAAA
   .closing__panel {
     background: var(--navy);
     padding-block: clamp(2rem, 4.5vw, 3.25rem);
+    display: flex;
+  }
+
+  .closing__panel > .sheet {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
   }
 
   .closing__mark {
@@ -238,6 +249,15 @@ src:url(data:font/woff2;base64,d09GMgABAAAAALyAABUAAAAB4CAAALwFAAEAAAAAAAAAAAAAA
   .closing__mark .cover__wordmark { color: #fff; }
   .closing__mark .cover__sub { color: rgba(255, 255, 255, 0.62); }
 
+  .closing__where {
+    margin-top: 1.9rem;
+    font-size: 0.875rem;
+    line-height: 1.7;
+    color: rgba(255, 255, 255, 0.82);
+  }
+
+  .closing__where a { color: var(--sky); border-bottom-color: rgba(107, 163, 232, 0.4); }
+
   .closing__line {
     font-size: 0.6875rem;
     font-weight: 500;
@@ -247,11 +267,12 @@ src:url(data:font/woff2;base64,d09GMgABAAAAALyAABUAAAAB4CAAALwFAAEAAAAAAAAAAAAAA
   }
 
   .closing__url {
-    font-size: clamp(1.5rem, 2.5vw, 2.1rem);
+    font-size: clamp(1.6rem, 2.8vw, 2.4rem);
     font-weight: 300;
     letter-spacing: -0.015em;
     color: #fff;
-    margin-top: 0.35rem;
+    margin-top: auto;
+    padding-top: 2rem;
   }
 
   /* --- figures ---------------------------------------------------------- */
@@ -411,7 +432,8 @@ src:url(data:font/woff2;base64,d09GMgABAAAAALyAABUAAAAB4CAAALwFAAEAAAAAAAAAAAAAA
     background: var(--paper);
     border-top: 1px solid var(--line);
     border-left: 1px solid var(--line);
-    margin-top: 2rem;
+    margin-top: auto;
+    padding-top: 2rem;
   }
 
   .net-grid figure {
@@ -603,16 +625,20 @@ src:url(data:font/woff2;base64,d09GMgABAAAAALyAABUAAAAB4CAAALwFAAEAAAAAAAAAAAAAA
     .fig__n { font-size: 21pt; }
     .fig__l { font-size: 7.5pt; line-height: 1.4; }
 
+    /* 140mm is the widest the photograph can be printed and still hold about
+       130 pixels to the inch, which is what the source files have. Given more
+       of the sheet it would be inventing detail. */
     .closing {
       page: back;
       min-height: 0;
       height: 297mm;
-      grid-template-rows: 1fr auto;
+      grid-template-rows: 140mm 1fr;
     }
     .closing .sheet { max-width: none; padding-inline: 17mm; }
-    .closing__panel { padding-block: 12mm 14mm; }
-    .closing__mark { margin-bottom: 8mm; }
-    .closing__url { font-size: 17pt; }
+    .closing__panel { padding-block: 18mm 16mm; }
+    .closing__mark { margin-bottom: 7mm; }
+    .closing__where { margin-top: 14mm; font-size: 10pt; }
+    .closing__url { font-size: 20pt; margin-top: auto; }
 
     .colophon { break-before: avoid; padding-block: 5mm 0; }
     /* Three columns. Five was one row instead of two and saved the page
@@ -1108,7 +1134,16 @@ src:url(data:font/woff2;base64,d09GMgABAAAAALyAABUAAAAB4CAAALwFAAEAAAAAAAAAAAAAA
            alt="AD PRO Communications Ltd." width="312" height="312" />
         <span class="cover__wordmark">AD&nbsp;PRO<span class="cover__sub">Communications Ltd.</span></span>
       </div>
+
       <p class="closing__line">Outdoor Advertising Agency in Bangladesh</p>
+
+      <div class="closing__where">
+        <p>House&nbsp;#99 (1st floor), Road&nbsp;#10/2, Block&nbsp;D</p>
+        <p>Niketon, Gulshan&nbsp;1, Dhaka&nbsp;1212</p>
+        <p><a href="tel:+8801763924619">+880 1763 924619</a> &nbsp;·&nbsp;
+           <a href="mailto:info@adpro.com.bd">info@adpro.com.bd</a></p>
+      </div>
+
       <p class="closing__url">adpro.com.bd</p>
     </div>
   </div>

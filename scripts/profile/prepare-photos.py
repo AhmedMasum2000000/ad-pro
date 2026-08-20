@@ -54,15 +54,21 @@ NETWORK = [
 
 LEAD = "dhaka-gulshan-circle-2-east-side-rob-super-market"
 
-# The cover photograph runs the full width of an A4 sheet, so it needs real
-# resolution behind it — 210mm at print density is a good deal more than the
-# 1500px the lead band inside the document gets away with.
-COVER = LEAD
+# The cover photograph runs the full width of an A4 sheet, so it is chosen for
+# the pixels it actually has. Asking encode() for more than the file holds
+# does not add detail, it only makes the document bigger.
+# Not the Gulshan 2 frame the lead band uses: that file is 747px wide, which
+# across an A4 sheet is 84 pixels to the inch and looks it, and its screen was
+# caught mid-refresh. This one is half as big again and the screen is lit.
+COVER = "dhaka-gulshan-circle-1-upper"
 
-# The photograph the document closes on, opposite the contact details. A
-# different site from the cover, or the reader is looking at the same picture
-# twice and notices.
-CLOSE = "sylhet-sylhet-surma-point"
+# The photograph the document closes on. Two things decide it: the screen has
+# to sit in the middle of the frame, and the file has to be big enough to
+# print. The board photographs run from 700px to 1150px on the long edge, so
+# the closing image is used at its native aspect and near its native width —
+# a portrait crop of an 850px frame throws away half the pixels it has and
+# then has to invent the rest.
+CLOSE = "dhaka-kamlapur-railway-station-entry-gate"
 
 # Work photographs, as regions of the slide they were flattened into.
 # (slide stem, x0, y0, x1, y1) in fractions of the slide.
@@ -118,7 +124,7 @@ def main() -> None:
 
     cover_path = BOARDS / f"{COVER}.jpg"
     if cover_path.exists():
-        out["cover"] = encode(cover(Image.open(cover_path), 16 / 10), 2000, 80)
+        out["cover"] = encode(cover(Image.open(cover_path), 7 / 5), 1400, 86)
 
     lead_path = BOARDS / f"{LEAD}.jpg"
     if lead_path.exists():
@@ -126,7 +132,7 @@ def main() -> None:
 
     close_path = BOARDS / f"{CLOSE}.jpg"
     if close_path.exists():
-        out["close"] = encode(cover(Image.open(close_path), 16 / 9), 1600, 80)
+        out["close"] = encode(cover(Image.open(close_path), 3 / 2), 1200, 86)
 
     for slug, name, city in NETWORK:
         p = BOARDS / f"{slug}.jpg"

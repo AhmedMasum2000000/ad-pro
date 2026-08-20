@@ -91,7 +91,7 @@ if (photos) {
   out = out.replace(
     '<!--@COVER-->',
     photos.cover
-      ? `<img src="${photos.cover}" alt="An AD PRO LED billboard at Gulshan 2 Circle, Dhaka" width="2000" height="1250" />`
+      ? `<img src="${photos.cover}" alt="An AD PRO LED billboard at Gulshan 1 Circle, Dhaka" width="1400" height="1000" />`
       : '',
   );
 
@@ -99,7 +99,7 @@ if (photos) {
   out = out.replace(
     '<!--@CLOSE-->',
     photos.close
-      ? `<img src="${photos.close}" alt="An AD PRO LED billboard at Surma Point, Sylhet" width="1600" height="900" />`
+      ? `<img src="${photos.close}" alt="An AD PRO LED screen at Kamlapur Railway Station, Dhaka" width="1200" height="800" />`
       : '',
   );
 
