@@ -357,7 +357,7 @@ src:url(data:font/woff2;base64,d09GMgABAAAAALyAABUAAAAB4CAAALwFAAEAAAAAAAAAAAAAA
     background: var(--paper);
     border-right: 1px solid var(--line);
     border-bottom: 1px solid var(--line);
-    aspect-ratio: 13 / 5;
+    aspect-ratio: 11 / 5;
     display: grid;
     place-items: center;
     padding: 0.5rem;
@@ -550,8 +550,8 @@ src:url(data:font/woff2;base64,d09GMgABAAAAALyAABUAAAAB4CAAALwFAAEAAAAAAAAAAAAAA
       orphans: 1;
       widows: 1;
     }
-    .wall figure { display: inline-grid; width: 14.2857%; vertical-align: top; padding: 1mm;
-                   aspect-ratio: 3 / 1; }
+    .wall figure { display: inline-grid; width: 14.2857%; vertical-align: top; padding: 0.7mm;
+                   aspect-ratio: 11 / 5; }
     .net-grid { margin-top: 5mm; }
     .net-grid figure { display: inline-block; width: 50%; vertical-align: top; font-size: 8.5pt; }
     /* Six sites printed large enough to be looked at, in a crop that puts
@@ -561,8 +561,17 @@ src:url(data:font/woff2;base64,d09GMgABAAAAALyAABUAAAAB4CAAALwFAAEAAAAAAAAAAAAAA
     .svc p { font-size: 8.5pt; line-height: 1.45; }
     .svc h3 { font-size: 10.5pt; }
     /* Five rows of cards have to come out three and two, so the card is
-       sized to the sheet rather than the sheet let out to the card. */
-    .svc__img { aspect-ratio: 12 / 5; object-fit: cover; }
+       sized to the sheet rather than the sheet let out to the card.
+       The photograph runs to the card's edges by negative margin, and that
+       margin has to be restated in the print padding — left at the screen
+       value it hangs 9px past the card on each side and laps over the card
+       beside it. */
+    .svc__img {
+      width: calc(100% + 8mm);
+      margin: -3.5mm -4mm 3mm;
+      aspect-ratio: 12 / 5;
+      object-fit: cover;
+    }
     .co { display: inline-block; width: calc(25% - 1.5mm); vertical-align: top; font-size: 9.75pt;
           margin: 0 1.5mm 1.5mm 0; padding: 3mm 3.5mm; }
     .co strong { font-size: 8.5pt; }
@@ -571,7 +580,7 @@ src:url(data:font/woff2;base64,d09GMgABAAAAALyAABUAAAAB4CAAALwFAAEAAAAAAAAAAAAAA
     /* Five figures on one line reads as a scoreboard; wrapped onto two it
        reads as a list that ran out of room. */
     .figures { grid-template-columns: repeat(5, 1fr); gap: 5mm; }
-    .figures--band { padding: 6mm; }
+    .figures--band { padding: 5mm; }
     .fig__n { font-size: 21pt; }
     .fig__l { font-size: 7.5pt; line-height: 1.4; }
 
@@ -631,7 +640,7 @@ src:url(data:font/woff2;base64,d09GMgABAAAAALyAABUAAAAB4CAAALwFAAEAAAAAAAAAAAAAA
       </div>
       <div class="body-col">
         <h2>The brands that have trusted us with a junction.</h2>
-        <p class="lede" style="max-width: 44ch">
+        <p class="lede" style="max-width: 62ch">
           Telecom, banking, FMCG, automotive, pharmaceutical, airlines, government
           and development — a selection of the 400+ brands who have run
           out-of-home with AD PRO.

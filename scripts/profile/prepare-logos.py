@@ -35,7 +35,13 @@ OUT.mkdir(exist_ok=True)
 
 PAGE = (255, 255, 255)          # the profile's paper colour
 INK = (30, 58, 99)              # brand navy — the chip a white-on-dark mark gets
-BOX_W, BOX_H = 260, 96          # the cell each mark is fitted into
+BOX_W, BOX_H = 260, 118         # the cell each mark is fitted into
+
+# 118 rather than 96 because 96 was clipping the scale of sixty-nine of the
+# hundred and five marks: everything square or round — an emblem, a seal, a
+# roundel — wants to be about 110px tall at this optical weight, and was being
+# shrunk to fit a cell built for logotypes. The U.S. Embassy seal was the one
+# that made it obvious.
 TARGET_AREA = 260 * 46          # optical weight: area, not height
 
 # Every supplied file is a client mark. Several arrived with hashes or

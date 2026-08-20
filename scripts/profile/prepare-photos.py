@@ -60,16 +60,21 @@ CLOSE = "dhaka-bijoy-saroni-mor"
 
 # Work photographs, as regions of the slide they were flattened into.
 # (slide stem, x0, y0, x1, y1) in fractions of the slide.
+#
+# Each region has to hold exactly one photograph. Several of these originally
+# spanned two or three of the pictures a slide laid out in a row, which in the
+# card came out as a strip of fragments with the slide's own background
+# showing between them.
 SERVICE_CROPS = {
     "bus": ("11", 0.10, 0.67, 0.52, 0.97),
     "van": ("14", 0.36, 0.57, 0.62, 0.99),
-    "car": ("12", 0.56, 0.60, 0.99, 0.93),
-    "trade": ("19", 0.55, 0.13, 0.99, 0.97),
-    "digital": ("21", 0.08, 0.67, 0.53, 0.98),
-    "outdoor": ("20", 0.34, 0.60, 0.60, 0.99),
-    "events": ("18", 0.53, 0.10, 0.99, 0.55),
+    "car": ("12", 0.550, 0.150, 0.990, 0.520),
+    "trade": ("19", 0.755, 0.735, 0.995, 0.995),
+    "digital": ("21", 0.418, 0.615, 0.638, 0.988),
+    "outdoor": ("20", 0.378, 0.625, 0.710, 0.995),
+    "events": ("18", 0.545, 0.555, 0.790, 0.992),
     "packaging": ("09", 0.79, 0.54, 0.99, 0.99),
-    "static": ("17", 0.47, 0.02, 0.99, 0.98),
+    "static": ("17", 0.720, 0.360, 0.995, 0.685),
 }
 
 
@@ -126,7 +131,10 @@ def main() -> None:
             {"name": name, "city": city, "uri": encode(cover(Image.open(p), 3 / 2), 900)}
         )
 
-    led = BOARDS / "dhaka-karwan-bazar.jpg"
+    # Not Karwan Bazar: it was running the same campaign as the closing
+    # photograph, and two frames of the same creative read as one picture
+    # printed twice. This one is indoor, which the card's copy also claims.
+    led = BOARDS / "dhaka-police-plaza-entry-gate-north-side.jpg"
     if led.exists():
         out["services"]["led"] = encode(cover(Image.open(led), 16 / 9), 560, 82)
 
