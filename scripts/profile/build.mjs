@@ -99,7 +99,7 @@ if (photos) {
   out = out.replace(
     '<!--@CLOSE-->',
     photos.close
-      ? `<img src="${photos.close}" alt="An AD PRO LED billboard at Bijoy Sarani, Dhaka" width="1500" height="643" />`
+      ? `<img src="${photos.close}" alt="An AD PRO LED billboard at Surma Point, Sylhet" width="1600" height="900" />`
       : '',
   );
 
@@ -110,7 +110,7 @@ if (photos) {
           .map(
             (n) =>
               `<figure><img src="${n.uri}" alt="${escapeHtml(n.name)}, ${escapeHtml(n.city)}" ` +
-              `loading="lazy" width="900" height="600" />` +
+              `loading="lazy" width="620" height="465" />` +
               `<figcaption>${escapeHtml(n.name)}<span>${escapeHtml(n.city)}</span></figcaption></figure>`,
           )
           .join('')}</div>`

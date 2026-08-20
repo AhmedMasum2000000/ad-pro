@@ -33,17 +33,23 @@ ROOT = HERE.parent.parent
 BOARDS = ROOT / "public" / "boards"
 SLIDES = Path(os.environ.get("ADPRO_SLIDE_DIR", HERE / "slides"))
 
-# Board photographs for the network grid: six sites, six cities, printed large
-# enough to be looked at rather than counted. Gulshan 2 and Karwan Bazar are
-# deliberately absent — they carry the cover and the LED service card, and the
-# same photograph twice in one document reads as a mistake.
+# Board photographs for the network grid: one site in each of the ten cities
+# the copy claims, which is the claim the grid is there to evidence. Picked by
+# the crop scorer, which measures how much of the frame the lit screen holds.
+# The cover, the LED service card and the closing photograph take their sites
+# from elsewhere — the same photograph twice in one document reads as a
+# mistake.
 NETWORK = [
-    ("dhaka-sks-tower-flyover-view-mohakhali", "SKS Tower, Mohakhali", "Dhaka"),
-    ("dhaka-mirpur-10-circle-4-screens", "Mirpur 10 Circle", "Dhaka"),
-    ("chattogram-agrabad-circle-chittagong", "Agrabad Circle", "Chattogram"),
-    ("sylhet-sylhet-surma-point", "Surma Point", "Sylhet"),
+    ("dhaka-sks-tower-entrance-mohakhali", "SKS Tower", "Dhaka"),
+    ("chattogram-golpahar-moor", "Golpahar Moor", "Chattogram"),
+    ("sylhet-sylhet-tilaghar-point", "Tilaghar Point", "Sylhet"),
+    ("rajshahi-rajshahi-new-market", "New Market", "Rajshahi"),
     ("coxs-bazar-dolphin-moor-coxs-bazar", "Dolphin Moor", "Cox's Bazar"),
-    ("rajshahi-rajshahi-shaheb-bazar-2-screens-both-side", "Shaheb Bazar", "Rajshahi"),
+    ("narayanganj-narayanganj", "Chashara", "Narayanganj"),
+    ("bogura-police-plaza-bogura", "Police Plaza", "Bogura"),
+    ("cumilla-kandirpar-cumilla", "Kandirpar", "Cumilla"),
+    ("rangpur-shapla-mor-rangpur", "Shapla Mor", "Rangpur"),
+    ("feni-feni", "Feni Town", "Feni"),
 ]
 
 LEAD = "dhaka-gulshan-circle-2-east-side-rob-super-market"
@@ -56,7 +62,7 @@ COVER = LEAD
 # The photograph the document closes on, opposite the contact details. A
 # different site from the cover, or the reader is looking at the same picture
 # twice and notices.
-CLOSE = "dhaka-bijoy-saroni-mor"
+CLOSE = "sylhet-sylhet-surma-point"
 
 # Work photographs, as regions of the slide they were flattened into.
 # (slide stem, x0, y0, x1, y1) in fractions of the slide.
@@ -120,7 +126,7 @@ def main() -> None:
 
     close_path = BOARDS / f"{CLOSE}.jpg"
     if close_path.exists():
-        out["close"] = encode(cover(Image.open(close_path), 21 / 9), 1500, 80)
+        out["close"] = encode(cover(Image.open(close_path), 16 / 9), 1600, 80)
 
     for slug, name, city in NETWORK:
         p = BOARDS / f"{slug}.jpg"
@@ -128,7 +134,7 @@ def main() -> None:
             print(f"  missing board {slug}")
             continue
         out["network"].append(
-            {"name": name, "city": city, "uri": encode(cover(Image.open(p), 3 / 2), 900)}
+            {"name": name, "city": city, "uri": encode(cover(Image.open(p), 4 / 3), 620)}
         )
 
     # Not Karwan Bazar: it was running the same campaign as the closing

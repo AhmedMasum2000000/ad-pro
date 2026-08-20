@@ -43,6 +43,8 @@ BOX_W, BOX_H = 260, 118         # the cell each mark is fitted into
 # shrunk to fit a cell built for logotypes. The U.S. Embassy seal was the one
 # that made it obvious.
 TARGET_AREA = 260 * 46          # optical weight: area, not height
+DENSITY_REF = 0.34              # how much of its box a typical mark inks
+DENSITY_BOOST_MAX = 1.30        # how far a sparse mark may be let up
 
 # Every supplied file is a client mark. Several arrived with hashes or
 # placeholder filenames, so they are identified by eye and named below rather
@@ -227,6 +229,21 @@ def is_white_mark(path: Path) -> bool:
         return sum(ink) / len(ink) > 215 and coverage < 0.35
 
 
+def boost(img: Image.Image) -> float:
+    """How much extra area a mark earns for the ink it does not have.
+
+    Measured against the corner colour rather than pure white, since a mark
+    trimmed from a tinted background still sits on that tint.
+    """
+    small = img.convert("L").resize((64, 64), Image.LANCZOS)
+    px = list(small.getdata())  # noqa: FURB — get_flattened_data is Pillow 12+
+    ground = max(set(px), key=px.count)
+    inked = sum(1 for v in px if abs(v - ground) > 24) / len(px)
+    if inked <= 0:
+        return 1.0
+    return min(DENSITY_REF / inked, DENSITY_BOOST_MAX ** 2)
+
+
 def main() -> None:
     seen: dict[str, str] = {}
     skipped: list[str] = []
@@ -256,8 +273,12 @@ def main() -> None:
             continue
 
         # Scale by area so a long wordmark and a square emblem carry the same
-        # visual weight, then cap to the cell.
-        scale = (TARGET_AREA / (w * h)) ** 0.5
+        # visual weight, corrected for how much of that area the mark actually
+        # inks, then capped to the cell. A solid logotype fills most of its
+        # box; an outline seal is mostly the paper showing through the middle
+        # of a circle, and at equal box area it reads as a pale disc next to
+        # the wordmark beside it.
+        scale = (TARGET_AREA * boost(img) / (w * h)) ** 0.5
         scale = min(scale, BOX_W / w, BOX_H / h)
         img = img.resize((max(1, int(w * scale)), max(1, int(h * scale))), Image.LANCZOS)
 
@@ -268,7 +289,7 @@ def main() -> None:
             # Re-flatten against the chip so the mark's own edges antialias
             # into the dark rather than into a white halo.
             img = trim(flatten(Image.open(path), INK))
-            scale = (TARGET_AREA / (img.width * img.height)) ** 0.5
+            scale = (TARGET_AREA * boost(img) / (img.width * img.height)) ** 0.5
             scale = min(scale, BOX_W / img.width, BOX_H / img.height)
             img = img.resize((max(1, int(img.width * scale)), max(1, int(img.height * scale))), Image.LANCZOS)
 
