@@ -170,6 +170,12 @@ jobs:
           # a 58-photograph site is the difference between seconds and minutes.
           # The marker is excluded from deletion so a failed run cannot strip
           # the very thing that proves ownership.
+          #
+          # .well-known is excluded because it is not ours to manage. The build
+          # never produces it, so a pruning sync would delete it — and it is
+          # where the host writes the HTTP-01 challenge when the TLS
+          # certificate renews. Losing it does not break the site today; it
+          # breaks HTTPS in ninety days, somewhere nobody is looking.
           lftp -u "$FTP_USER","$FTP_PASSWORD" "$FTP_HOST" <<LFTP
             set ftp:ssl-force true
             set ftp:ssl-protect-data true
@@ -179,6 +185,7 @@ jobs:
             set mirror:parallel-transfer-count 4
             mirror --reverse --only-newer --verbose=1 $DELETE \
                    --exclude-glob .git* \
+                   --exclude-glob .well-known* \
                    dist/ $REMOTE_DIR/
             bye
           LFTP
