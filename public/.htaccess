@@ -5,6 +5,13 @@
 # here. Every directive is wrapped in an <IfModule> so a missing module
 # degrades the site rather than returning a 500.
 
+# --- Index priority ----------------------------------------------------------
+# Apache's default order puts index.php first, so a leftover WordPress install
+# in the document root would answer the homepage instead of this site.
+<IfModule mod_dir.c>
+  DirectoryIndex index.html index.php
+</IfModule>
+
 # --- HTTPS and canonical host ------------------------------------------------
 <IfModule mod_rewrite.c>
   RewriteEngine On
