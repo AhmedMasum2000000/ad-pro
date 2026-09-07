@@ -135,12 +135,18 @@ jobs:
             exit 1
           fi
 
-          listing=$(lftp -u "$FTP_USER","$FTP_PASSWORD" -e "
-            set ftp:ssl-force true;
-            set ssl:verify-certificate no;
-            cls -1 $REMOTE_DIR/.adpro-deploy; bye" "$FTP_HOST" 2>&1 || true)
-
-          if echo "$listing" | grep -q '.adpro-deploy'; then
+          # Fetch the marker rather than listing it. FTP's LIST omits hidden
+          # entries unless it is asked for them, and the marker is a dotfile —
+          # so a listing-based check could never see it wherever it sat, which
+          # left `owned` false on every run and pruning permanently switched
+          # off. Retrieving the file is unambiguous: it either arrives or it
+          # does not. It is fetched into the runner's temp directory, not the
+          # workspace, so it cannot end up in the upload.
+          if lftp -u "$FTP_USER","$FTP_PASSWORD" -e "
+               set ftp:ssl-force true;
+               set ssl:verify-certificate no;
+               get $REMOTE_DIR/.adpro-deploy -o $RUNNER_TEMP/marker.check;
+               bye" "$FTP_HOST" >/dev/null 2>&1 && [ -s "$RUNNER_TEMP/marker.check" ]; then
             echo "owned=true" >> "$GITHUB_OUTPUT"
             echo "Marker found — this directory was published by this workflow."
           else
