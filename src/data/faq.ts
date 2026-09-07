@@ -1527,11 +1527,11 @@ export const faqArticles: FaqArticle[] = [
       },
       {
         kind: 'note',
-        text: 'The fastest route is genuinely the phone. We can usually tell you what is free while you are still on the line — call +880 1763-924619.',
+        text: 'The fastest route is genuinely the phone. We can usually tell you what is free while you are still on the line — call +880 1958-503753.',
       },
       {
         kind: 'cta',
-        text: 'Ready? Call +880 1763-924619, or send the cities and dates and we will do the rest.',
+        text: 'Ready? Call +880 1958-503753, or send the cities and dates and we will do the rest.',
       },
     ],
     related: [

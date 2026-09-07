@@ -5,6 +5,13 @@
 # here. Every directive is wrapped in an <IfModule> so a missing module
 # degrades the site rather than returning a 500.
 
+# --- Index priority ----------------------------------------------------------
+# Apache's default order puts index.php first, so a leftover WordPress install
+# in the document root would answer the homepage instead of this site.
+<IfModule mod_dir.c>
+  DirectoryIndex index.html index.php
+</IfModule>
+
 # --- HTTPS and canonical host ------------------------------------------------
 <IfModule mod_rewrite.c>
   RewriteEngine On
@@ -68,6 +75,20 @@
   ExpiresByType image/png                     "access plus 6 months"
   ExpiresByType image/svg+xml                 "access plus 6 months"
   ExpiresByType image/webp                    "access plus 6 months"
+</IfModule>
+
+# --- LiteSpeed's page cache --------------------------------------------------
+# Hostinger fronts the site with LiteSpeed, and its page cache is a different
+# thing from the headers below: it answers before the file system is consulted,
+# so the headers never get a say. It is what kept serving the WordPress
+# homepage this site replaced — deleting the PHP that produced that page did
+# not stop it, because the cached copy had seven days left to run.
+#
+# There is nothing here for a page cache to earn. These pages are already
+# static files on disk; all the cache can add is a window during which a deploy
+# is invisible, which is the one thing this setup cannot afford.
+<IfModule LiteSpeed>
+  CacheDisable public /
 </IfModule>
 
 <IfModule mod_headers.c>
