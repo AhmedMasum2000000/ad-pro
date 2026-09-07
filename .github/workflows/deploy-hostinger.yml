@@ -142,15 +142,27 @@ jobs:
           # off. Retrieving the file is unambiguous: it either arrives or it
           # does not. It is fetched into the runner's temp directory, not the
           # workspace, so it cannot end up in the upload.
+          # ftp:ssl-protect-data has to be set here too. The host refuses an
+          # unprotected data channel, and fetching a file needs one — so
+          # without it this check fails for a reason that has nothing to do
+          # with whether the marker exists. The upload step below always set
+          # it; this one never did, which is why the check reported "no
+          # marker" against a directory that had one.
           if lftp -u "$FTP_USER","$FTP_PASSWORD" -e "
                set ftp:ssl-force true;
+               set ftp:ssl-protect-data true;
                set ssl:verify-certificate no;
                get $REMOTE_DIR/.adpro-deploy -o $RUNNER_TEMP/marker.check;
-               bye" "$FTP_HOST" >/dev/null 2>&1 && [ -s "$RUNNER_TEMP/marker.check" ]; then
+               bye" "$FTP_HOST" >"$RUNNER_TEMP/marker.log" 2>&1 && [ -s "$RUNNER_TEMP/marker.check" ]; then
             echo "owned=true" >> "$GITHUB_OUTPUT"
             echo "Marker found — this directory was published by this workflow."
           else
             echo "owned=false" >> "$GITHUB_OUTPUT"
+            # Printed rather than discarded: a check that fails for a
+            # connection reason looks exactly like an unowned directory, and
+            # that ambiguity is what hid this bug through six deploys.
+            echo "Marker check reported:"
+            cat "$RUNNER_TEMP/marker.log" || true
             echo "::warning::No ownership marker at $REMOTE_DIR. Uploading without deleting anything on this run; the marker is written now and pruning applies from the next deploy."
           fi
 
