@@ -111,8 +111,14 @@ jobs:
       - name: Install lftp
         run: sudo apt-get update -qq && sudo apt-get install -y -qq lftp
 
-      # Written to the build, uploaded with it, and looked for on the remote
-      # before any destructive sync is allowed.
+      # Written to the build, uploaded with it, and looked for before any
+      # destructive sync is allowed.
+      #
+      # There are two, because they answer different questions. The dotfile is
+      # the record — who deployed, from what commit, when — and the host
+      # refuses to serve it, which is correct for a file that names a
+      # repository and a commit. The plain-named one carries no detail and
+      # exists only to be fetched over HTTP by the guard below.
       - name: Stamp the build
         run: |
           {
@@ -121,6 +127,8 @@ jobs:
             echo "commit: ${{ github.sha }}"
             echo "at: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
           } > dist/.adpro-deploy
+
+          echo "ad-pro managed deploy" > dist/adpro-deploy.txt
 
       - name: Decide whether deleting is safe
         id: guard
@@ -142,28 +150,30 @@ jobs:
           # off. Retrieving the file is unambiguous: it either arrives or it
           # does not. It is fetched into the runner's temp directory, not the
           # workspace, so it cannot end up in the upload.
-          # ftp:ssl-protect-data has to be set here too. The host refuses an
-          # unprotected data channel, and fetching a file needs one — so
-          # without it this check fails for a reason that has nothing to do
-          # with whether the marker exists. The upload step below always set
-          # it; this one never did, which is why the check reported "no
-          # marker" against a directory that had one.
-          if lftp -u "$FTP_USER","$FTP_PASSWORD" -e "
-               set ftp:ssl-force true;
-               set ftp:ssl-protect-data true;
-               set ssl:verify-certificate no;
-               get $REMOTE_DIR/.adpro-deploy -o $RUNNER_TEMP/marker.check;
-               bye" "$FTP_HOST" >"$RUNNER_TEMP/marker.log" 2>&1 && [ -s "$RUNNER_TEMP/marker.check" ]; then
+          # Ask over HTTP, not FTP. Two FTP formulations of this check — cls
+          # and get — both reported "no marker" against a document root that
+          # provably had one, and the second returned in milliseconds with no
+          # error text to explain itself. Rather than keep guessing at path
+          # handling on this server, the check now fetches the marker the same
+          # way the confirmation step at the end of this job fetches the site.
+          #
+          # It is also the better question. Presence at an FTP path says the
+          # marker is somewhere on the account; a 200 over HTTP says the
+          # directory being pruned is the one actually serving the domain,
+          # which is what the guard is there to establish.
+          code=$(curl -s -o "$RUNNER_TEMP/marker.check" -w '%{http_code}' \
+                      --max-time 20 "$SITE_URL/adpro-deploy.txt" || echo 000)
+
+          if [ "$code" = "200" ] && grep -q 'ad-pro managed deploy' "$RUNNER_TEMP/marker.check"; then
             echo "owned=true" >> "$GITHUB_OUTPUT"
-            echo "Marker found — this directory was published by this workflow."
+            echo "Marker found at $SITE_URL/adpro-deploy.txt — this site was published by this workflow."
           else
             echo "owned=false" >> "$GITHUB_OUTPUT"
-            # Printed rather than discarded: a check that fails for a
-            # connection reason looks exactly like an unowned directory, and
-            # that ambiguity is what hid this bug through six deploys.
-            echo "Marker check reported:"
-            cat "$RUNNER_TEMP/marker.log" || true
-            echo "::warning::No ownership marker at $REMOTE_DIR. Uploading without deleting anything on this run; the marker is written now and pruning applies from the next deploy."
+            # Reported rather than swallowed: a check that fails for a
+            # transport reason looks exactly like an unowned directory, and
+            # that ambiguity is what hid this through several deploys.
+            echo "Marker check returned HTTP $code."
+            echo "::warning::No ownership marker at $SITE_URL/adpro-deploy.txt. Uploading without deleting anything on this run; the marker is written now and pruning applies from the next deploy."
           fi
 
       - name: Upload
