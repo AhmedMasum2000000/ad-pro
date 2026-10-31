@@ -1,6 +1,7 @@
 /*
   Base layer: reset, document chrome, and the structural pieces that every
-  page shares (canvas, curtain, header, footer).
+  page shares (curtain, header, footer, cookie notice), plus the initial
+  states the motion layer relies on.
 */
 
 *,
@@ -10,15 +11,23 @@
 }
 
 html {
-  font-size: var(--base-font-size);
+  font-size: 100%;
   -webkit-text-size-adjust: 100%;
+  /* The ink is set on the root as well as the body so that overscroll, the
+     area under a short page, and the gap before the body paints are all the
+     same colour — there is no "black void" below the last section. */
+  background: var(--ink);
 }
 
 /*
   Native smooth scrolling is disabled because Lenis owns scrolling. Leaving it
-  on makes anchor jumps fight the interpolated position and stutter.
+  on makes anchor jumps fight the interpolated position and stutter. Where
+  Lenis is deliberately off (coarse pointers, reduced motion) scroll.ts sets
+  `no-smooth-scroll` and the document scrolls natively, still without the
+  browser's own smoothing, so anchors land where the motion layer expects.
 */
-html.lenis {
+html.lenis,
+html.no-smooth-scroll {
   scroll-behavior: auto;
 }
 
@@ -28,15 +37,15 @@ html.lenis {
 
 body {
   margin: 0;
-  background: var(--bg-color);
-  color: var(--text-color);
+  background: var(--ink);
+  color: var(--text);
   font-family: var(--font-main);
-  font-size: var(--p-size);
-  line-height: 1.6;
+  font-size: var(--body);
+  line-height: 1.55;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  /* Every page has a full-bleed canvas and marquees that intentionally run
-     past the viewport; without this they would produce a horizontal scrollbar. */
+  /* Marquees intentionally run past the viewport; without this they would
+     produce a horizontal scrollbar. */
   overflow-x: hidden;
 }
 
@@ -48,11 +57,24 @@ body.menu-open {
   height: 100%;
 }
 
+::selection {
+  background: var(--brand-blue);
+  color: var(--text);
+}
+
 img,
 svg,
-canvas {
+canvas,
+video {
   display: block;
   max-width: 100%;
+}
+
+/* Every image carries width/height attributes; letting height follow keeps
+   the aspect ratio reserved before the file arrives, which is what stops the
+   page from jumping as photographs land. */
+img {
+  height: auto;
 }
 
 ul, ol {
@@ -69,9 +91,20 @@ button {
   cursor: pointer;
 }
 
+/* 16px is the floor for form controls: anything smaller makes iOS zoom the
+   page on focus. */
+input,
+select,
+textarea {
+  font: inherit;
+  font-size: max(16px, 1em);
+  color: inherit;
+}
+
+/* One focus ring for every interactive element, in the UI light. */
 :focus-visible {
-  outline: 2px solid var(--lightalpha-color);
-  outline-offset: 3px;
+  outline: 2px solid var(--led);
+  outline-offset: 2px;
 }
 
 /* Visible only to screen readers, and to keyboard users once focused. */
@@ -90,10 +123,11 @@ button {
   position: absolute;
   top: 0;
   left: 0;
-  z-index: 100;
-  padding: 0.75rem 1.25rem;
-  background: var(--lightalpha-color);
-  color: var(--bg-color);
+  z-index: var(--z-skip);
+  padding: .75rem 1.25rem;
+  background: var(--hot);
+  color: var(--ink);
+  font-weight: 600;
   transform: translateY(-120%);
   transition: transform var(--dur-fast) var(--ease-out);
 }
@@ -102,21 +136,11 @@ button {
   transform: translateY(0);
 }
 
-/* --- WebGL canvas --------------------------------------------------------- */
-
-/*
-  One canvas for the whole document, fixed behind the content. Individual
-  sections register regions with the renderer rather than each mounting their
-  own context — browsers cap the number of live WebGL contexts, and a
-  per-section canvas would hit that ceiling on the projects page.
-*/
+/* The WebGL dot-field is gone. The element is kept out of layout rather than
+   deleted here, so a shell that still emits the canvas does not drop a
+   300×150 block into the flow. */
 .wgl-canvas {
-  position: fixed;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  z-index: var(--z-canvas);
-  pointer-events: none;
+  display: none;
 }
 
 .all-content-wrapper {
@@ -126,14 +150,38 @@ button {
   max-width: var(--max-width);
 }
 
-/* Held back until the curtain finishes so content never flashes behind it. */
-.hideOnLoad {
+/* --- reveal initial states ----------------------------------------------- */
+
+/*
+  Elements that reveal on scroll start hidden — but only once JS has declared
+  itself (`html.js`, set first thing in main.ts). Without that guard a page
+  whose script failed, or a crawler, would get an invisible site. The variants
+  that animate something other than opacity (`clip`, `line`) keep their
+  opacity so that whichever property reveal.ts animates, nothing can be left
+  at zero.
+*/
+html.js [data-reveal]:not([data-reveal="clip"]):not([data-reveal="line"]):not([data-reveal="words"]),
+html.js [data-reveal-item] {
   opacity: 0;
 }
 
-body:not(.isLoading) .hideOnLoad {
-  opacity: 1;
-  transition: opacity var(--dur-base) var(--ease-out);
+html.js [data-reveal="clip"] {
+  clip-path: inset(0 0 100% 0);
+}
+
+html.js [data-reveal="line"] {
+  transform: scaleX(0);
+}
+
+/* Reduced motion is the static page: everything simply shown. reveal.ts sets
+   the same final state, this just makes it true before it runs. */
+@media (prefers-reduced-motion: reduce) {
+  html.js [data-reveal],
+  html.js [data-reveal-item] {
+    opacity: 1;
+    clip-path: none;
+    transform: none;
+  }
 }
 
 /* --- intro curtain -------------------------------------------------------- */
@@ -160,7 +208,7 @@ body:not(.isLoading) .hideOnLoad {
 .curtain-item {
   flex: 1 1 25%;
   height: 100%;
-  background: var(--bg-color);
+  background: var(--ink);
   transform-origin: top center;
   will-change: transform;
 }
@@ -186,8 +234,8 @@ body:not(.isLoading) .hideOnLoad {
 .intro_logo____placeholder {
   font-family: var(--font-heading);
   font-size: clamp(2rem, 6vw, 4rem);
-  letter-spacing: 0.14em;
-  color: var(--text-color);
+  letter-spacing: .14em;
+  color: var(--text);
   text-transform: uppercase;
   will-change: transform, opacity;
 }
@@ -197,10 +245,11 @@ body:not(.isLoading) .hideOnLoad {
 /*
   A scrim rather than `mix-blend-mode: difference`.
 
-  Difference blending kept the old cream wordmark legible over any section
-  for free, but it inverts everything underneath it — including the brand
-  mark, whose blues would come back as orange. A gradient scrim keeps the
-  header readable over the hero while leaving the logo its real colours.
+  Difference blending would keep the wordmark legible over any section for
+  free, but it inverts everything underneath it — including the brand mark,
+  whose blues would come back as orange. A gradient of the ink keeps the
+  header readable over the hero photograph while leaving the logo its real
+  colours.
 */
 .main-nav-wrapper {
   position: fixed;
@@ -209,7 +258,7 @@ body:not(.isLoading) .hideOnLoad {
   width: 100%;
   z-index: var(--z-header);
   padding: 1.25rem var(--edge-r) 1.25rem var(--edge-l);
-  background: linear-gradient(to bottom, rgba(14, 20, 32, 0.9), rgba(14, 20, 32, 0));
+  background: linear-gradient(rgb(var(--ink-rgb) / .85), transparent);
   pointer-events: none; /* the bar is a scrim; only its controls take clicks */
   border-bottom: 1px solid transparent;
   transition:
@@ -218,26 +267,23 @@ body:not(.isLoading) .hideOnLoad {
 }
 
 /*
-  Below the hero the scrim stops working.
-
-  It fades from the page's own background colour to nothing, which is fine
-  over a photograph and invisible over the page itself — so the wordmark was
-  being painted straight onto body copy from the second section down. Past the
-  fold the bar takes a real background and a hairline, and the gradient is
-  dropped so the two do not stack into a smear.
+  Below the hero the scrim stops working: it fades from the page's own colour
+  to nothing, which is fine over a photograph and invisible over the page
+  itself. Past the fold the bar becomes glass — a real background with a
+  hairline — and the gradient is dropped so the two do not stack into a smear.
 */
 :root[data-scrolled='true'] .main-nav-wrapper {
-  background: rgba(14, 20, 32, 0.82);
-  border-bottom-color: var(--line-color);
-  backdrop-filter: blur(14px) saturate(1.3);
-  -webkit-backdrop-filter: blur(14px) saturate(1.3);
+  background: var(--surface-glass);
+  border-bottom-color: var(--line);
+  backdrop-filter: blur(14px) saturate(140%);
+  -webkit-backdrop-filter: blur(14px) saturate(140%);
 }
 
 /* Where the backdrop filter is unavailable, translucency would let text show
    through the bar; those browsers get an opaque one instead. */
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
   :root[data-scrolled='true'] .main-nav-wrapper {
-    background: rgb(14, 20, 32);
+    background: var(--surface);
   }
 }
 
@@ -248,17 +294,13 @@ body:not(.isLoading) .hideOnLoad {
 .brand {
   display: inline-flex;
   align-items: center;
-  gap: 0.7rem;
-  font-family: var(--font-heading);
-  font-size: 1.4rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--text-color);
+  gap: .7rem;
+  color: var(--text);
 }
 
 .brand__mark {
-  width: 2.25rem;
-  height: 2.25rem;
+  width: 36px;
+  height: 36px;
   flex-shrink: 0;
   /* The supplied artwork is a 312px square raster rather than the vector it
      replaced, so it is fitted rather than stretched, and rendered at a size
@@ -272,24 +314,111 @@ body:not(.isLoading) .hideOnLoad {
   line-height: 1;
 }
 
+.brand__name {
+  font-family: var(--font-heading);
+  font-size: 1.5rem;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  line-height: 1;
+  color: var(--text);
+}
+
+/* The descriptor line is a readout: same register as the viewfinder. The
+   extra ancestor in the selector is deliberate so this wins over the older
+   rule in components.css regardless of load order. */
+.brand .brand__sub {
+  margin-top: .3em;
+  font-family: var(--font-mono);
+  font-weight: 400;
+  font-size: var(--readout);
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
 .main-links-wrapper {
+  align-items: center;
   gap: 1.5rem;
+}
+
+/* The two shortcut links in the bar share the button register — small, bold,
+   tracked — and take the sky underline on hover. */
+.nav-link {
+  font-family: var(--font-main);
+  font-weight: 600;
+  font-size: var(--btn);
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--text);
+  padding-block: .35em;
+}
+
+.nav-link::before {
+  opacity: 0;
+}
+
+/* The tap-to-call control: the one amber element in the bar. On a phone it
+   becomes a 44px disc with only the handset glyph. */
+.nav-call {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: .5rem;
+  min-height: var(--tap);
+  padding: 0 1.1rem;
+  border-radius: 999px;
+  background: var(--hot);
+  color: var(--ink);
+  font-family: var(--font-main);
+  font-weight: 600;
+  font-size: var(--btn);
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  line-height: 1;
+  transition: background-color var(--dur-fast) var(--ease-out), transform var(--dur-fast) var(--ease-out);
+}
+
+.nav-call svg {
+  width: 18px;
+  height: 18px;
+  flex: 0 0 auto;
+  fill: currentColor;
+}
+
+.nav-call:hover,
+.nav-call:focus-visible {
+  background: var(--hot-hover);
+  transform: translateY(-1px);
 }
 
 .menu-toggle {
   display: inline-flex;
   align-items: center;
-  gap: 0.6rem;
-  font-size: var(--menu-size);
-  letter-spacing: 0.08em;
+  gap: .6rem;
+  min-height: var(--tap);
+  padding: 0 1.1rem;
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  font-family: var(--font-main);
+  font-weight: 600;
+  font-size: var(--btn);
+  letter-spacing: .08em;
   text-transform: uppercase;
+  color: var(--text);
+  transition: border-color var(--dur-fast) var(--ease-out), background-color var(--dur-fast) var(--ease-out);
+}
+
+.menu-toggle:hover,
+.menu-toggle:focus-visible {
+  border-color: var(--text);
+  background: rgb(244 247 251 / .06);
 }
 
 .menu-toggle__bars {
   display: inline-flex;
   flex-direction: column;
   gap: 4px;
-  width: 22px;
+  width: 20px;
 }
 
 .menu-toggle__bars span {
@@ -307,38 +436,108 @@ body.menu-open .menu-toggle__bars span:last-child {
   transform: translateY(-2.5px) rotate(-45deg);
 }
 
+@media (max-width: 767px) {
+  /* The bar keeps its 4.75rem total height — which `--header-safe` depends
+     on — while the controls reach a 44px target: the bar loses the padding
+     the controls gain. */
+  .main-nav-wrapper {
+    padding-block: .875rem;
+  }
+
+  .brand__mark {
+    width: 32px;
+    height: 32px;
+  }
+
+  .brand .brand__sub {
+    display: none;
+  }
+
+  .nav-call {
+    width: var(--tap);
+    padding: 0;
+    gap: 0;
+  }
+
+  .nav-call__label {
+    display: none;
+  }
+
+  .menu-toggle {
+    padding: 0 .9rem;
+  }
+}
+
 /* --- footer --------------------------------------------------------------- */
 
+/*
+  The footer is a surface band: a hairline above, the raised ground, and the
+  same rhythm gap every section uses, so it reads as the last section rather
+  than as something bolted on after the content ended.
+*/
 #footer {
-  border-top: 1px solid var(--line-color);
-  margin-top: clamp(4rem, 12vw, 10rem);
+  border-top: 1px solid var(--line);
+  background: var(--surface);
+  margin-top: var(--section-gap);
 }
 
 /*
-  The call to action, the three link columns and the platform row are three
-  separate bands, not one run of text. Without explicit spacing they had none
-  at all once the columns stacked — the CTA button ran straight into the word
-  "Pages".
+  One row: the question on the left, the two ways to answer it on the right.
+  The buttons are placed explicitly so the row holds whether or not a line of
+  supporting copy sits under the heading.
 */
 .footer-cta {
-  margin-bottom: clamp(2.5rem, 8vw, 5rem);
+  display: grid;
+  grid-template-columns: 1fr auto;
+  column-gap: var(--grid-gap);
+  row-gap: .75rem;
+  align-items: center;
+  padding-bottom: clamp(2rem, 5vw, 3rem);
+  margin-bottom: clamp(2rem, 5vw, 3rem);
+  border-bottom: 1px solid var(--line);
 }
 
-.footer-grid {
-  row-gap: clamp(2rem, 6vw, 3rem);
+.footer-cta > .btn-wrapper {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  align-self: center;
+  margin-top: 0;
 }
 
 .footer-heading {
-  font-size: var(--h2-size);
-  margin-bottom: 1.5rem;
+  font-size: var(--display-3);
+  margin: 0;
 }
 
-/* `.sub-text` is an inline span, so it needs to be told to hold a line of its
-   own above each group. */
+.footer-cta .accent-text {
+  grid-column: 1;
+  max-width: 40rem;
+}
+
+.footer-grid {
+  row-gap: clamp(2rem, 5vw, 3rem);
+}
+
+/* Group labels are eyebrows. `.sub-text` is the old name on untouched
+   markup; it is styled identically in typography.css. */
+.footer-grid .eyebrow,
 .footer-grid .sub-text,
+.footer-platforms .eyebrow,
 .footer-platforms .sub-text {
   display: block;
-  margin-bottom: 0.9rem;
+  margin-bottom: 1rem;
+}
+
+.footer-grid p {
+  font-size: var(--small);
+  line-height: 1.6;
+  color: var(--text-2);
+  max-width: 28rem;
+}
+
+.footer-grid strong {
+  font-weight: 600;
+  color: var(--text);
 }
 
 .footer-links {
@@ -346,10 +545,21 @@ body.menu-open .menu-toggle__bars span:last-child {
   flex-direction: column;
 }
 
+.footer-links li {
+  padding-block: .2rem;
+}
+
+.footer-grid .text-link,
+.footer-platforms .text-link {
+  font-size: var(--small);
+  color: var(--text-2);
+}
+
+/* Platform and social rows are inline runs, wrapping as they need to. */
 .footer-platforms {
-  margin-top: clamp(2rem, 6vw, 3rem);
+  margin-top: clamp(2rem, 5vw, 3rem);
   padding-top: clamp(1.5rem, 4vw, 2rem);
-  border-top: 1px solid var(--line-color);
+  border-top: 1px solid var(--line);
 }
 
 .footer-platforms .social-links {
@@ -357,10 +567,10 @@ body.menu-open .menu-toggle__bars span:last-child {
 }
 
 .social-links {
-  display: flex;
+  display: inline-flex;
   flex-wrap: wrap;
-  gap: 1.25rem;
-  margin-top: 1.5rem;
+  gap: .75rem 1.25rem;
+  margin-top: 1.25rem;
 }
 
 .footer-meta {
@@ -369,11 +579,32 @@ body.menu-open .menu-toggle__bars span:last-child {
   gap: 1rem 2rem;
   justify-content: space-between;
   align-items: baseline;
-  margin-top: clamp(2rem, 6vw, 4rem);
+  margin-top: clamp(2rem, 5vw, 3rem);
   padding-top: 1.5rem;
-  border-top: 1px solid var(--line-color);
-  font-size: var(--sub-size);
-  color: var(--grey-dark-color);
+  border-top: 1px solid var(--line);
+  font-size: var(--small);
+  color: var(--text-muted);
+}
+
+.footer-meta p {
+  font-size: inherit;
+  color: inherit;
+}
+
+@media (max-width: 767px) {
+  .footer-cta {
+    grid-template-columns: 1fr;
+  }
+
+  .footer-cta > .btn-wrapper {
+    grid-column: 1;
+    grid-row: auto;
+    margin-top: .5rem;
+  }
+
+  .footer-cta .btn {
+    flex: 1 1 100%;
+  }
 }
 
 /* --- cookie alert --------------------------------------------------------- */
@@ -383,13 +614,15 @@ body.menu-open .menu-toggle__bars span:last-child {
   left: var(--edge-l);
   right: var(--edge-r);
   bottom: calc(1.5rem + var(--safe-b));
-  z-index: var(--z-alert);
+  z-index: var(--z-sticky);
   max-width: 30rem;
   padding: 1.5rem;
-  border: 1px solid var(--line-color);
-  background: var(--darkalpha-color);
-  backdrop-filter: blur(12px);
-  font-size: var(--sub-size);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius);
+  background: var(--surface-glass);
+  backdrop-filter: blur(14px) saturate(140%);
+  -webkit-backdrop-filter: blur(14px) saturate(140%);
+  font-size: var(--small);
   transition: opacity var(--dur-base) var(--ease-out),
               transform var(--dur-base) var(--ease-out);
 }

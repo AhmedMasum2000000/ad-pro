@@ -39,7 +39,7 @@ const GENERATED_DIRS = ['assets', 'images', 'boards'];
   is small, the sources all live in subdirectories, and a manifest is one more
   thing that can fall out of step with reality.
 */
-const OWNED_EXTENSIONS = ['.html', '.png', '.jpg', '.jpeg', '.svg', '.ico', '.webmanifest', '.xml', '.txt'];
+const OWNED_EXTENSIONS = ['.html', '.png', '.jpg', '.jpeg', '.webp', '.svg', '.ico', '.webmanifest', '.xml', '.txt'];
 const NEVER_PRUNE = new Set(['README.md', 'LICENSE', '.nojekyll']);
 
 const distExists = await stat(DIST).catch(() => null);

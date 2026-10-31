@@ -1,6 +1,12 @@
 /*
   Design tokens.
 
+  The site is a screen that is on: a true-ink ground, photography shown at
+  full exposure carrying all the colour, one blue family for brand and UI
+  light, and a single hot amber reserved for the primary action and the
+  on-air state. Everything below is in service of that — if a colour is not
+  listed here it does not appear anywhere on the site.
+
   The type scale is fluid rather than stepped: every heading is a `clamp()`
   with a viewport term, so there is no breakpoint at which text jumps size.
   That is what lets a single grid carry a display headline from 390px to
@@ -10,83 +16,118 @@
   using raw `vh`/`vw` units. Mobile browsers change the viewport height when
   the address bar collapses, which makes `100vh` resize mid-scroll and shifts
   everything below it; a JS-set custom property only updates on a real resize.
+
+  Legacy aliases are kept at the end of each block so that rules which have
+  not yet been migrated still resolve to the new palette rather than to
+  nothing. They are aliases, not second values: nothing new should use them.
 */
 
 :root {
-  /*
-    --- brand ---------------------------------------------------------------
-    Taken from the APCL mark: the bright foresail blue and the deep navy
-    body. Everything else in the palette is derived from these two rather
-    than picked independently, which is what keeps the UI reading as one
-    brand instead of a neutral shell with a logo dropped into it.
-  */
-  --brand-blue: #2c6fc6;
-  --brand-navy: #1e3a63;
-  /* Lifted toward the light end: the mark's own blue is too dark to carry
-     text or thin strokes against the near-black ground. */
-  --brand-sky: #6ba3e8;
+  /* ---------- GROUND ---------- */
+  --ink: #07090e;                 /* page bg; set on html AND body */
+  --ink-rgb: 7 9 14;
+  --surface: #0d1118;             /* cards, table rows, footer band, stats band */
+  --surface-raised: #131a25;      /* hover rows, open accordion, chip hover */
+  --surface-glass: rgb(7 9 14 / .62);  /* + backdrop-filter: blur(14px) saturate(140%) */
+  --bg-color: var(--ink);         /* legacy alias */
+  --bg-raised: var(--surface);    /* legacy alias */
+  --darkalpha-color: rgb(7 9 14 / .75);
 
-  /* --- colour ------------------------------------------------------------ */
-  /* Near-black, but pulled toward the navy rather than neutral grey — the
-     difference is subtle in isolation and obvious beside the mark. */
-  --bg-color: #0e1420;
-  --bg-raised: #141d2c;
-  --text-color: #dbe4f0;
-  --grey-dark-color: #7286a0;
-  /* The accent used for fills, rules and emphasis across the whole UI. */
-  --lightalpha-color: var(--brand-sky);
-  --darkalpha-color: rgba(14, 20, 32, 0.75);
-  --darkalphasolid-color: #c9d6e6;
-  --line-color: rgba(219, 228, 240, 0.16);
-  --accent-color: var(--brand-blue);
+  /* ---------- BRAND (unchanged seeds) ---------- */
+  /* Taken from the APCL mark: the bright foresail blue and the deep navy
+     body. Sky is lifted toward the light end because the mark's own blue is
+     too dark to carry text or thin strokes against the ink. */
+  --brand-blue: #2c6fc6;          /* mark, menu overlay tint, CTA gradient start, selected menu link */
+  --brand-navy: #1e3a63;          /* deep end of brand gradients only */
+  --brand-sky:  #6ba3e8;          /* text links, breadcrumbs, table header text, figures */
+  --sky-rgb: 107 163 232;
+  --led: var(--brand-sky);        /* UI light: ticks, focus rings, progress bar, stat figures. ONE blue family. */
+  --led-rgb: var(--sky-rgb);
 
-  /* --- type -------------------------------------------------------------- */
-  --base-font-size: 16px;
+  /* ---------- HOT (the only warm colour) ---------- */
+  --hot: #ff7a1a;                 /* primary button fill, cta top rule, process numbers, active chip fill */
+  --hot-rgb: 255 122 26;
+  --hot-hover: #ff8f3f;
+  --on-air: #38e07b;              /* lamp when live */
+  --standby: #9aa9bd;             /* lamp when off air */
+
+  /* ---------- PER-SITE ACCENT ---------- */
+  /* Overridden inline on anything that belongs to one billboard. Declared
+     here so every rule that uses it has a value on pages that belong to no
+     single site, rather than silently resolving to nothing. */
+  --accent: var(--brand-sky);     /* default; listing/board markup injects one of four hues inline */
+  /* allowed inline values from accentOf(): #6ba3e8 sky | #35e0a1 mint | #ff5ca8 magenta | #ff7a1a amber */
+
+  /* ---------- TEXT ---------- */
+  --text: #f4f7fb;                /* ~18:1 on ink */
+  --text-2: #c7d1de;              /* body on surfaces, ledes */
+  --text-muted: #9aa9bd;          /* eyebrows, labels, captions, readouts (~8:1 on ink, ~7:1 on surface-raised) */
+  --text-dim: #6f7f94;            /* decorative mono only: separators, glyphs — never information */
+  --text-color: var(--text);              /* legacy alias */
+  --grey-dark-color: var(--text-muted);   /* legacy alias */
+  --lightalpha-color: var(--brand-sky);   /* legacy alias */
+
+  /* ---------- LINES ---------- */
+  --line: rgb(244 247 251 / .12);
+  --line-strong: rgb(244 247 251 / .28);     /* outline buttons, frame, input borders */
+  --line-accent: color-mix(in srgb, var(--accent) 55%, transparent);
+  --line-color: var(--line);                 /* legacy alias */
+
+  /* ---------- PHOTO TREATMENT ---------- */
+  /* Photographs are never dimmed. Legibility over a photo comes from a scrim
+     that weights one edge, so most of the frame stays at full exposure. */
+  --photo-scrim: linear-gradient(to top, rgb(7 9 14 / .88) 0%, rgb(7 9 14 / .35) 38%, transparent 62%);
+  --photo-scrim-left: linear-gradient(90deg, rgb(7 9 14 / .92) 0%, rgb(7 9 14 / .78) 34%, rgb(7 9 14 / .25) 58%, transparent 78%);
+  --bleed-blur: 48px;
+  --bleed-opacity: .55;
+  --bloom: 0 0 48px color-mix(in srgb, var(--accent) 34%, transparent),
+           0 0 120px color-mix(in srgb, var(--accent) 16%, transparent);
+
+  /* ---------- GRADIENTS ---------- */
+  --grad-cta: linear-gradient(135deg, #122a4d 0%, #0b1526 45%, #07090e 100%);
+  --grad-cta-glow: radial-gradient(60% 80% at 85% 20%, rgb(var(--led-rgb) / .18), transparent 70%);
+  --grad-card: linear-gradient(150deg, #16283f, #0d1420);   /* image placeholder only */
+  --grad-shimmer: linear-gradient(110deg, var(--surface) 30%, var(--surface-raised) 50%, var(--surface) 70%);
+
+  /* ---------- VIEWFINDER ---------- */
+  --chrome-line: rgb(244 247 251 / .34);
+  --scan-opacity: .05;            /* hero only, under the copy layer */
+  --vignette-strength: 0;         /* vignette deleted; token kept so old refs resolve to nothing */
+
+  /* ---------- TYPE ---------- */
   --font-heading: 'Bebas Neue', Impact, system-ui, -apple-system, sans-serif;
   --font-main: 'Inter Variable', 'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-  /* Specifications only — see main.ts. */
+  /* Specifications, readouts and figures only — never prose. */
   --font-mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 
-  /*
-    The per-site accent, overridden inline on anything that belongs to one
-    billboard. Declared here so every rule that uses it has a value on pages
-    that belong to no single site, rather than silently resolving to nothing.
-  */
-  --accent: var(--brand-sky);
+  /* ---------- TYPE SCALE ---------- */
+  --display-1: clamp(3.25rem, 8.5vw + .5rem, 8.5rem);
+  --display-2: clamp(2.5rem, 4.8vw + .5rem, 5.25rem);
+  --display-3: clamp(1.75rem, 2.4vw + .5rem, 2.75rem);
+  --title:     clamp(1.25rem, 1.1vw + .8rem, 1.75rem);
+  --lede:      clamp(1.125rem, .6vw + .95rem, 1.375rem);
+  --body:      clamp(1rem, .3vw + .9rem, 1.125rem);
+  --small:     .875rem;
+  --eyebrow:   .75rem;
+  --readout:   .6875rem;          /* 11px — the floor. Nothing renders smaller. */
+  --btn:       .8125rem;
+  --fig-xl: clamp(3.5rem, 7vw, 7.5rem);
+  --fig-lg: clamp(2rem, 3.4vw, 3.25rem);
+  --fig-md: 1.125rem;
+  --fig-num: 1.25rem;
+  /* legacy aliases so nothing breaks mid-migration */
+  --h1-size: var(--display-1); --h2-size: var(--display-2); --h3-size: var(--display-3);
+  --h4-size: var(--title); --h5-size: var(--body); --h6-size: var(--small);
+  --h1-strong-size: var(--display-1);
+  --mtitle-size: var(--display-2); --accent-title-size: var(--title);
+  --h1em-size: var(--lede); --accent-size: var(--lede); --p-size: var(--body);
+  --sub-size: var(--eyebrow); --menu-size: var(--btn); --marquee-size: 1.1rem;
 
-  --h1-size: clamp(1.6rem, 10vw + 1rem, 7.32rem);
-  --h1-strong-size: clamp(3rem, 15vw + 1rem, 15.32rem);
-  --h1em-size: clamp(16px, 0.5vw + 0.6rem, 1.55rem);
-  --h2-size: clamp(1.2rem, 3vw + 1rem, 3rem);
-  --h3-size: clamp(1.125rem, 1.2vw + 1rem, 1.55rem);
-  --h4-size: clamp(1.1rem, 1.2vw + 1rem, 1.375rem);
-  --h5-size: clamp(0.938rem, 2vw + 1rem, 1.063rem);
-  --h6-size: 14px;
-  --p-size: clamp(0.95rem, 1vw + 0.5rem, 0.98rem);
-  --sub-size: 13px;
-  --menu-size: clamp(14px, 1vw + 0.5rem, 15px);
-  --accent-size: clamp(0.95rem, 1.35vw, 1.12rem);
-  --accent-title-size: clamp(1.125rem, 1.2vw + 1rem, 1.55rem);
-  --mtitle-size: clamp(1.2rem, 3vw + 1rem, 4rem);
-  --marquee-size: clamp(1.125rem, 2.2vw + 1rem, 1.75rem);
-
-  /* --- viewport-derived sizing ------------------------------------------- */
+  /* ---------- VIEWPORT-DERIVED SIZING ---------- */
   --vh: 1vh;
   --vw: 1vw;
   --size-vh100: calc(var(--vh, 1vh) * 100);
-  --size-vh80: calc(var(--vh, 1vh) * 80);
-  --size-vh60: calc(var(--vh, 1vh) * 60);
-  --size-vh50: calc(var(--vh, 1vh) * 50);
-  --size-vh25: calc(var(--vh, 1vh) * 25);
-  --size-vh12: calc(var(--vh, 1vh) * 12);
-  --size-vh8: calc(var(--vh, 1vh) * 8);
-  --size-vh4: calc(var(--vh, 1vh) * 4);
   --size-vw100: calc(var(--vw, 1vw) * 100);
-  --size-vw60: calc(var(--vw, 1vw) * 60);
-  --size-vw25: calc(var(--vw, 1vw) * 25);
-  --size-vw8: calc(var(--vw, 1vw) * 8);
-  --size-vw4: calc(var(--vw, 1vw) * 4);
-  --size-vw2: calc(var(--vw, 1vw) * 2);
 
   /*
     The real height of the fixed header, not an estimate: 1.25rem of padding
@@ -98,22 +139,10 @@
   --header-h: 4.75rem;
   --header-safe: calc(var(--header-h) + 1.5rem);
 
-  /* --- layout ------------------------------------------------------------ */
+  /* ---------- LAYOUT ---------- */
   --gl-padding-lr: clamp(1.25rem, 4vw, 4.5rem);
-  --gl-padding-tb: clamp(2.5rem, 8vw, 7rem);
   --grid-gap: clamp(1rem, 2.5vw, 2.5rem);
   --max-width: 2200px;
-
-  /*
-    The vertical rhythm between two adjacent sections that carry no component
-    of their own. Sections used to be spaced only by the side-by-side columns
-    inside them, which works on desktop and collapses to nothing the moment
-    those columns stack.
-  */
-  --section-gap: clamp(2.25rem, 7vw, 4.5rem);
-
-  /* The larger rhythm around a page's own heading block. */
-  --intro-gap: clamp(3rem, 14vw, 12rem);
 
   /*
     The page is edge-to-edge under `viewport-fit=cover`, so the horizontal
@@ -127,53 +156,32 @@
   --edge-l: max(var(--gl-padding-lr), var(--safe-l));
   --edge-r: max(var(--gl-padding-lr), var(--safe-r));
 
-  /* The smallest comfortable touch target. Applied on coarse pointers only,
-     so a mouse still gets the tighter, more typographic spacing. */
+  /* The smallest comfortable touch target. */
   --tap: 44px;
 
-  /* --- marquee ----------------------------------------------------------- */
-  --offset: 20vw;
-  --marquee-width: var(--size-vw100);
-  --move-initial: calc(0 + var(--offset));
-  --move-final: calc(-48% + var(--offset));
+  /* ---------- RHYTHM ---------- */
+  --gl-padding-tb: clamp(2.5rem, 6vw, 5.5rem);
+  --section-gap:   clamp(2rem, 5vw, 3.5rem);
+  --intro-gap:     clamp(2.5rem, 7vw, 5.5rem);
+  --radius: 2px;                  /* max radius anywhere except pills (999px) */
+
+  /* ---------- MOTION ---------- */
+  --dur-fast: .25s; --dur-base: .45s; --dur-slow: .8s;
+  --ease-out: cubic-bezier(.22, 1, .36, 1);       /* "expo-ish" */
+  --ease-in-out: cubic-bezier(.65, 0, .35, 1);
+  --ease-wipe: cubic-bezier(.7, 0, .2, 1);
+  /* The marquee starts with its first item whole and runs exactly one copy
+     of its track to the left; marquee.ts clones the track to make that seamless. */
+  --move-initial: 0; --move-final: -50%;
+  --marquee-width: var(--size-vw100);             /* legacy alias */
 
   /* Written by the scroll layer; drives parallax without a scroll listener
      in every component. */
   --scrollY: 0;
-  --m-pose: calc(var(--scrollY, 1vh) / 10);
 
-  /* --- motion ------------------------------------------------------------ */
-  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
-  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
-  --dur-fast: 0.35s;
-  --dur-base: 0.7s;
-  --dur-slow: 1.2s;
-
-  --z-canvas: 0;
-  --z-content: 1;
-  --z-header: 40;
-  /* The viewfinder furniture — frame, corner ticks, readouts, crosshair. Above
-     the header scrim, below the menu, so an open menu covers it. */
-  --z-chrome: 45;
-  /* The LED matrix and vignette, one step up, so the frame is never grained
-     over by its own texture. */
-  --z-grain: 46;
-  --z-menu: 60;
-  --z-alert: 80;
-  --z-curtain: 90;
-  /* The one layer above the curtain. The conceit is that you are always
-     looking through a viewfinder, so the readouts keep ticking across a page
-     transition rather than blinking out with the rest of the page. */
-  --z-chrome-top: 95;
-
-  /* --- viewfinder intensity ------------------------------------------------
-     The whole cinematic treatment dials from these four. Raise them for more
-     weight, drop them toward 0 for a plain dark site — nothing else needs to
-     change, and nothing reads them but the chrome layer. */
-  --grain-opacity: 0.16;
-  --scan-opacity: 0.14;
-  --vignette-strength: 0.72;
-  --chrome-line: rgba(219, 228, 240, 0.28);
+  /* ---------- Z SCALE ---------- */
+  --z-content: 1; --z-sticky: 30; --z-header: 60; --z-cursor: 70;
+  --z-menu: 80; --z-curtain: 90; --z-skip: 100;
 }
 
 /*
@@ -182,9 +190,5 @@
   a faster version of the same animation.
 */
 @media (prefers-reduced-motion: reduce) {
-  :root {
-    --dur-fast: 0.01s;
-    --dur-base: 0.01s;
-    --dur-slow: 0.01s;
-  }
+  :root { --dur-fast: .01s; --dur-base: .01s; --dur-slow: .01s; }
 }

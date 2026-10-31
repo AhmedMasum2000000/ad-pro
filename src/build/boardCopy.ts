@@ -66,12 +66,56 @@ export function viewingDistance(board: Billboard): number | null {
   return pitch ? Math.round(pitch) : null;
 }
 
-export function sizeWords(board: Billboard): string {
-  const d = parseDimension(board.dimension);
-  if (!d) return board.dimension;
-  const unit = d.unit === 'in' ? 'inch' : 'ft';
-  return `${d.width}${unit} × ${d.height}${unit}`;
+/* --- normalised figures ----------------------------------------------------
+   The deck was typed by several hands: "1920p X1080p", "9.00am-10.00pm",
+   "W-22'x H-12.5'". Every figure that reaches the page goes through one of
+   these first, so the same quantity is always written the same way, in the
+   mono face, with the same multiplication sign and the same dash.          */
+
+/** "W-30' x H-20'" → "30 ft × 20 ft"; inches as "20 in × 40 in". */
+export function fmtDimension(value: string): string {
+  const d = parseDimension(value);
+  if (!d) return value.replace(/^:/, '').trim();
+  return `${d.width} ${d.unit} × ${d.height} ${d.unit}`;
 }
+
+export const sizeWords = (board: Billboard): string => fmtDimension(board.dimension);
+
+/** "1920p X1080p" → "1920 × 1080". Returns '' for an empty field. */
+export function fmtResolution(value: string): string {
+  const m = /(\d+)\s*p?\s*[x×]\s*(\d+)\s*p?/i.exec(value);
+  return m ? `${m[1]} × ${m[2]}` : value.trim();
+}
+
+/** "09.00am - 11.00pm" → "9am–11pm"; "12:00pm-4:00pm" → "12pm–4pm";
+    "11:30am" keeps its minutes as "11:30am". Returns '' for an empty field. */
+export function fmtSchedule(value: string): string {
+  if (!value) return '';
+  const clock = (t: string): string => {
+    const m = /(\d{1,2})(?:[.:](\d{2}))?\s*(am|pm)/i.exec(t);
+    if (!m) return t.trim();
+    const hour = String(Number(m[1]));
+    const mins = m[2] && m[2] !== '00' ? `:${m[2]}` : '';
+    return `${hour}${mins}${m[3].toLowerCase()}`;
+  };
+  const parts = value.split(/\s*(?:-|–|—|to)\s*/i).filter(Boolean);
+  if (parts.length !== 2) return clock(value);
+  return `${clock(parts[0])}–${clock(parts[1])}`;
+}
+
+/** "14 hours" → "14 h/day" for a glance row; '' when unknown. */
+export function fmtHours(value: string): string {
+  const m = /(\d+)/.exec(value);
+  return m ? `${m[1]} h/day` : '';
+}
+
+/**
+ * Figures inside prose, set in the mono face so a size reads as a
+ * specification and not as a word. Returns HTML; the caller must not escape
+ * it again. Everything that goes in is a formatter's output or a plain
+ * number, so there is nothing in it that needs escaping.
+ */
+export const num = (value: string): string => `<span class="num">${value}</span>`;
 
 /* --- prose ---------------------------------------------------------------- */
 
@@ -124,7 +168,7 @@ export function boardMetaDescription(board: Billboard): string {
   const head = `${board.title}: ${size} LED billboard in ${board.city}`;
   const optional = [
     board.facing ? `, facing ${board.facing}` : '',
-    board.schedule ? `, on air ${board.schedule}` : board.hours ? `, ${board.hours} a day` : '',
+    board.schedule ? `, on air ${fmtSchedule(board.schedule)}` : board.hours ? `, ${board.hours} a day` : '',
     '. Photos, specs and availability — call for price.',
   ];
 
@@ -138,19 +182,30 @@ export function boardMetaDescription(board: Billboard): string {
   return out.endsWith('.') ? out : `${out}. Call for price.`;
 }
 
-/** The opening paragraph on the listing page. */
+const escText = (value: string): string =>
+  value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+/**
+ * The opening paragraph on the listing page.
+ *
+ * Returns HTML, not text: the figures are wrapped in `.num` so they set in
+ * the mono face. The words around them are escaped here, so the caller drops
+ * the result straight into the template.
+ */
 export function boardIntro(board: Billboard): string {
-  const size = sizeWords(board);
+  const size = num(sizeWords(board));
   const scale = scaleLine(board);
   const scalePart = scale ? `, ${scale}` : '';
-  const window = board.schedule ? ` The screen runs ${board.schedule}` : ' The screen runs daily';
-  const hours = board.hours ? `, ${board.hours} of on-air time` : '';
+  const window = board.schedule
+    ? ` The screen runs ${num(fmtSchedule(board.schedule))}`
+    : ' The screen runs daily';
+  const hours = board.hours ? `, ${num(board.hours.replace(/\s*hours?/i, ''))} hours of on-air time` : '';
   const brk =
     board.breakTime && !/^n\/?a$/i.test(board.breakTime)
-      ? `, with a maintenance break at ${board.breakTime}`
+      ? `, with a maintenance break at ${num(fmtSchedule(board.breakTime))}`
       : '';
 
-  return `${board.title} is a ${size} LED screen in ${board.city}${scalePart}, facing ${board.facing}.${window}${hours}${brk}.`;
+  return `${escText(board.title)} is a ${size} LED screen in ${escText(board.city)}${scalePart}, facing ${escText(board.facing)}.${window}${hours}${brk}.`;
 }
 
 /** The second paragraph — technical, and different per screen. */
@@ -167,8 +222,11 @@ export function boardTechnical(board: Billboard): string {
     );
   }
 
+  // The resolution is deliberately absent here. It sits in the glance card
+  // and the specification sheet, which is where a figure belongs; printing it
+  // a third time in a sentence made the page read as padding.
   parts.push(
-    `Artwork is delivered at ${board.resolution} in ${board.format}. Minimum booking is ${board.minimum || '60 min/day'}, and every campaign closes with a ${(board.reporting || 'log summary').toLowerCase()} showing when each spot actually played.`,
+    `Artwork is supplied as ${board.format || 'MP4'}. Minimum booking is ${board.minimum || '60 min/day'}, and every campaign closes with a ${(board.reporting || 'log summary').toLowerCase()} showing when each spot actually played.`,
   );
 
   return parts.join(' ');
@@ -207,16 +265,16 @@ export function boardFaqs(board: Billboard): { q: string; a: string }[] {
     },
     {
       q: `What size is the ${board.title} screen?`,
-      a: `${size}, running artwork at ${board.resolution}. Files are supplied as ${board.format}${
+      a: `${size}, running artwork at ${fmtResolution(board.resolution)}. Files are supplied as ${board.format}${
         pitch ? `, on a ${board.ledModel} panel — ${pitch}mm pixel pitch` : ''
       }.`,
     },
     {
       q: `What hours does the ${board.title} billboard run?`,
       a: board.schedule
-        ? `${board.schedule}${board.hours ? `, which is ${board.hours} of on-air time a day` : ''}${
+        ? `${fmtSchedule(board.schedule)}${board.hours ? `, which is ${board.hours} of on-air time a day` : ''}${
             board.breakTime && !/^n\/?a$/i.test(board.breakTime)
-              ? `. There is a maintenance break at ${board.breakTime}`
+              ? `. There is a maintenance break at ${fmtSchedule(board.breakTime)}`
               : ''
           }. Minimum booking is ${board.minimum || '60 min/day'}.`
         : `The screen runs daily${board.hours ? `, ${board.hours} of on-air time` : ''}. Minimum booking is ${board.minimum || '60 min/day'}. Call ${company.phone} for the current on-air window.`,

@@ -29,6 +29,14 @@ export const company = {
   email: 'info@adprobd.com',
   phone: '+880 1958-503753',
   phoneHref: '+8801958503753',
+  /**
+   * The number in the shape wa.me wants: country code, no plus, no spaces.
+   * No separate WhatsApp line is known, so this is the office mobile — the
+   * same number a caller dials — until someone tells us otherwise.
+   */
+  whatsapp: '8801958503753',
+  // Sentence case, as a postal address is written on an envelope. The deck
+  // shouted these in capitals and the footer was repeating it.
   corporateAddress:
     'Flat A1, House 99 (1st floor), Road 10/2, Block D, Niketon, Gulshan 1, Dhaka',
   registeredAddress:
@@ -40,11 +48,17 @@ export const company = {
   city: 'Dhaka',
 } as const;
 
-/** Headline figures. Kept in one place because they appear on several pages. */
+/**
+ * Headline figures. Kept in one place because they appear on several pages.
+ *
+ * Ordered as the stats band reads them: the inventory first, because that is
+ * the thing being sold, then what has run on it, then who ran it, then the
+ * share of the market that says the first figure is not a boast.
+ */
 export const stats = [
-  { value: '400+', label: 'Brands advertised', detail: 'From local challengers to global names.' },
-  { value: '2,000+', label: 'Campaigns delivered', detail: 'Planned, printed, mounted, monitored.' },
   { value: '150+', label: 'Digital locations', detail: 'LED inventory across the country.' },
+  { value: '2,000+', label: 'Campaigns delivered', detail: 'Planned, printed, mounted, monitored.' },
+  { value: '400+', label: 'Brands advertised', detail: 'From local challengers to global names.' },
   { value: '60%', label: 'Of premium digital boards', detail: 'The largest single network in Bangladesh.' },
 ];
 
@@ -313,9 +327,56 @@ export const billboards: Billboard[] = (boardData as Billboard[]).map((b) => ({
   focus: [b.focus[0], b.focus[1]] as [number, number],
 }));
 
-/** A site's accent, or the brand blue where its screen carried no usable
-    colour. One place, so a missing sample degrades the same way everywhere. */
-export const accentOf = (board: Billboard): string => board.accent || '#6ba3e8';
+/*
+  The four accents a site is allowed to carry.
+
+  The sampled colours are honest but unruly — fifty-eight of them, some muddy,
+  some clashing with the blue the rest of the page is built on. Each sample is
+  snapped to the nearest of four hues chosen to sit on the ink ground: sky for
+  the blues, mint for the greens and cyans, magenta for the pinks and purples,
+  amber for the reds, oranges and yellows. A site still reads as its own
+  place, and the palette stays a palette.
+*/
+export const ACCENTS = {
+  sky: '#6ba3e8',
+  mint: '#35e0a1',
+  magenta: '#ff5ca8',
+  amber: '#ff7a1a',
+} as const;
+
+/** Hue in degrees and saturation 0-1 of a #rrggbb colour; null if unparseable. */
+function hueOf(hex: string): { hue: number; sat: number } | null {
+  const m = /^#?([0-9a-f]{6})$/i.exec(hex.trim());
+  if (!m) return null;
+  const n = parseInt(m[1], 16);
+  const r = ((n >> 16) & 255) / 255;
+  const g = ((n >> 8) & 255) / 255;
+  const b = (n & 255) / 255;
+  const max = Math.max(r, g, b);
+  const min = Math.min(r, g, b);
+  const d = max - min;
+  if (d === 0) return { hue: 0, sat: 0 };
+  let hue: number;
+  if (max === r) hue = ((g - b) / d) % 6;
+  else if (max === g) hue = (b - r) / d + 2;
+  else hue = (r - g) / d + 4;
+  hue = (hue * 60 + 360) % 360;
+  const light = (max + min) / 2;
+  const sat = d / (1 - Math.abs(2 * light - 1));
+  return { hue, sat };
+}
+
+/** A site's accent, snapped to one of the four hues above. The brand blue is
+    the fallback, so a board without a sample degrades the same way everywhere. */
+export const accentOf = (board: Billboard): string => {
+  const c = board.accent ? hueOf(board.accent) : null;
+  if (!c || c.sat < 0.18) return ACCENTS.sky;
+  const h = c.hue;
+  if (h < 70 || h >= 335) return ACCENTS.amber;
+  if (h < 195) return ACCENTS.mint;
+  if (h < 262) return ACCENTS.sky;
+  return ACCENTS.magenta;
+};
 
 /** Every screen in the deck is LED. Static formats are sold, but none of the
     sites in this inventory are static, so the split is a constant. */

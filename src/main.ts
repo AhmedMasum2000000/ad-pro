@@ -1,9 +1,12 @@
 /**
  * Boot sequence.
  *
- * Order matters: viewport units before anything measures, scroll before the
- * curtain (which locks it), and the WebGL layer last because it is the only
- * part that is allowed to fail.
+ * Order matters: the `js` class first, because the reveal styles hide nothing
+ * until it is there; viewport units before anything measures; scroll before
+ * the curtain (which locks it); then the shell-level modules, which live for
+ * the session, and finally the first page mount — scoped to the Barba
+ * container, exactly as every later mount will be, so the shell never has
+ * its bindings torn down with a page.
  */
 
 import '@fontsource/bebas-neue/400.css';
@@ -26,41 +29,58 @@ import './styles/chrome.css';
 // Last, so the small-screen layer overrides the composition above it.
 import './styles/mobile.css';
 
+import { gsap } from 'gsap';
+import { Flip } from 'gsap/Flip';
+import { qs } from './lib/dom';
 import { initViewport } from './lib/viewport';
-import { initBarba, mountPage } from './motion/barba';
+import { initHoverScramble } from './motion/ascii';
+import { initBarba, mountPage, pageContainer } from './motion/barba';
+import { initMagnetic } from './motion/cursor';
 import { initCursorFollower } from './motion/cursorFollower';
-import { initPointerTrail } from './motion/ascii';
 import { playIntro } from './motion/curtain';
 import { initHud } from './motion/hud';
 import { initMenu } from './motion/menu';
 import { initScroll } from './motion/scroll';
-import { initField } from './motion/wgl';
 import { initCookieNotice } from './ui/cookieNotice';
 
+// Registered once, here, so no module has to wonder whether another did.
+gsap.registerPlugin(Flip);
+
+/** Everything outside the Barba container that carries `.addHover`. */
+const SHELL_SCOPES = ['.main-nav-wrapper', '#menu_wrapper', '.js-fixed__cover'];
+
 function boot(): void {
+  // Declares that the script is running. The reveal initial states in
+  // global.css are gated on this class, so a page whose script never ran —
+  // or a crawler — gets the fully visible site.
+  document.documentElement.classList.add('js');
+
   initViewport();
   initScroll();
 
   // Shell-level modules live for the session; only page modules are remounted
   // by Barba.
   initMenu();
-  // The viewfinder and its two live readouts. Shell-level: the instrument does
-  // not blink out and rebuild on every navigation, which is the point of it.
+  // The viewfinder's live readouts. Shell-level: the clock does not blink out
+  // and restart on every navigation, which is the point of it.
   initHud();
   initCursorFollower();
-  // Shell-level: the trail follows the pointer across navigations rather than
-  // being torn down and rebuilt with each page.
-  initPointerTrail();
   initCookieNotice();
-  initBarba();
 
-  mountPage(document);
+  // The shell's own interactive elements — menu toggle and close, nav links,
+  // the call button — are bound here, once. Page mounts are scoped to the
+  // container, so they never see these and never tear them down.
+  for (const selector of SHELL_SCOPES) {
+    const scope = qs<HTMLElement>(selector);
+    if (!scope) continue;
+    initMagnetic(scope);
+    initHoverScramble(scope);
+  }
+
+  initBarba();
+  mountPage(pageContainer());
 
   void playIntro();
-
-  // Decorative — kicked off without blocking the intro, and its failure is
-  // not the site's failure.
-  initField();
 }
 
 if (document.readyState === 'loading') {
