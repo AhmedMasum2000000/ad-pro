@@ -8,22 +8,26 @@ import { articles } from './src/data/articles';
 import { buildArticle, buildNewsHub, newsPath } from './src/build/newsPages';
 import {
   buildBoards,
-  buildChrome,
   buildCity,
   buildCityIndex,
-  buildNetworkIndex,
   buildClientWall,
   buildComparison,
   buildFaq,
+  buildFilterBar,
   buildFooter,
+  buildFormats,
   buildHead,
+  buildHero,
   buildListing,
   buildMarquee,
+  buildNetworkIndex,
   buildProcess,
-  buildScreenWall,
   buildServices,
   buildShell,
+  buildSitesRail,
   buildStats,
+  fontPreloadTags,
+  PRELOAD_FONTS,
   type PageMeta,
 } from './src/build/partials';
 import { boardPath, buildRobots, buildSitemap, cityPath } from './src/build/seo';
@@ -232,35 +236,47 @@ const shellPlugin = (): Plugin => ({
       if (page.article) html = html.replace('<!--@ARTICLE-->', buildArticle(page.article));
       if (page.namespace === 'news') html = html.replace('<!--@NEWS-->', buildNewsHub());
 
-      return html
-        .replace('<!--@HEAD-->', buildHead(page))
-        .replace('<!--@SHELL-->', buildChrome(page) + buildShell())
-        .replace('<!--@FOOTER-->', buildFooter())
-        .replace('<!--@WALL-->', buildScreenWall())
-        .replace('<!--@STATS-->', buildStats())
-        .replace('<!--@PROCESS-->', buildProcess())
-        .replace('<!--@SERVICES-->', buildServices())
-        .replace('<!--@COMPARISON-->', buildComparison())
-        .replace('<!--@FAQ-->', buildFaq())
-        .replace('<!--@CLIENT_TEASER-->', buildClientWall(16))
-        .replace('<!--@CLIENT_WALL-->', buildClientWall())
-        .replace('<!--@CITY_INDEX-->', buildCityIndex())
-        .replace('<!--@NETWORK_INDEX-->', buildNetworkIndex())
-        // A marquee appears inside generated listing bodies too, so this has
-        // to run after the body is in place — hence `replaceAll`.
-        .replaceAll('<!--@MARQUEE-->', buildMarquee())
-        .replace('<!--@BOARDS_ALL-->', buildBoards())
-        // The phone number appears in hand-written templates too. Tokens
-        // rather than literals, so it lives in exactly one place.
-        .replaceAll('@PHONE_HREF@', company.phoneHref)
-        .replaceAll('@PHONE@', company.phone)
-        .replaceAll(
-          '<!--@CTA-->',
-          buildCta(
-            'Tell us the city and the dates. We will tell you what is free and what it costs.',
-            'Most enquiries get a written plan — sites, sizes, minutes and an all-in cost — inside one working day.',
-          ),
-        );
+      // The viewfinder chrome is part of the hero and the hero is the home
+      // page's alone: no other route carries `<!--@HERO-->`, so no other
+      // route gets a frame over its content.
+      return (
+        html
+          .replace('<!--@HEAD-->', buildHead(page))
+          .replace('<!--@SHELL-->', buildShell())
+          .replace('<!--@HERO-->', page.namespace === 'home' ? buildHero() : '')
+          .replace('<!--@STATS-->', buildStats())
+          .replace('<!--@SITES_RAIL-->', buildSitesRail())
+          .replace('<!--@SITES_RAIL_SHORT-->', buildSitesRail(6, 'Six that are on right now'))
+          .replace('<!--@FORMATS-->', buildFormats())
+          .replace('<!--@PROCESS-->', buildProcess())
+          .replace('<!--@PROCESS_CONTACT-->', buildProcess('contact'))
+          .replace('<!--@SERVICES-->', buildServices())
+          .replace('<!--@COMPARISON-->', buildComparison())
+          .replace('<!--@FAQ-->', buildFaq())
+          .replace('<!--@CLIENT_TEASER-->', buildClientWall('marquee'))
+          .replace('<!--@CLIENT_WALL-->', buildClientWall())
+          .replace('<!--@CITY_INDEX-->', buildCityIndex())
+          .replace('<!--@NETWORK_INDEX-->', buildNetworkIndex())
+          // The hub puts the filter under its head, a long way above the
+          // grid; everywhere else the grid carries its own.
+          .replace('<!--@FILTER_BAR-->', buildFilterBar())
+          .replace('<!--@BOARDS_ALL-->', buildBoards(undefined, page.namespace !== 'billboards'))
+          // The phone number appears in hand-written templates too. Tokens
+          // rather than literals, so it lives in exactly one place.
+          .replaceAll('@PHONE_HREF@', company.phoneHref)
+          .replaceAll('@PHONE@', company.phone)
+          .replaceAll(
+            '<!--@CTA-->',
+            buildCta(
+              'Tell us the city and the dates. We will tell you what is free and what it costs.',
+              'Most enquiries get a written plan — sites, sizes, minutes and an all-in cost — inside one working day.',
+            ),
+          )
+          // Last, because generated bodies (listings, cities, answers) land
+          // above and the skeleton carries the strip and the footer for them.
+          .replaceAll('<!--@MARQUEE-->', buildMarquee())
+          .replace('<!--@FOOTER-->', buildFooter())
+      );
     },
   },
   // robots.txt and sitemap.xml are generated from the same page metadata
@@ -286,9 +302,33 @@ const input = Object.fromEntries(
 const rawBase = process.env.BASE_PATH || '/';
 const base = rawBase.endsWith('/') ? rawBase : `${rawBase}/`;
 
+/**
+ * Preloads the three font files the first paint needs.
+ *
+ * The fonts arrive through @fontsource imports in src/main.ts, so Vite names
+ * the files, with a hash, only once the bundle exists. buildHead leaves a
+ * `<!--@FONTS-->` marker; this runs after the bundle and swaps in the real
+ * paths. In the dev server there is no bundle and the marker is dropped —
+ * the fonts still load, just not ahead of the stylesheet.
+ */
+const fontPreloadPlugin = (): Plugin => ({
+  name: 'adpro-font-preload',
+  transformIndexHtml: {
+    order: 'post',
+    handler(html, ctx) {
+      const files = ctx.bundle
+        ? Object.keys(ctx.bundle).filter(
+            (file) => file.endsWith('.woff2') && PRELOAD_FONTS.some((f) => file.includes(f)),
+          )
+        : [];
+      return html.replace('<!--@FONTS-->', fontPreloadTags(files.map((f) => `${base}${f}`)));
+    },
+  },
+});
+
 export default defineConfig({
   base,
-  plugins: [shellPlugin()],
+  plugins: [shellPlugin(), fontPreloadPlugin()],
   build: {
     target: 'es2020',
     rollupOptions: {

@@ -2,72 +2,59 @@
   The viewfinder.
 
   This company sells screens — 58 of them, lit, on junctions across the
-  country. So the site is framed as something being watched rather than
-  something being read: a hairline border with corner ticks, a focal reticle,
-  four readouts, and the texture of an LED panel over everything.
+  country — so the home hero is framed as something being watched: a hairline
+  frame with corner ticks and four readouts in the mono face the spec tables
+  use. Each readout reports something true: the site that is live on the
+  stage, whether the network is on air right now, where that site is and how
+  big it is, and the clock in Dhaka.
 
-  Nothing here is arbitrary dressing. Each readout reports something true, and
-  the "grain" is a pixel matrix rather than film dust — a P5 screen is a 5mm
-  grid of emitters, so the texture is the product's own, seen close up.
+  It used to be a fixed layer over every page, with an LED-matrix grain and a
+  vignette riding on top. All of that is gone. The instrument is now scoped
+  to the hero (`.chrome--hero`, absolute inside `.main-header.hero`), fades
+  out as the hero scrolls away, and no other page carries any furniture
+  beyond a single `.page-head__readout` line.
 
-  Two layers at different depths:
-
-  - `.chrome`      z 95 — above the page-transition curtain, so the instrument
-                   stays put while the page behind it changes. That is the
-                   whole conceit: you never stop looking through it.
-  - `.chrome-grain` z 46 — below the menu, so an open menu is read against
-                   clean ground rather than through the matrix.
-
-  Both are inert to the pointer. Everything is gated behind `body.chrome-on`
-  (set in src/motion/hud.ts): the markup lands on all 96 routes at once with
-  no incremental rollout, so the escape hatch has to be one class name.
+  It is inert to the pointer. The HUD values are written by src/motion/hud.ts
+  and the draw-on is run by src/motion/hero.ts; the CSS here only describes
+  the resting state and the lamp.
 */
 
+/* Anything still carrying the old fixed-layer class renders nothing. Only
+   the hero variant below is a real element. */
 .chrome,
 .chrome-grain {
   display: none;
 }
 
-body.chrome-on .chrome,
-body.chrome-on .chrome-grain {
+.chrome--hero {
   display: block;
-}
-
-.chrome {
-  position: fixed;
-  inset: 0;
-  z-index: var(--z-chrome-top);
+  position: absolute;
+  inset: calc(var(--header-h) + .5rem) var(--edge-r) 1.25rem var(--edge-l);
+  z-index: 3;
   pointer-events: none;
+  /* `--hero-progress` is 0→1 over the first 60vh of scroll (scrollfx.ts),
+     written on `.hero`. The frame is gone by a little past a third of that,
+     before the stage itself has visibly moved. */
+  opacity: clamp(0, 1 - var(--hero-progress, 0) * 1.6, 1);
 }
 
-/* --- the frame --------------------------------------------------------------
-   Inset from the viewport, but clamped to the content column. A viewport-fixed
-   frame on a 3440px display floats ~600px outside the text it is supposed to
-   be framing, which reads as a rendering fault rather than as an instrument. */
+/* --- the frame --------------------------------------------------------- */
 
+/* The border stays faint and the corners carry the weight: corner ticks read
+   as a viewfinder in a way a continuous box never does. */
 .chrome__frame {
   position: absolute;
-  /* Clears the fixed header rather than running underneath it. The header
-     already occupies the top 4.75rem with the brand at one end and the menu
-     control at the other; a frame drawn through that band puts its readouts
-     directly behind both. Starting below it also says the right thing — the
-     header is the site's furniture, the viewfinder frames the work. */
-  top: calc(var(--header-h) + 0.35rem);
-  bottom: clamp(0.5rem, 1.4vh, 1.15rem);
-  inset-inline: max(var(--edge-l), calc((100% - var(--max-width)) / 2 + 1rem))
-    max(var(--edge-r), calc((100% - var(--max-width)) / 2 + 1rem));
+  inset: 0;
   border: 1px solid var(--chrome-line);
-  opacity: 0.55;
 }
 
-/* Corner ticks read as a viewfinder in a way a continuous border does not, so
-   the border stays faint and the corners carry the weight. */
+/* Each tick's transform origin is its own corner so hero.ts can scale it in
+   from the frame's edge rather than from its centre. */
 .chrome__tick {
   position: absolute;
-  width: 0.85rem;
-  height: 0.85rem;
-  border: 0 solid var(--chrome-line);
-  opacity: 0.9;
+  width: 14px;
+  height: 14px;
+  border: 0 solid var(--led);
 }
 
 .chrome__tick--tl {
@@ -75,6 +62,7 @@ body.chrome-on .chrome-grain {
   left: -1px;
   border-top-width: 2px;
   border-left-width: 2px;
+  transform-origin: top left;
 }
 
 .chrome__tick--tr {
@@ -82,6 +70,7 @@ body.chrome-on .chrome-grain {
   right: -1px;
   border-top-width: 2px;
   border-right-width: 2px;
+  transform-origin: top right;
 }
 
 .chrome__tick--bl {
@@ -89,6 +78,7 @@ body.chrome-on .chrome-grain {
   left: -1px;
   border-bottom-width: 2px;
   border-left-width: 2px;
+  transform-origin: bottom left;
 }
 
 .chrome__tick--br {
@@ -96,198 +86,156 @@ body.chrome-on .chrome-grain {
   right: -1px;
   border-bottom-width: 2px;
   border-right-width: 2px;
+  transform-origin: bottom right;
 }
 
-/* --- focal reticle ----------------------------------------------------------
-   Dead centre, and very nearly invisible. Every photograph on this site stores
-   a focus point; this is where that point would land. */
+/* --- readouts ---------------------------------------------------------- */
 
-.chrome__reticle {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 13px;
-  height: 13px;
-  margin: -6.5px 0 0 -6.5px;
-  opacity: 0.32;
-}
-
-.chrome__reticle::before,
-.chrome__reticle::after {
-  content: '';
-  position: absolute;
-  background: var(--chrome-line);
-}
-
-.chrome__reticle::before {
-  top: 50%;
-  left: 0;
-  width: 100%;
-  height: 1px;
-}
-
-.chrome__reticle::after {
-  left: 50%;
-  top: 0;
-  width: 1px;
-  height: 100%;
-}
-
-/* --- readouts ---------------------------------------------------------------
-   Set in the mono face the specification tables already use, so the HUD and
-   the spec sheet are visibly the same register. Tabular figures because the
-   clock updates ten times a second and proportional digits would make it
-   jitter sideways as the numerals change width. */
-
+/*
+  Set at `--readout`, the floor of the type scale, at full opacity, on a
+  backplate of the ink at 60% so they stay legible over a bright photograph
+  without a scrim of their own. Tabular figures because the clock ticks and
+  proportional digits would make it jitter sideways as the numerals change
+  width. The bracket convention `[ … ]` lives in the markup and the HUD text,
+  not here, so a readout never ends up double-bracketed.
+*/
 .chrome__read {
   position: absolute;
   margin: 0;
+  max-width: 46%;
+  padding: 2px 6px;
   font-family: var(--font-mono);
-  font-size: 0.62rem;
+  font-weight: 400;
+  font-size: var(--readout);
+  line-height: 1.3;
   font-variant-numeric: tabular-nums;
-  letter-spacing: 0.14em;
+  letter-spacing: .12em;
   text-transform: uppercase;
-  color: var(--grey-dark-color);
-  opacity: 0.78;
+  color: var(--text-muted);
+  background: rgb(var(--ink-rgb) / .6);
+  opacity: 1;
   white-space: nowrap;
-  max-width: 42vw;
   overflow: hidden;
   text-overflow: ellipsis;
+  transition: opacity .4s var(--ease-out);
 }
 
-/* Bracketed, matching the `[ P5 ] [ 1920×1080 ]` convention the spec rows use. */
-.chrome__read::before {
-  content: '[ ';
-}
+.chrome__read--tl { top: .5rem; left: .5rem; }
+.chrome__read--tr { top: .5rem; right: .5rem; }
+.chrome__read--bl { bottom: .5rem; left: .5rem; }
+.chrome__read--br { bottom: .5rem; right: .5rem; }
 
-.chrome__read::after {
-  content: ' ]';
-}
-
-.chrome__read--tl {
-  top: calc(var(--header-h) + 1.15rem);
-  left: max(var(--edge-l), calc((100% - var(--max-width)) / 2 + 1.9rem));
-}
-
+/* The state readout carries the lamp and a label. */
 .chrome__read--tr {
-  top: calc(var(--header-h) + 1.15rem);
-  right: max(var(--edge-r), calc((100% - var(--max-width)) / 2 + 1.9rem));
+  display: flex;
+  align-items: center;
+  gap: .55em;
 }
 
-.chrome__read--bl {
-  bottom: clamp(1.2rem, 2.6vh, 2rem);
-  left: max(var(--edge-l), calc((100% - var(--max-width)) / 2 + 1.9rem));
+/* The server renders no state word — the page cannot know the Dhaka clock —
+   so until hud.ts has written one, the whole state readout stays out of
+   sight rather than showing a lamp with nothing beside it. */
+.chrome__read--tr:has([data-hud-label]:empty) {
+  opacity: 0;
 }
 
-.chrome__read--br {
-  bottom: clamp(1.2rem, 2.6vh, 2rem);
-  right: max(var(--edge-r), calc((100% - var(--max-width)) / 2 + 1.9rem));
-}
+/* --- the on-air lamp --------------------------------------------------- */
 
-/* The on-air lamp. Lit while the network is running, dark outside its hours —
-   the state is real, read from the schedule in src/motion/hud.ts. */
+/*
+  Lit while the network is running (09–23 Dhaka time), standby outside those
+  hours — the state is real, read from the schedule in hud.ts, and it is
+  never red: off air is a fact about the clock, not a warning.
+*/
 .chrome__lamp {
   display: inline-block;
-  width: 0.42em;
-  height: 0.42em;
-  margin-right: 0.6em;
+  flex: 0 0 auto;
+  width: .55em;
+  height: .55em;
   border-radius: 50%;
-  background: var(--grey-dark-color);
-  vertical-align: 0.06em;
+  background: var(--standby);
+  transition: background-color .4s var(--ease-out), box-shadow .4s var(--ease-out);
 }
 
+.chrome__lamp.is-standby {
+  background: var(--standby);
+  box-shadow: none;
+  animation: none;
+}
+
+.chrome__lamp.is-onair,
 body.is-onair .chrome__lamp {
-  background: #ff4d3d;
-  box-shadow: 0 0 6px rgba(255, 77, 61, 0.9);
+  background: var(--on-air);
+  box-shadow: 0 0 6px rgb(56 224 123 / .9), 0 0 14px rgb(56 224 123 / .45);
   animation: chrome-pulse 2.4s var(--ease-in-out) infinite;
 }
 
 @keyframes chrome-pulse {
-  0%,
-  100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.35;
-  }
+  0%, 100% { opacity: 1; }
+  50% { opacity: .55; }
 }
 
-/* --- the LED matrix ---------------------------------------------------------
-   Static, never animated. A per-frame full-viewport noise repaint is the most
-   expensive thing this design could do on a phone and it cannot be occluded or
-   culled, so the texture is painted once as a gradient pair and left alone:
-   a vertical scanline and a horizontal one, crossing into a dot grid.
+/* --- other pages ------------------------------------------------------- */
 
-   The vignette rides on the same element — one compositing layer rather than
-   two for effects that always appear together. */
-
-.chrome-grain {
-  position: fixed;
-  inset: 0;
-  z-index: var(--z-grain);
-  pointer-events: none;
-  background-image:
-    repeating-linear-gradient(
-      0deg,
-      rgba(0, 0, 0, var(--scan-opacity)) 0 1px,
-      transparent 1px 3px
-    ),
-    repeating-linear-gradient(
-      90deg,
-      rgba(0, 0, 0, calc(var(--scan-opacity) * 0.55)) 0 1px,
-      transparent 1px 3px
-    );
+/* The one line of instrument furniture a non-home page gets: a single mono
+   readout in the top-left of the page head, under the header, over nothing. */
+.page-head {
+  position: relative;
 }
 
-/* Vignette as its own pass so it can be soft while the matrix stays crisp. */
-.chrome-grain::after {
-  content: '';
+.page-head__readout {
   position: absolute;
-  inset: 0;
-  background: radial-gradient(
-    118% 88% at 50% 45%,
-    transparent 34%,
-    rgba(4, 7, 12, calc(var(--vignette-strength) * 0.5)) 74%,
-    rgba(4, 7, 12, var(--vignette-strength)) 100%
-  );
+  top: calc(var(--header-h) + .5rem);
+  left: var(--edge-l);
+  z-index: 2;
+  margin: 0;
+  max-width: calc(100% - var(--edge-l) - var(--edge-r));
+  font-family: var(--font-mono);
+  font-weight: 400;
+  font-size: var(--readout);
+  line-height: 1.3;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  pointer-events: none;
 }
 
-/* --- small screens ----------------------------------------------------------
-   The frame closes in, the reticle goes (there is no pointer to aim), and two
-   of the four readouts drop — at 390px the remaining pair is already most of
-   the width. */
+/* --- small screens ----------------------------------------------------- */
 
+/*
+  The frame closes in to the hero's own edges and the readouts reduce to one
+  bottom-left line: the lamp with its state, then the clock. Site and city
+  are already the headline on a phone; repeating them in 11px mono would
+  only crowd the copy.
+*/
 @media (max-width: 767px) {
-  .chrome__frame {
-    inset-block: 0.4rem;
-    inset-inline: 0.4rem;
+  .chrome--hero {
+    display: flex;
+    align-items: flex-end;
+    gap: .5rem;
+    inset: calc(var(--header-h) + .25rem) .75rem .75rem;
+    padding: .5rem;
   }
 
-  .chrome__reticle,
-  .chrome__read--tl {
+  .chrome__read--tl,
+  .chrome__read--bl {
     display: none;
   }
 
-  .chrome__read {
-    font-size: 0.55rem;
-    letter-spacing: 0.1em;
-    max-width: 46vw;
-  }
-
-  /* A 3px matrix at 3x device pixel ratio is invisible and still costs a
-     full-viewport layer, so the pitch opens up and the scan drops away. */
-  .chrome-grain {
-    background-image: repeating-linear-gradient(
-      0deg,
-      rgba(0, 0, 0, calc(var(--scan-opacity) * 0.6)) 0 1px,
-      transparent 1px 4px
-    );
+  .chrome__read--tr,
+  .chrome__read--br {
+    position: static;
+    max-width: none;
   }
 }
 
 /* Someone who asked for less motion still gets the instrument — it is the
    design, not an animation — but the lamp stops pulsing. */
 @media (prefers-reduced-motion: reduce) {
+  .chrome__lamp.is-onair,
   body.is-onair .chrome__lamp {
     animation: none;
   }

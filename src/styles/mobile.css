@@ -14,13 +14,13 @@
     holding a phone or a 12in tablet, and a mouse on a 600px window does not.
 
   Nothing here changes the desktop composition; the reference design is the
-  design, and this only makes it survive a 390px viewport.
+  design, and this only makes it survive a 390px viewport. The viewfinder
+  chrome's own phone rules live in chrome.css.
 */
 
 /* --- reach: touch targets --------------------------------------------------
-   Twenty links and buttons measured 29-36px tall. The rule is to grow the
-   padding box rather than the type, so the setting is unchanged and only the
-   hit area moves. */
+   The rule is to grow the padding box rather than the type, so the setting
+   is unchanged and only the hit area moves. */
 
 @media (pointer: coarse) {
   /*
@@ -41,17 +41,8 @@
   .brand,
   .menu-toggle,
   .menu-close,
-  .slideshow-control {
+  .nav-call {
     min-height: var(--tap);
-  }
-
-  /* Buttons in a filter row are bare text, so their target is their line box
-     until it is padded out. */
-  .filter-btn {
-    display: inline-flex;
-    align-items: center;
-    min-height: var(--tap);
-    padding-inline: 0.15rem;
   }
 
   .menu-sublink {
@@ -65,16 +56,61 @@
   .awards-list li {
     padding-block: 0.75rem;
   }
+
+  .breadcrumb a {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--tap);
+  }
+}
+
+/* --- hover that would stick -------------------------------------------------
+   A tap leaves `:hover` set until the next tap somewhere else, so on a touch
+   screen the photograph a visitor just tapped would stay zoomed and glowing
+   under the page they navigated to. The hover motion is for pointers. */
+
+@media (hover: none) {
+  .board-card:hover .board-card__img,
+  .rail__card:hover .plate > img,
+  .nearby__link:hover .plate > img,
+  .nearby__link:hover .nearby__img,
+  .city-card:hover .city-card__img,
+  .city-card__link:hover .city-card__img {
+    transform: none;
+  }
+
+  .board-card:hover,
+  .city-card:hover,
+  .city-card__link:hover,
+  .nearby__link:hover .plate > img,
+  .nearby__link:hover .nearby__img {
+    box-shadow: none;
+  }
+
+  .board-card:hover .board-card__media::after,
+  .rail__card:hover .plate::after,
+  .nearby__link:hover .plate::after,
+  .city-card:hover::after {
+    transform: scaleX(0);
+  }
 }
 
 /* --- space: phone layout --------------------------------------------------- */
 
 @media (max-width: 767px) {
-  /*
-    The header keeps its 4.75rem total height — which `--header-safe` depends
-    on — while giving the brand lockup room to reach a 44px target: the bar
-    loses the padding the lockup gains.
-  */
+  /* The rhythm tightens: the whitespace beside a column that desktop relies
+     on does not exist once the column is the full width. */
+  :root {
+    --gl-padding-tb: 3rem;
+    --section-gap: 2rem;
+    --intro-gap: 2.5rem;
+  }
+
+  /* --- header -------------------------------------------------------------
+     Mark and the two words; the descriptor line goes. The header keeps its
+     total height — `--header-safe` depends on it — while the lockup gains
+     room for a 44px target. */
+
   .main-nav-wrapper {
     padding-block: 1rem;
   }
@@ -89,56 +125,105 @@
     height: 2rem;
   }
 
+  .brand__sub {
+    display: none;
+  }
+
   /* --- hero ---------------------------------------------------------------
-     Three separate collisions at 390x844: the play control sat on top of the
-     CTA button, the site caption ran into the bottom edge of the screen, and
-     the illustration was invisible. */
+     One live slide, a plain crossfade (hero.ts), no pointer parallax. The
+     copy is bottom-aligned, both buttons full width with the primary first,
+     and the cue rail becomes a strip of three thumbnails under them. The
+     scrim is bottom-weighted: a portrait crop of a landscape photograph puts
+     the screen in the upper half, and the words need the lower. */
 
-  .slider-text {
-    /* Clears the home indicator on a notched phone; `--safe-b` is 0 elsewhere. */
-    padding-bottom: calc(1.75rem + var(--safe-b));
+  .hero__slide img {
+    object-position: var(--fx, 50%) var(--fy, 50%);
   }
 
-  /*
-    The control moves out of the CTA's way and into the top-right, which is
-    otherwise the emptiest part of a portrait hero. It reads as a slideshow
-    index there, which is what it is.
-  */
-  .slider-nav {
-    top: var(--header-safe);
+  .hero__scrim {
+    background: linear-gradient(
+      to top,
+      rgb(var(--ink-rgb) / 0.94) 0%,
+      rgb(var(--ink-rgb) / 0.72) 45%,
+      rgb(var(--ink-rgb) / 0.15) 75%,
+      transparent
+    );
+  }
+
+  .hero__bleed.is-on {
+    opacity: 0.4;
+  }
+
+  .hero__copy {
+    padding-top: calc(var(--header-h) + 2rem);
+    padding-bottom: 1.25rem;
+  }
+
+  .hero__inner {
+    max-width: none;
+  }
+
+  .hero__inner .lede {
+    font-size: 1.0625rem;
+  }
+
+  .hero .btn-wrapper .btn {
+    flex: 1 1 100%;
+    justify-content: center;
+  }
+
+  /* The rail: static, horizontal, snapping, under the buttons. Each cue is a
+     56px-tall 16:9 thumb; the labels are too small to earn their place. */
+  .hero__rail {
+    position: relative;
+    top: auto;
+    right: auto;
+    z-index: 3;
+    grid-row: 3;
+    transform: none;
+    flex-direction: row;
+    width: auto;
+    gap: 0.5rem;
+    padding: 0 var(--edge-r) 0 var(--edge-l);
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+  }
+
+  .hero__rail::-webkit-scrollbar {
+    display: none;
+  }
+
+  .hero__rail > li {
+    flex: 0 0 auto;
+    scroll-snap-align: start;
+  }
+
+  .hero__cue {
+    width: calc(56px * 16 / 9);
+    height: 56px;
+    aspect-ratio: auto;
+  }
+
+  .hero__cue-label {
+    display: none;
+  }
+
+  /* The count follows the rail, and clears the home indicator on a notched
+     phone; the inset is 0 everywhere else. */
+  .hero__count {
+    position: relative;
+    left: auto;
     bottom: auto;
+    grid-row: 4;
+    padding: 1.25rem var(--edge-r) calc(2rem + env(safe-area-inset-bottom, 0px)) var(--edge-l);
   }
 
-  /*
-    The hero stops cropping and starts framing.
+  /* --- page heads -------------------------------------------------------- */
 
-    `cover` fills a 390x844 portrait hero from a 3:2 photograph by scaling it
-    until it is 1270px wide and showing the middle 31% — which is a wall, a
-    shopfront, anything but the screen the photograph is of. No focal point
-    rescues that: at this aspect ratio there is simply not enough of the
-    picture on screen.
-
-    So on a phone the photograph is laid in at its own proportions, full
-    width across the top, and the scrim ramps from nearly clear over the
-    image to solid below it. The whole site is visible, the band reads as
-    deliberate, and the headline sits on flat colour where it is most legible.
-  */
-  .slide__media {
-    background:
-      radial-gradient(130% 55% at 50% 6%, rgba(107, 163, 232, 0.18), transparent 62%),
-      linear-gradient(
-        180deg,
-        rgba(14, 20, 32, 0.22) 0%,
-        rgba(14, 20, 32, 0.16) 18%,
-        rgba(14, 20, 32, 0.72) 30%,
-        rgba(14, 20, 32, 0.95) 40%,
-        rgba(14, 20, 32, 0.99) 100%
-      ),
-      var(--slide-img, none) center top / 100% auto no-repeat;
-  }
-
-  .slider-copyright-text {
-    margin-top: 1.1rem;
+  .page-head .btn-wrapper .btn {
+    flex: 1 1 100%;
+    justify-content: center;
   }
 
   /* --- rhythm --------------------------------------------------------------
@@ -149,22 +234,148 @@
     margin-top: 0.35rem;
   }
 
+  .section-head > *,
+  .section-head__lede,
+  .section-head__fig {
+    grid-column: 1 / -1;
+    grid-row: auto;
+    justify-self: start;
+  }
+
+  .section-head__fig {
+    font-size: var(--fig-md);
+  }
+
   .service-block__title,
   .grid-item > .accent-title {
     margin-bottom: 0.75rem;
   }
 
-  /* The text half of a media card is already inside a padded box; on mobile
-     that padding is doing the same job twice. */
   .card-grid__text {
     padding-inline: 0;
     padding-block: 1.25rem 0;
   }
 
-  /* --- client wall ---------------------------------------------------------
-     At `minmax(7.5rem, 1fr)` the wall resolved to two 174px squares per row —
-     3,666px of monograms for 40 names. Three narrower, shallower tiles put the
-     same roster in a third of the height, which is the point of a wall. */
+  .board-grid,
+  .nearby,
+  .rail-section {
+    padding-block: 1.5rem;
+  }
+
+  /* --- stats: two by two ------------------------------------------------- */
+
+  .stats-band {
+    padding-block: 0.5rem;
+  }
+
+  .stats-band .stat {
+    grid-column: span 50;
+    padding: 1rem 0;
+    border-left: 0;
+  }
+
+  .stats-band .stat:nth-child(odd) {
+    padding-inline-end: var(--grid-gap);
+    border-right: 1px solid var(--line);
+  }
+
+  .stats-band .stat:nth-child(even) {
+    padding-inline-start: var(--grid-gap);
+  }
+
+  .stats-band .stat:nth-child(-n + 2) {
+    border-bottom: 1px solid var(--line);
+  }
+
+  .stat__value {
+    font-size: max(2rem, var(--fig-lg));
+  }
+
+  /* --- network index ----------------------------------------------------- */
+
+  .net-index__preview {
+    display: none;
+  }
+
+  .net-index__total {
+    font-size: var(--fig-lg);
+  }
+
+  /* --- rails: one card and a glimpse of the next --------------------------- */
+
+  .rail__item {
+    flex-basis: 78vw;
+  }
+
+  /* --- format split: stacked, no hover growth ----------------------------- */
+
+  .format-split {
+    flex-direction: column;
+    height: auto;
+  }
+
+  .format-pane {
+    flex: none;
+    aspect-ratio: 16 / 9;
+  }
+
+  .format-split__captions {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  /* --- process: a column with a rail down the left ------------------------
+     The horizontal track becomes a vertical one, drawn down the steps' own
+     left edge, and the amber line fills it top to bottom as the section
+     scrolls in. */
+
+  .process__track {
+    display: none;
+  }
+
+  .process__steps {
+    position: relative;
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
+    padding-left: 1.25rem;
+    border-left: 1px solid var(--line);
+  }
+
+  .process__steps::after {
+    content: '';
+    position: absolute;
+    left: -1px;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background: var(--hot);
+    transform: scaleY(var(--section-progress, 0));
+    transform-origin: top center;
+  }
+
+  .process__step {
+    padding: 0 0 1.25rem;
+    border-bottom: 0;
+  }
+
+  .process__step .checklist {
+    columns: 1;
+  }
+
+  /* --- client marquee ----------------------------------------------------- */
+
+  .client-marquee__name,
+  .client-marquee__dot {
+    font-size: 1.75rem;
+  }
+
+  .client-marquee__row {
+    animation-duration: 28s;
+  }
+
+  .client-marquee__row--reverse {
+    animation-duration: 36s;
+  }
 
   .client-wall {
     grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -172,16 +383,11 @@
 
   .client-tile {
     aspect-ratio: 4 / 3;
-    gap: 0.3rem;
     padding: 0.5rem 0.35rem;
   }
 
-  .client-tile__monogram {
-    font-size: 1.15rem;
-  }
-
   .client-tile__name {
-    font-size: 0.58rem;
+    font-size: 1.125rem;
     /* Two lines maximum: a long name should not set the height of its row. */
     display: -webkit-box;
     -webkit-box-orient: vertical;
@@ -189,35 +395,164 @@
     overflow: hidden;
   }
 
-  /* --- inventory ----------------------------------------------------------- */
+  /* --- conversion block: one column, full-width buttons ------------------- */
+
+  .cta-block__inner {
+    grid-template-columns: 1fr;
+    padding: 1.5rem;
+  }
+
+  .cta-block__line {
+    max-width: none;
+  }
+
+  /* --- footer -------------------------------------------------------------
+     Pages and Answers side by side; Offices and Contact full width under
+     them, ruled off. */
+
+  .footer-grid > .grid-item {
+    grid-column: span 50;
+  }
+
+  .footer-grid > .grid-item:nth-child(n + 3) {
+    grid-column: span 100;
+    margin-top: 0;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--line);
+  }
+
+  .footer-grid > .grid-item + .grid-item {
+    margin-top: 0;
+  }
+
+  .footer-cta {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  .social-links,
+  .footer-platforms {
+    display: inline-flex;
+    flex-wrap: wrap;
+    gap: 0.75rem 1.25rem;
+  }
+
+  .footer-meta {
+    flex-direction: column;
+    gap: 0.5rem;
+    font-size: var(--small);
+  }
+
+  #footer .gl-padding {
+    padding-bottom: calc(var(--gl-padding-tb) + env(safe-area-inset-bottom, 0px));
+  }
+
+  /* --- billboards: the filter bar scrolls sideways -----------------------
+     Ten chips do not fit across 390px and must not wrap to three rows under
+     a sticky header. One row, scrolling, bled to the viewport edges, with a
+     fade on the trailing edge as the sign that it scrolls. The bar expects
+     to sit inside a gutter-padded wrapper. */
+
+  .filter-bar {
+    flex-wrap: nowrap;
+    gap: 0.5rem;
+    margin-inline: calc(-1 * var(--edge-l)) calc(-1 * var(--edge-r));
+    padding-inline: var(--edge-l) var(--edge-r);
+    overflow-x: auto;
+    white-space: nowrap;
+    scrollbar-width: none;
+    mask-image: linear-gradient(to right, #000 85%, transparent);
+  }
+
+  .filter-bar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .filter-btn {
+    flex: 0 0 auto;
+  }
+
+  .filter-bar__status {
+    flex: 0 0 auto;
+    margin-left: 0.5rem;
+    padding-right: 1.5rem;
+  }
+
+  /* --- inventory: one column, 16:9 ---------------------------------------- */
+
+  .board-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .board-card__media {
+    aspect-ratio: 16 / 9;
+  }
 
   .board-card__body {
     padding: 1.1rem;
   }
 
-  /* The two spec pairs fit side by side at 390px, but only just; stacking the
-     term above its value keeps both readable without shrinking the type. */
   .board-card__specs {
     gap: 0.5rem 1.25rem;
     margin: 0.75rem 0;
   }
 
-  /*
-    A table that scrolls sideways inside the page gives no sign it can. The
-    fade on the trailing edge is that sign — it disappears as the last column
-    arrives because it is painted on the scroll container, not the table.
-  */
-  .table-scroll {
-    -webkit-overflow-scrolling: touch;
-    mask-image: linear-gradient(to right, #000 88%, transparent 100%);
+  /* --- listing ------------------------------------------------------------
+     A 21:9 band is 180px tall on a phone, which is a stripe rather than a
+     photograph; the portrait screen keeps the 3:2 frame. The glass card
+     stops floating and sits under the photograph at full width. */
+
+  .listing-figure--bleed .listing-figure__img {
+    aspect-ratio: 3 / 2;
+    max-height: none;
   }
 
-  .table-scroll::after {
-    content: 'Scroll for the full table';
-    display: block;
-    padding-top: 0.85rem;
-    font-size: var(--sub-size);
-    color: var(--grey-dark-color);
+  .listing-hero .glance--glass {
+    position: static;
+    width: auto;
+    margin: 1rem var(--edge-r) 0 var(--edge-l);
+    background: var(--surface);
+    backdrop-filter: none;
+  }
+
+  .glance__value--lead {
+    font-size: 2.5rem;
+  }
+
+  .listing-title {
+    font-size: max(2.75rem, var(--display-1));
+    max-width: none;
+  }
+
+  .listing .btn-wrapper .btn {
+    flex: 1 1 100%;
+    justify-content: center;
+  }
+
+  /* Three rows of two. The inline three-column rule from the builder has to
+     be beaten, hence the `!important`. */
+  .nearby {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  /* --- contact --------------------------------------------------------------
+     The number has to stay on one line at 390px: 2.75rem is the size at
+     which "+880 1958‑503753" fits the gutter with room to spare. WhatsApp
+     is the first button, in the head and in the brief. */
+
+  .contact-number {
+    font-size: clamp(2.75rem, 11vw, var(--display-1));
+  }
+
+  .contact-head .btn-wrapper .btn[href^='https://wa.me'],
+  .brief [data-brief-send='whatsapp'] {
+    order: -1;
+  }
+
+  .brief .btn-wrapper .btn {
+    flex: 1 1 100%;
+    justify-content: center;
   }
 
   /* --- menu ----------------------------------------------------------------
@@ -225,7 +560,7 @@
      legible as separate groups rather than one long list. */
 
   .main-navigation {
-    padding-bottom: var(--safe-b);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
   }
 
   .menu-header {
@@ -240,7 +575,7 @@
   .links_group + .links_group {
     margin-top: 1.5rem;
     padding-top: 1.5rem;
-    border-top: 1px solid var(--line-color);
+    border-top: 1px solid var(--line);
   }
 
   .links_group__label {
@@ -248,24 +583,96 @@
   }
 
   .menu-foot {
-    padding-bottom: calc(clamp(1.5rem, 4vw, 3rem) + var(--safe-b));
+    padding-bottom: calc(clamp(1.5rem, 4vw, 3rem) + env(safe-area-inset-bottom, 0px));
+  }
+}
+
+/* --- the comparison table, stacked -------------------------------------------
+   At 640px two text columns and a row heading no longer fit, and a table that
+   scrolls sideways inside the page loses its second column to anyone who does
+   not know to drag. Each row becomes a small block: the question across the
+   top, then the two answers side by side, each labelled from its own
+   `data-label`. Nothing scrolls, nothing is hidden. */
+
+@media (max-width: 640px) {
+  .table-scroll {
+    overflow: visible;
+    padding-block: 1rem;
   }
 
-  /* --- footer -------------------------------------------------------------- */
-
-  .footer-grid > .grid-item + .grid-item {
-    margin-top: 0;
-    padding-top: 1.5rem;
-    border-top: 1px solid var(--line-color);
+  .compare-table,
+  .compare-table tbody {
+    display: block;
+    width: 100%;
   }
 
-  .footer-meta {
-    flex-direction: column;
-    gap: 0.5rem;
+  .compare-table thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
   }
 
-  #footer .gl-padding {
-    padding-bottom: calc(var(--gl-padding-tb) + var(--safe-b));
+  .compare-table tr {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    column-gap: 1rem;
+    row-gap: 0.25rem;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .compare-table th,
+  .compare-table td {
+    padding: 0;
+    border-bottom: 0;
+  }
+
+  .compare-table th[scope='row'] {
+    grid-column: 1 / -1;
+    margin-bottom: 0.25rem;
+    font-family: var(--font-mono);
+    font-weight: 500;
+    font-size: var(--eyebrow);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    white-space: normal;
+    color: var(--text-muted);
+  }
+
+  .compare-table td::before {
+    content: attr(data-label);
+    display: block;
+    margin-bottom: 0.2rem;
+    font: 500 var(--eyebrow) / 1.3 var(--font-mono);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+}
+
+/* --- the FAQ teaser, question and arrow only --------------------------------- */
+
+@media (max-width: 480px) {
+  .answer-list--compact .answer-list__a {
+    display: none;
+  }
+}
+
+/* --- a specification sheet on a narrow phone ---------------------------------
+   Below 420px the label column and a long value such as a schedule no longer
+   share a line; the label goes above its value. */
+
+@media (max-width: 420px) {
+  .spec {
+    grid-template-columns: 1fr;
+    gap: 0.3rem;
+  }
+
+  .spec__label {
+    padding-top: 0;
   }
 }
 
@@ -274,34 +681,33 @@
    above cannot see.
 
    The display scale is keyed to viewport *width*, which is exactly backwards
-   when an 844px-wide screen is only 390px tall: the headline sets at 100px,
-   the hero's copy, button and caption no longer fit, and `overflow: hidden`
-   on the header quietly cuts them off. Keying the hero headline to the height
-   instead, and letting the header grow past the fold, fixes both. */
+   when an 844px-wide screen is only 390px tall: the headline sets at 100px
+   and the hero's copy and buttons no longer fit. Keying the hero headline to
+   the height instead, and letting the hero grow past the fold, fixes both. */
 
 @media (orientation: landscape) and (max-height: 640px) {
   /* The hero may now be taller than the screen. That is the point: a clipped
      call to action is worse than one reached by a short scroll. */
-  .main-header {
+  .hero {
     min-height: max(var(--size-vh100), 26rem);
   }
 
-  .slide h1 {
+  .hero__inner h1 {
     font-size: clamp(1.6rem, 7vh + 0.5rem, 4rem);
   }
 
-  .slider-text {
-    /* A floor, for the case where the copy is long enough to reach the top. */
-    padding-top: var(--header-safe);
+  .hero__copy {
+    padding-top: max(var(--header-safe), 3rem);
     padding-bottom: clamp(1.5rem, 5vh, 3rem);
   }
 
-  .slider-article .btn-wrapper {
+  .hero__inner .btn-wrapper {
     margin-top: 1.1rem;
   }
 
-  .slider-copyright-text {
-    margin-top: 0.85rem;
+  /* The cue rail has no room at the side of a short landscape frame. */
+  .hero__rail {
+    display: none;
   }
 
   /* The intro block on every other page is sized off `vw` too, and runs to
@@ -309,18 +715,20 @@
   .intro-text-wrapper {
     padding-block: max(var(--header-safe), clamp(2rem, 12vh, 6rem));
   }
+
+  .page-head {
+    padding-top: max(var(--header-safe), clamp(2rem, 12vh, 6rem));
+  }
 }
 
 /* --- very small phones ------------------------------------------------------
-   360px and below: the wall drops to two columns rather than squeezing three
-   into 100px each, and the buttons stop trying to sit side by side. */
+   360px and below: the cue strip goes, the wall drops to two columns rather
+   than squeezing three into 100px each, and the buttons stop trying to sit
+   side by side. */
 
 @media (max-width: 360px) {
-  /* 568px tall leaves the hero about 400px once the header and its own insets
-     are taken out — just enough for this headline at a slightly tighter
-     setting, and not enough at the full one. */
-  .slide h1 {
-    font-size: clamp(1.5rem, 8vw + 0.5rem, 3rem);
+  .hero__rail {
+    display: none;
   }
 
   .client-wall {
@@ -344,29 +752,7 @@
     will-change: auto;
   }
 
-  /* The decode hint is desktop-only — there is no hover to act on it. */
-  .listing-figure.has-ascii::after,
-  .article-figure.has-ascii::after {
-    display: none;
-  }
-
   .scroll-progress {
     height: 3px;
-  }
-}
-
-/* The decode button is the touch replacement for hover, so on a phone it has
-   to clear the same 44px bar as everything else. */
-@media (pointer: coarse) {
-  .ascii-toggle {
-    min-height: var(--tap);
-    padding-inline: 1.1em;
-  }
-}
-
-@media (max-width: 767px) {
-  .ascii-rule {
-    max-width: 12rem;
-    margin-bottom: 1rem;
   }
 }

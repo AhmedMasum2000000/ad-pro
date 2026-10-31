@@ -1,91 +1,187 @@
 /*
   Type.
 
-  Two families doing different jobs: a condensed display face for headings,
-  set tight and upper-case, against a variable humanist sans for everything
-  read at length. The contrast in width between them is what carries the
-  hierarchy — not weight, which is why headings are not bolded.
+  Three families doing three jobs. Bebas carries the display register —
+  headlines and section titles, set upper-case and tight, where the condensed
+  width does the work that weight would do elsewhere. Inter carries everything
+  read at length, and at 600 the mid-level titles. IBM Plex Mono carries the
+  specification register: eyebrows, readouts, figures, anything that is a
+  value rather than a sentence. Mono is never used for prose.
+
+  Nothing renders below `--readout` (11px). Every size here is a token so the
+  scale can be retuned in one place.
 */
 
-h1, h2, h3, h4, h5, h6,
-.h1, .h2, .h3, .h4, .h5, .h6 {
+/* --- display ------------------------------------------------------------ */
+
+h1, h2,
+.h1, .h2,
+.mtitle,
+.footer-heading,
+.cta-block__line {
   font-family: var(--font-heading);
   font-weight: 400;
   text-transform: uppercase;
-  /* Condensed display faces have generous side bearings; pulling the tracking
-     in slightly stops large settings looking loose. */
-  letter-spacing: 0.01em;
-  line-height: 0.92;
+  /* Bebas has tight side bearings already; a hair of tracking stops the
+     largest settings from clumping without ever reading as spaced. */
+  letter-spacing: .005em;
+  line-height: .92;
   margin: 0;
+  color: var(--text);
+  text-wrap: balance;
+  /* Site names carry a non-breaking hyphen, so the browser must never add
+     its own break inside a word. */
+  hyphens: manual;
+  overflow-wrap: normal;
+}
+
+h1, .h1 {
+  font-size: var(--display-1);
+  line-height: .9;
+  max-width: 11ch;
+}
+
+h2, .h2, .mtitle, .cta-block__line {
+  font-size: var(--display-2);
+}
+
+/* --- titles ------------------------------------------------------------- */
+
+/* Mid-level titles step out of the display face: a card title in Bebas is
+   fine (the components set that themselves), but an h3 above a paragraph
+   should read as part of the paragraph's register, not as a second headline. */
+h3, h4, h5, h6,
+.h3, .h4, .h5, .h6,
+.accent-title {
+  font-family: var(--font-main);
+  font-weight: 600;
+  font-size: var(--title);
+  line-height: 1.2;
+  letter-spacing: -.01em;
+  text-transform: none;
+  margin: 0;
+  color: var(--text);
   text-wrap: balance;
 }
 
-h1, .h1 { font-size: var(--h1-size); }
-h2, .h2 { font-size: var(--h2-size); }
-h3, .h3 { font-size: var(--h3-size); }
-h4, .h4 { font-size: var(--h4-size); }
-h5, .h5 { font-size: var(--h5-size); }
-h6, .h6 { font-size: var(--h6-size); }
-
-/* The oversized statement setting used once per page at most. */
-.h1-strong {
-  font-size: var(--h1-strong-size);
-  line-height: 0.82;
+h5, h6, .h5, .h6 {
+  font-size: var(--body);
 }
 
-/* Small roman text set inside a display heading — a lowercase counterpoint
-   that keeps a long headline from reading as one undifferentiated block. */
-.h1-em {
-  display: block;
-  font-family: var(--font-main);
-  font-size: var(--h1em-size);
-  font-weight: 400;
-  text-transform: none;
-  letter-spacing: 0;
-  line-height: 1.5;
-  color: var(--grey-dark-color);
-  max-width: 46ch;
-}
+/* --- body --------------------------------------------------------------- */
 
 p {
-  font-size: var(--p-size);
-  line-height: 1.65;
+  font-size: var(--body);
+  line-height: 1.55;
   margin: 0 0 1.2em;
-  max-width: 68ch;
+  max-width: 60ch;
+  color: var(--text-2);
   text-wrap: pretty;
 }
 
 p:last-child { margin-bottom: 0; }
 
 .accent-text {
-  font-size: var(--accent-size);
+  font-size: var(--body);
   line-height: 1.55;
-  color: var(--text-color);
-  max-width: 52ch;
+  color: var(--text-2);
+  max-width: 60ch;
 }
 
-.accent-title {
-  font-size: var(--accent-title-size);
+/* The lede under a headline. One step up from body, a shade down from the
+   headline's white — never muted, it is the second thing anyone reads. */
+.lede,
+.h1-em {
+  display: block;
   font-family: var(--font-main);
-  font-weight: 500;
-  line-height: 1.3;
+  font-size: var(--lede);
+  font-weight: 400;
+  line-height: 1.5;
+  letter-spacing: 0;
   text-transform: none;
-  letter-spacing: -0.01em;
+  color: var(--text-2);
+  max-width: 34rem;
+  margin-top: 1.25rem;
 }
 
+/* --- eyebrow / labels --------------------------------------------------- */
+
+/*
+  The eyebrow is mono — it is a label, not a sentence, and setting it in the
+  same face as the readouts and figures makes the whole site share one
+  specification register. `.sub-text` is the old name; it is kept as a
+  selector so untouched markup looks identical until it is migrated.
+*/
+.eyebrow,
 .sub-text {
-  font-size: var(--sub-size);
-  letter-spacing: 0.08em;
+  display: block;
+  font-family: var(--font-mono);
+  font-weight: 500;
+  font-size: var(--eyebrow);
+  line-height: 1.4;
+  letter-spacing: .14em;
   text-transform: uppercase;
-  color: var(--grey-dark-color);
+  color: var(--text-muted);
 }
 
-.mtitle { font-size: var(--mtitle-size); }
+/* Low specificity on purpose: components stack eyebrows differently and
+   should be able to zero this without fighting it. */
+:where(.eyebrow, .sub-text) {
+  margin: 0 0 1rem;
+}
 
-.text-muted { color: var(--grey-dark-color); }
-.text-light { color: var(--lightalpha-color); }
+/* The short accent rule under an eyebrow. Drawn in by reveal.ts
+   (`data-reveal="line"`), so it scales from the left. */
+.rule {
+  display: block;
+  width: 2.5rem;
+  height: 2px;
+  margin: 0 0 1.25rem;
+  background: var(--accent);
+  transform-origin: left center;
+}
 
-/* --- links ---------------------------------------------------------------- */
+.rule--full {
+  width: 100%;
+}
+
+/* Figures inside prose: boardIntro() wraps them so a size or an hour reads
+   as a value even mid-sentence. */
+.num {
+  font-family: var(--font-mono);
+  font-size: .95em;
+  font-variant-numeric: tabular-nums;
+}
+
+.nowrap { white-space: nowrap; }
+
+.text-muted { color: var(--text-muted); }
+.text-light { color: var(--brand-sky); }
+
+/* --- split masks -------------------------------------------------------- */
+
+/*
+  split.ts wraps every word of a `[data-split="words"]` heading in a mask
+  and an inner span, then slides the inner span up into view. The mask is
+  an inline-block so the heading still wraps as text; `vertical-align: top`
+  keeps the masks from sitting on the baseline and opening a gap under each
+  line. The small padding gives descenders room inside the mask so a Q or a
+  J is not clipped at rest.
+*/
+.w {
+  display: inline-block;
+  overflow: hidden;
+  vertical-align: top;
+  padding-bottom: .08em;
+  margin-bottom: -.08em;
+}
+
+.w__in {
+  display: inline-block;
+  will-change: transform;
+}
+
+/* --- links -------------------------------------------------------------- */
 
 a {
   color: inherit;
@@ -93,20 +189,18 @@ a {
 }
 
 /*
-  Underline that draws from the left on hover and, on the way out, retracts to
-  the right rather than reversing — the line reads as passing through rather
-  than rewinding. `transform-origin` is what switches direction; it flips at
-  the moment hover ends.
+  A text link carries a faint sky underline at rest, and on hover a full one
+  draws over it from the left. On the way out the full line retracts to the
+  right rather than reversing, so it reads as passing through.
 */
 .text-link {
   position: relative;
   display: inline-block;
-  font-size: var(--menu-size);
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  padding-block: 0.25em;
+  font-weight: 500;
+  padding-block: .15em;
 }
 
+.text-link::before,
 .text-link::after {
   content: '';
   position: absolute;
@@ -114,10 +208,17 @@ a {
   bottom: 0;
   width: 100%;
   height: 1px;
-  background: currentColor;
+  background: var(--brand-sky);
+}
+
+.text-link::before {
+  opacity: .6;
+}
+
+.text-link::after {
   transform: scaleX(0);
   transform-origin: right center;
-  transition: transform var(--dur-fast) var(--ease-out);
+  transition: transform .35s var(--ease-out);
 }
 
 .text-link:hover::after,
@@ -126,44 +227,60 @@ a {
   transform-origin: left center;
 }
 
-/* --- buttons -------------------------------------------------------------- */
+/* --- buttons ------------------------------------------------------------ */
 
+/*
+  Three buttons and no more. The ghost is the default; `--primary` is the one
+  amber element a viewport gets; `--accent` borrows the per-site hue on a
+  listing. All three are pills with a 44px minimum so they are the same
+  target on a phone as on a desk.
+*/
 .btn {
   display: inline-flex;
   align-items: center;
-  gap: 0.7em;
-  padding: 0.95em 1.9em;
-  border: 1px solid var(--line-color);
+  justify-content: center;
+  gap: .6em;
+  min-height: var(--tap);
+  padding: .9em 1.6em;
+  border: 1px solid var(--line-strong);
   border-radius: 999px;
-  font-size: var(--menu-size);
-  letter-spacing: 0.06em;
+  font-family: var(--font-main);
+  font-weight: 600;
+  font-size: var(--btn);
+  line-height: 1;
+  letter-spacing: .08em;
   text-transform: uppercase;
-  color: var(--text-color);
+  text-decoration: none;
+  color: var(--text);
   background: transparent;
   cursor: pointer;
   overflow: hidden;
   position: relative;
   isolation: isolate;
-  transition: color var(--dur-fast) var(--ease-out),
-              border-color var(--dur-fast) var(--ease-out);
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    color var(--dur-fast) var(--ease-out),
+    border-color var(--dur-fast) var(--ease-out),
+    background-color var(--dur-fast) var(--ease-out),
+    transform var(--dur-fast) var(--ease-out);
 }
 
 /* The fill wipes up from the bottom edge and, on exit, continues off the top
-   instead of sinking back down. */
+   instead of sinking back down. On the ghost it is a faint lift; the variants
+   recolour it. */
 .btn::before {
   content: '';
   position: absolute;
   inset: 0;
   z-index: -1;
-  background: var(--lightalpha-color);
+  background: rgb(244 247 251 / .06);
   transform: translateY(101%);
   transition: transform var(--dur-base) var(--ease-out);
 }
 
 .btn:hover,
 .btn:focus-visible {
-  color: var(--bg-color);
-  border-color: var(--lightalpha-color);
+  border-color: var(--text);
 }
 
 .btn:hover::before,
@@ -171,9 +288,56 @@ a {
   transform: translateY(0);
 }
 
+/* The label is its own element so the magnetic follower can move it a little
+   less than the button — the text lags the pill, which is what sells the
+   pull. It must not catch the pointer, or hover would flicker at its edge. */
+.btn__label {
+  display: inline-block;
+  position: relative;
+  pointer-events: none;
+  will-change: transform;
+}
+
+.btn--primary {
+  background: var(--hot);
+  color: var(--ink);
+  border-color: transparent;
+}
+
+.btn--primary::before {
+  background: var(--hot-hover);
+}
+
+.btn--primary:hover,
+.btn--primary:focus-visible {
+  background: var(--hot-hover);
+  border-color: transparent;
+  color: var(--ink);
+  transform: translateY(-1px);
+}
+
+.btn--primary:active {
+  transform: translateY(0);
+}
+
+.btn--accent {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.btn--accent::before {
+  background: var(--accent);
+}
+
+.btn--accent:hover,
+.btn--accent:focus-visible {
+  border-color: var(--accent);
+  color: var(--ink);
+}
+
 .btn-wrapper {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.75rem;
+  gap: .75rem;
   margin-top: 2rem;
 }

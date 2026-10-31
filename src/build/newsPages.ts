@@ -16,7 +16,7 @@
 import { cityGroups, company } from '../data/site';
 import { articleBySlug, articles, articlesByDate, type Article } from '../data/articles';
 import { faqBySlug } from '../data/faq';
-import { buildCta, esc, faqPath, renderBlock } from './faqPages';
+import { articleHead, buildCta, esc, faqPath, renderBlock } from './faqPages';
 import { cityPath } from './seo';
 
 export const newsPath = (slug: string): string => `news-${slug}.html`;
@@ -52,10 +52,10 @@ function answersRail(article: Article): string {
     .filter((a): a is NonNullable<ReturnType<typeof faqBySlug>> => Boolean(a))
     .map(
       (a) => `
-          <li class="related-q__item" data-reveal-item>
+          <li class="related-q__item ruled__row" data-reveal-item>
             <a class="related-q__link" href="${esc(faqPath(a.slug))}">
               <span class="related-q__question">${esc(a.question)}</span>
-              <span class="related-q__cat">${esc(a.category)}</span>
+              <span class="related-q__cat eyebrow">${esc(a.category)}</span>
             </a>
           </li>`,
     )
@@ -65,13 +65,13 @@ function answersRail(article: Article): string {
 
   return `
         <section class="gl-section gl-padding_lr">
-          <div class="intro-text" data-reveal>
-            <span class="sub-text">Go deeper</span>
-            <h2 class="mtitle">Questions this raises</h2>
-          </div>
-          <ul class="related-q" data-reveal>${items}</ul>
+          <header class="section-head" data-reveal>
+            <span class="eyebrow">Go deeper</span>
+            <h2 data-split="words">Questions this raises</h2>
+          </header>
+          <ul class="related-q ruled" data-reveal>${items}</ul>
           <div class="btn-wrapper">
-            <a class="btn addHover" href="faq.html">All 20 questions</a>
+            <a class="btn addHover" href="faq.html"><span class="btn__label">All 20 questions</span></a>
           </div>
         </section>`;
 }
@@ -100,10 +100,10 @@ function moreArticles(article: Article): string {
 
   return `
         <section class="gl-section gl-padding_lr">
-          <div class="intro-text" data-reveal>
-            <span class="sub-text">More from the newsroom</span>
-            <h2 class="mtitle">Keep reading</h2>
-          </div>
+          <header class="section-head" data-reveal>
+            <span class="eyebrow">More from the newsroom</span>
+            <h2 data-split="words">Keep reading</h2>
+          </header>
           <ul class="news-grid" data-reveal>${items}</ul>
         </section>`;
 }
@@ -130,6 +130,7 @@ function inventoryRail(article: Article): string {
         <section class="gl-section gl-padding_lr" data-reveal>
           <div class="css-grid-wrapper">
             <div class="grid-item grid-40 xsm-grid-100">
+              <span class="eyebrow">Inventory</span>
               <h2 class="accent-title">The sites behind this</h2>
               <p class="text-muted">
                 Every screen has a page with a photograph, the size, the direction it faces and
@@ -139,7 +140,7 @@ function inventoryRail(article: Article): string {
             <div class="grid-item grid-60 xsm-grid-100">
               <ul class="city-links">${links}</ul>
               <div class="btn-wrapper">
-                <a class="btn addHover" href="billboards.html">Browse all 58 sites</a>
+                <a class="btn addHover" href="billboards.html"><span class="btn__label">Browse all 58 sites</span></a>
               </div>
             </div>
           </div>
@@ -153,29 +154,20 @@ export function buildArticle(slug: string): string {
   if (!article) throw new Error(`No article with slug "${slug}"`);
 
   return `
-        <nav class="breadcrumb gl-padding_lr" aria-label="Breadcrumb" data-reveal>
-          <a class="text-link" href="${NEWS_HUB}">News</a>
-          <span aria-hidden="true">/</span>
-          <span>${esc(article.shortTitle)}</span>
-        </nav>
-
-        <section class="intro-text-wrapper gl-padding_lr">
-          <header class="intro-text" data-reveal>
-            <span class="sub-text">${esc(article.topic)}</span>
-            <div class="ascii-rule" data-ascii-rule aria-hidden="true"></div>
-            <h1 class="listing-title" data-scramble>${esc(article.title)}</h1>
-            <p class="answer-lede">${esc(article.standfirst)}</p>
-            ${dateline(article)}
-          </header>
-        </section>
+        ${articleHead({
+          readout: `NEWS · ${formatDate(article.published).toUpperCase()}`,
+          crumbs: [{ label: 'News', href: NEWS_HUB }, { label: article.shortTitle }],
+          eyebrow: article.topic,
+          title: esc(article.title),
+          lede: esc(article.standfirst),
+          after: dateline(article),
+        })}
 
         <section class="gl-section gl-padding_lr">
           <article class="article" data-reveal>
             ${article.body.map(renderBlock).join('\n')}
           </article>
         </section>
-
-        <!--@MARQUEE-->
 
         ${inventoryRail(article)}
         ${answersRail(article)}
@@ -184,6 +176,7 @@ export function buildArticle(slug: string): string {
         ${buildCta(
           'Reading is the easy part. Tell us the city and the dates.',
           `A written plan — sites, sizes, minutes and an all-in cost — inside one working day. Call ${esc(company.phone)}.`,
+          article.shortTitle,
         )}`;
 }
 
@@ -196,7 +189,7 @@ export function buildNewsHub(): string {
           <article class="news-lead" data-reveal>
             <a class="news-lead__link" href="${esc(newsPath(lead.slug))}">
               <span class="news-lead__topic">${esc(lead.topic)}</span>
-              <h2 class="news-lead__title" data-scramble>${esc(lead.title)}</h2>
+              <h2 class="news-lead__title">${esc(lead.title)}</h2>
               <p class="news-lead__stand">${esc(lead.standfirst)}</p>
               <p class="news-lead__meta">
                 <time datetime="${esc(lead.published)}">${esc(formatDate(lead.published))}</time>
@@ -224,17 +217,12 @@ export function buildNewsHub(): string {
     .join('');
 
   return `
-        <section class="intro-text-wrapper gl-padding_lr">
-          <header class="intro-text" data-reveal>
-            <span class="sub-text">News and analysis</span>
-            <div class="ascii-rule" data-ascii-rule aria-hidden="true"></div>
-            <h1 data-scramble>The newsroom</h1>
-            <p class="h1-em">
-              Seasonal planning, sector playbooks and what is actually changing in Bangladeshi
-              out-of-home — written by the people who own and run the screens.
-            </p>
-          </header>
-        </section>
+        ${articleHead({
+          readout: `NEWS · ${String(articles.length).padStart(2, '0')} PIECES`,
+          eyebrow: 'News and analysis',
+          title: 'The newsroom',
+          lede: 'Seasonal planning, sector playbooks and what is actually changing in Bangladeshi out-of-home — written by the people who own and run the screens.',
+        })}
 
         <section class="gl-section gl-padding_lr">
           ${leadCard}

@@ -58,12 +58,17 @@ for (const file of readdirSync(pagesDir)) {
   if (/^(led|billboards|faq|news)-.+\.html$/.test(file)) unlinkSync(join(pagesDir, file));
 }
 
+// `main` is visible from the first paint — the old `hideOnLoad` class kept
+// the page dark until the script ran, which with a slow network meant a dark
+// page. The curtain alone covers the intro now. The services strip and the
+// footer are placed here, after the body, so every generated route ends the
+// same way the hand-written ones do.
 const skeleton = (namespace, placeholder) => `<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <meta name="theme-color" content="#0e1420" />
+    <meta name="theme-color" content="#07090e" />
     <meta name="color-scheme" content="dark" />
     <!--@HEAD-->
   </head>
@@ -71,10 +76,11 @@ const skeleton = (namespace, placeholder) => `<!doctype html>
   <body class="isLoading" data-barba="wrapper">
     <!--@SHELL-->
 
-    <main class="all-content-wrapper hideOnLoad margin-auto" id="main">
+    <main class="all-content-wrapper margin-auto" id="main">
       <div class="page-content" data-barba="container" data-barba-namespace="${namespace}">
         ${placeholder}
 
+        <!--@MARQUEE-->
         <!--@FOOTER-->
       </div>
     </main>

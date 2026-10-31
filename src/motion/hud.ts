@@ -1,23 +1,27 @@
 /**
- * The two live readouts in the viewfinder chrome.
+ * The viewfinder's live state: the clock and the on-air lamp.
  *
  * Both report something real. The clock is Dhaka time, which is where the
  * screens are — a buyer in another timezone asking "are they running right
  * now?" gets the answer without doing the arithmetic. The lamp is lit while
- * the network is on air and dark outside its hours.
+ * the network is on air (09:00–23:00 Dhaka) and on standby outside those
+ * hours. Standby is grey, never red: off air is a fact about the clock, not a
+ * warning, and the readout says when it comes back.
  *
- * Deliberately not on a rAF loop. A clock that changes ten times a second
- * needs ten updates a second, not sixty, and every one of them is a paint on
- * a fixed element that sits above the whole page. `setInterval` at 100ms costs
- * a sixth as much and looks identical.
+ * One tick a second, aligned to the second. The clock only shows seconds, so
+ * anything faster is paint for nothing on an element that sits over the hero
+ * photograph; aligning the interval to the wall clock keeps the display from
+ * visibly lagging the real time by up to a second.
  *
- * This module also sets `body.chrome-on`, which is the only thing that makes
- * the chrome visible. The markup ships to all 96 routes at once with no
- * incremental rollout, so the escape hatch is a single class name: drop this
- * call from boot() and every trace of the instrument goes with it.
+ * Shell-level, but the chrome lives inside the home hero, which Barba swaps.
+ * So the readouts are looked up on every tick rather than cached once — one
+ * `querySelector` a second is nothing, and it means the instrument comes
+ * back the moment a visitor returns to the home page, without a rebind.
+ *
+ * `body.chrome-on` is set here and is the only thing that makes the chrome
+ * visible: drop this call from boot() and every trace of the instrument goes
+ * with it.
  */
-
-import { qs } from '../lib/dom';
 
 export interface HudHandle {
   destroy: () => void;
@@ -38,7 +42,8 @@ const DHAKA_OFFSET_MIN = 6 * 60;
 const ON_AIR_FROM = 9;
 const ON_AIR_UNTIL = 23;
 
-const TICK_MS = 100;
+const LABEL_ON = 'On air';
+const LABEL_OFF = `Off air · back ${String(ON_AIR_FROM).padStart(2, '0')}:00`;
 
 const pad = (n: number): string => String(n).padStart(2, '0');
 
@@ -48,50 +53,76 @@ function dhakaNow(): Date {
   return new Date(now.getTime() + (DHAKA_OFFSET_MIN + now.getTimezoneOffset()) * 60_000);
 }
 
+export const isOnAir = (t: Date = dhakaNow()): boolean =>
+  t.getHours() >= ON_AIR_FROM && t.getHours() < ON_AIR_UNTIL;
+
 export function initHud(): HudHandle {
   document.body.classList.add('chrome-on');
 
-  const clock = qs<HTMLElement>('[data-hud-clock]');
-  const label = qs<HTMLElement>('[data-hud-label]');
-
-  if (!clock && !label) {
-    return { destroy: () => document.body.classList.remove('chrome-on') };
-  }
-
   let lastOnAir: boolean | null = null;
+  let lastClockText = '';
+  let timeout = 0;
+  let interval = 0;
 
   const tick = (): void => {
     const t = dhakaNow();
 
-    if (clock) {
-      clock.textContent = `${pad(t.getHours())}:${pad(t.getMinutes())}:${pad(t.getSeconds())}`;
+    const clockText = `${pad(t.getHours())}:${pad(t.getMinutes())}:${pad(t.getSeconds())}`;
+    if (clockText !== lastClockText) {
+      lastClockText = clockText;
+      document.querySelectorAll<HTMLElement>('[data-hud-clock]').forEach((clock) => {
+        clock.textContent = clockText;
+      });
     }
 
-    const onAir = t.getHours() >= ON_AIR_FROM && t.getHours() < ON_AIR_UNTIL;
-    // Only touch the DOM on the two moments a day this changes.
-    if (onAir !== lastOnAir) {
+    const onAir = isOnAir(t);
+    const lamps = document.querySelectorAll<HTMLElement>('[data-hud-lamp]');
+    const labels = document.querySelectorAll<HTMLElement>('[data-hud-label]');
+    // Only touch the DOM on the two moments a day this changes — or when a
+    // fresh page has brought a fresh, unlabelled chrome with it.
+    const fresh = Array.from(labels).some((l) => l.textContent !== (onAir ? LABEL_ON : LABEL_OFF));
+    if (onAir !== lastOnAir || fresh) {
       lastOnAir = onAir;
       document.body.classList.toggle('is-onair', onAir);
-      if (label) label.textContent = onAir ? 'On air' : 'Off air';
+      lamps.forEach((lamp) => {
+        lamp.classList.toggle('is-onair', onAir);
+        lamp.classList.toggle('is-standby', !onAir);
+      });
+      labels.forEach((label) => {
+        label.textContent = onAir ? LABEL_ON : LABEL_OFF;
+      });
     }
   };
 
-  tick();
-  let timer = window.setInterval(tick, TICK_MS);
+  const stop = (): void => {
+    window.clearTimeout(timeout);
+    window.clearInterval(interval);
+    timeout = 0;
+    interval = 0;
+  };
+
+  /** Ticks now, then once a second on the second. */
+  const run = (): void => {
+    stop();
+    tick();
+    timeout = window.setTimeout(() => {
+      tick();
+      interval = window.setInterval(tick, 1000);
+    }, 1000 - (Date.now() % 1000));
+  };
+
+  run();
 
   // A clock in a background tab is telling no one anything.
   const onVisibility = (): void => {
-    window.clearInterval(timer);
-    if (!document.hidden) {
-      tick();
-      timer = window.setInterval(tick, TICK_MS);
-    }
+    if (document.hidden) stop();
+    else run();
   };
   document.addEventListener('visibilitychange', onVisibility);
 
   return {
     destroy: () => {
-      window.clearInterval(timer);
+      stop();
       document.removeEventListener('visibilitychange', onVisibility);
       document.body.classList.remove('chrome-on', 'is-onair');
     },
