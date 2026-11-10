@@ -6,6 +6,11 @@
   `grid-33` is a third — so a layout can be read off the markup without
   consulting a scale. Breakpoint prefixes override downward:
   `grid-50 xsm-grid-100` is half on desktop, full on small screens.
+
+  Three small primitives live at the bottom of this file because every page
+  composes them: the two-column editorial section head, the ruled list, and
+  the captioned plate. They are layout, not components — a section head is
+  the same shape whether it introduces a rail of photographs or a table.
 */
 
 /*
@@ -139,18 +144,158 @@
   padding-block: var(--section-gap);
 }
 
+/* A photograph that runs edge to edge. The caption inside it re-applies the
+   gutter itself (see `.plate__caption.gl-padding_lr`). */
+.gl-section--bleed {
+  padding-inline: 0;
+}
+
 /*
   The first thing on a page sits under the fixed header, so it has to reserve
   the header's height itself. Applied to the element rather than to `main` so
   a full-bleed hero — which is *meant* to run under the header — can opt out
-  simply by not being one of these.
+  simply by not being one of these. `.page-head` reserves its own clearance in
+  components.css and is excluded here so the two do not stack.
 */
 .page-content > .intro-text-wrapper:first-child {
   padding-top: max(var(--intro-gap), var(--header-safe));
 }
 
-.page-content > .gl-section:first-child {
+.page-content > .gl-section:first-child:not(.page-head) {
   padding-top: max(var(--section-gap), var(--header-safe));
 }
 
 .z-on-top { z-index: var(--z-curtain); }
+
+/* --- section head -----------------------------------------------------------
+   The editorial two-column head every section with an h2 uses. Eyebrow and
+   headline take the left seven columns; an optional lede or mono figure sits
+   in the right five, bottom-aligned to the headline's baseline so the two
+   read as one line of composition rather than a heading with a stray
+   paragraph beside it.
+
+   The right-hand items span three rows rather than naming one, because the
+   left column holds two or three things (eyebrow, optional rule, headline)
+   depending on the section, and a fixed row number would land the lede
+   beside the eyebrow on one page and beside the headline on the next. */
+
+.section-head {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  column-gap: var(--grid-gap);
+  row-gap: 0.75rem;
+  align-items: end;
+  margin-bottom: var(--section-gap);
+}
+
+.section-head > * {
+  grid-column: 1 / 8;
+  min-width: 0;
+}
+
+.section-head > .eyebrow {
+  display: block;
+}
+
+.section-head > h2 {
+  margin: 0;
+}
+
+.section-head__lede,
+.section-head__fig {
+  grid-column: 8 / 13;
+  grid-row: 1 / span 3;
+  align-self: end;
+  margin: 0;
+}
+
+.section-head__lede {
+  font-size: var(--lede);
+  line-height: 1.45;
+  color: var(--text-2);
+  max-width: 34rem;
+}
+
+/* A counter or a total, set to the same size as the stat figures so the mono
+   register is one size everywhere it appears at this scale. */
+.section-head__fig {
+  justify-self: end;
+  font-family: var(--font-mono);
+  font-weight: 500;
+  font-size: var(--fig-lg);
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  color: var(--text-muted);
+}
+
+/* Both present: the lede takes the inner three columns, the figure the outer
+   two. */
+.section-head:has(.section-head__fig) > .section-head__lede { grid-column: 8 / 11; }
+.section-head:has(.section-head__lede) > .section-head__fig { grid-column: 11 / 13; }
+
+/* --- ruled list -------------------------------------------------------------
+   Rows separated by hairlines, never boxed. The container's top rule is one
+   step stronger than the rows so the list has a visible start. No radius, no
+   shadow — the only thing allowed to glow on this site is a photograph. */
+
+.ruled {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--line-strong);
+}
+
+.ruled__row {
+  border-bottom: 1px solid var(--line);
+}
+
+/* --- plate ------------------------------------------------------------------
+   A photograph with its caption underneath, on the ground, never on the
+   picture. The image is shown at full exposure; the caption is mono, small,
+   and ruled off from the photograph above it. */
+
+.plate {
+  position: relative;
+  margin: 0;
+  min-width: 0;
+}
+
+.plate > img {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 3 / 2;
+  object-fit: cover;
+  filter: none;
+}
+
+.plate__caption {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 1rem;
+  margin: 0;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--line);
+  font-family: var(--font-mono);
+  font-size: var(--small);
+  line-height: 1.4;
+  color: var(--text-muted);
+}
+
+.plate__caption > span:last-child {
+  flex-shrink: 0;
+  text-align: right;
+}
+
+/* Inside a rail card the title is display-sized and carries the whole
+   caption, so the second span can wrap under it. */
+.plate--rail .plate__caption {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.35rem;
+}
+
+.plate--rail .plate__caption > span:last-child {
+  text-align: left;
+}

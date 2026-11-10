@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <meta name="theme-color" content="#0e1420" />
+    <meta name="theme-color" content="#07090e" />
     <meta name="color-scheme" content="dark" />
     <!--@HEAD-->
   </head>
@@ -11,88 +11,77 @@
   <body class="isLoading" data-barba="wrapper">
     <!--@SHELL-->
 
-    <main class="all-content-wrapper hideOnLoad margin-auto" id="main">
+    <main class="all-content-wrapper margin-auto" id="main">
       <div class="page-content" data-barba="container" data-barba-namespace="billboards">
-        <section class="intro-text-wrapper gl-padding_lr">
-          <header class="intro-text" data-reveal>
-            <span class="sub-text">Inventory</span>
-            <div class="ascii-rule" data-ascii-rule aria-hidden="true"></div>
-            <h1 data-scramble>Billboards</h1>
-            <p class="h1-em">
-              58 digital LED sites across ten cities. Every listing carries the screen size, the
-              direction it faces, the hours it runs and a photograph of the site itself. Rates are
-              quoted per screen — call for price.
-            </p>
-            <div class="btn-wrapper">
-              <a class="btn addHover" href="tel:@PHONE_HREF@">Call for price</a>
-              <a class="btn addHover" href="contact.html">Send a brief</a>
+        <section class="page-head gl-padding_lr">
+          <p class="page-head__readout" aria-hidden="true">[ NETWORK · 58 SITES / 10 CITIES ]</p>
+          <div class="css-grid-wrapper">
+            <header class="grid-item grid-55 xsm-grid-100 intro-text" data-reveal>
+              <span class="eyebrow">Inventory</span>
+              <i class="rule" data-reveal="line"></i>
+              <h1 data-split="words">Billboards</h1>
+              <p class="lede">
+                58 digital LED sites across ten cities. Every listing carries the screen size, the
+                direction it faces, the hours it runs and a photograph of the site itself. Rates are
+                quoted per screen — call for price.
+              </p>
+              <div class="btn-wrapper">
+                <a class="btn btn--primary addHover" href="tel:@PHONE_HREF@"><span class="btn__label">Call for price</span></a>
+                <a class="btn addHover" href="contact.html"><span class="btn__label">Send a brief</span></a>
+              </div>
+            </header>
+            <!--
+              The two formats, compactly: a pair of plates that link to the
+              format pages. The full-bleed format split lower down says more;
+              this is the signpost at the top.
+            -->
+            <div class="grid-item grid-45 xsm-grid-100 page-head__aside" data-reveal data-reveal-delay="0.1">
+              <div class="page-head__formats" style="display:grid;grid-template-columns:1fr 1fr;gap:var(--grid-gap)">
+                <a class="plate" href="digital-billboards.html" data-cursor="media" data-cursor-label="Digital">
+                  <img src="/boards/dhaka-sks-tower-entrance-mohakhali.jpg" alt="" width="992" height="662" loading="eager" decoding="async" style="object-position:50% 50%;aspect-ratio:16/9;object-fit:cover" />
+                  <span class="plate__caption"><span class="format-pane__title">Digital</span><span class="eyebrow">By the day</span></span>
+                </a>
+                <a class="plate" href="static-billboards.html" data-cursor="media" data-cursor-label="Static">
+                  <img src="/boards/coxs-bazar-dolphin-moor-coxs-bazar.jpg" alt="" width="992" height="662" loading="eager" decoding="async" style="object-position:50% 40%;aspect-ratio:16/9;object-fit:cover" />
+                  <span class="plate__caption"><span class="format-pane__title">Static</span><span class="eyebrow">By the month</span></span>
+                </a>
+              </div>
             </div>
-          </header>
+          </div>
         </section>
+
+        <!--
+          The city filter sits directly under the head and stays pinned under
+          the header while the rail, the formats and the comparison scroll by,
+          so a visitor who already knows the city never has to find it again.
+        -->
+        <!--@FILTER_BAR-->
+
+        <!--@CITY_INDEX-->
+
+        <!--@FORMATS-->
 
         <section class="gl-section gl-padding_lr">
-          <div class="intro-text" data-reveal>
-            <span class="sub-text">By city</span>
-            <h2 class="mtitle" data-parallax="18">Where the network is</h2>
-          </div>
-          <!--@CITY_INDEX-->
-        </section>
-
-        <section class="gl-section gl-padding_lr" data-reveal>
-          <div class="css-grid-wrapper">
-            <div class="grid-item grid-50 xsm-grid-100 grid-item-media has-link" data-cursor="media" data-cursor-label="Digital">
-              <div class="grid-item-media__inner" style="--card-img:url('/boards/dhaka-gulshan-circle-2-west-side-barun-bhaban.jpg'); --card-focus:52.2% 50.0%" aria-hidden="true"></div>
-              <span class="grid-item-media__label">Digital Billboards</span>
-            </div>
-            <div class="grid-item grid-50 xsm-grid-100 grid-item-text">
-              <div class="card-grid__text">
-                <h3 class="accent-title">Digital Billboards</h3>
-                <p>
-                  Full-motion LED, bookable by the day. Change the creative the same day, target
-                  particular hours, and get proof-of-play on every slot.
-                </p>
-                <a class="text-link" href="digital-billboards.html">See digital sites</a>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <section class="gl-section gl-padding_lr" data-reveal>
-          <div class="css-grid-wrapper">
-            <div class="grid-item grid-50 xsm-grid-100 grid-item-text">
-              <div class="card-grid__text">
-                <h3 class="accent-title">Static Billboards</h3>
-                <p>
-                  Unipoles, gantries and building wraps. Sole occupancy for the length of the
-                  booking, printed and mounted by our own crews.
-                </p>
-                <a class="text-link" href="static-billboards.html">See static sites</a>
-              </div>
-            </div>
-            <div class="grid-item grid-50 xsm-grid-100 grid-item-media has-link" data-cursor="media" data-cursor-label="Static">
-              <div class="grid-item-media__inner" style="--card-img:url('/boards/coxs-bazar-dolphin-moor-coxs-bazar.jpg'); --card-focus:50.0% 40.5%" aria-hidden="true"></div>
-              <span class="grid-item-media__label">Static Billboards</span>
-            </div>
-          </div>
-        </section>
-
-        <section class="intro-text-wrapper gl-padding_lr" data-reveal>
-          <span class="sub-text">Which format</span>
-          <h2 class="mtitle" data-parallax="18">Digital compared with static</h2>
+          <header class="section-head" data-reveal>
+            <span class="eyebrow">Which format</span>
+            <h2 data-split="words">Digital compared with static</h2>
+            <p class="section-head__lede">Both are sold by the operator, so the comparison is honest about what each one is for.</p>
+          </header>
           <!--@COMPARISON-->
         </section>
 
-        <section class="gl-section gl-padding_lr">
-          <div class="intro-text" data-reveal>
-            <span class="sub-text">Every site, 58 in total</span>
-            <h2>The full network</h2>
-          </div>
+        <section class="gl-section gl-padding_lr" id="inventory">
+          <header class="section-head" data-reveal>
+            <span class="eyebrow">Every site, 58 in total</span>
+            <h2 data-split="words">The full network</h2>
+            <span class="section-head__fig">58</span>
+          </header>
           <!--@BOARDS_ALL-->
         </section>
 
-        <!--@MARQUEE-->
-
         <!--@CTA-->
+
+        <!--@MARQUEE-->
 
         <!--@FOOTER-->
       </div>

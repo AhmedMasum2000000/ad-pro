@@ -19,3 +19,6 @@ pages/billboards-*.html
 # into one file for sharing a work-in-progress state without deploying it.
 # Derived output, and several megabytes of it.
 preview.html
+
+# Session working notes (spec, research, screenshot harness) — not shipped.
+.work/

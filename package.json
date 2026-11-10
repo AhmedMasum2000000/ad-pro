@@ -6,7 +6,7 @@
   "description": "AD PRO Communications Limited — outdoor advertising agency site, Dhaka, Bangladesh.",
   "scripts": {
     "dev": "npm run prebuild && vite",
-    "prebuild": "node scripts/generate-listing-pages.mjs",
+    "prebuild": "node scripts/generate-listing-pages.mjs && node scripts/check-assets.mjs",
     "build": "npm run prebuild && tsc -b && vite build",
     "build:pages": "BASE_PATH=/ad-pro/ npm run build && node scripts/publish-root.mjs",
     "preview": "vite preview",
@@ -14,7 +14,6 @@
   },
   "dependencies": {
     "@barba/core": "^2.10.3",
-    "@fontsource-variable/fraunces": "^5.3.0",
     "gsap": "^3.13.0",
     "lenis": "^1.1.18"
   },

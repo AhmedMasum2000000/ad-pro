@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <meta name="theme-color" content="#0e1420" />
+    <meta name="theme-color" content="#07090e" />
     <meta name="color-scheme" content="dark" />
     <!--@HEAD-->
   </head>
@@ -11,140 +11,88 @@
   <body class="isLoading" data-barba="wrapper">
     <!--@SHELL-->
 
-    <main class="all-content-wrapper hideOnLoad margin-auto" id="main">
+    <main class="all-content-wrapper margin-auto" id="main">
       <div class="page-content" data-barba="container" data-barba-namespace="home">
         <!--
-          The hero is the inventory itself: a dark room with the network
-          hanging in it, every rectangle a real site zoomed onto its own
-          screen. The wall is generated from boards.json — see buildScreenWall
-          in src/build/partials.ts — so it cannot drift from what is actually
-          on sale.
+          The hero is the inventory itself: one site on the stage at full
+          exposure, five more on the rail waiting their turn. Generated from
+          boards.json — see buildHero in src/build/partials.ts — so it cannot
+          drift from what is actually on sale. The viewfinder lives inside it
+          and nowhere else.
         -->
-        <header class="main-header" id="main_header">
-          <!--@WALL-->
-
-          <div class="wall-copy gl-padding_lr">
-            <article class="wall-copy__inner">
-              <span class="sub-text">Outdoor advertising, Bangladesh</span>
-              <div class="ascii-rule" data-ascii-rule aria-hidden="true"></div>
-              <h1 data-scramble>Be seen where the country actually is</h1>
-              <p class="h1-em">
-                Digital and static out-of-home across Dhaka, Chattogram and Sylhet — planned
-                around traffic, not around what happens to be vacant.
-              </p>
-              <div class="btn-wrapper">
-                <a class="btn btn--primary addHover" href="billboards.html">See the inventory</a>
-                <a class="btn addHover" href="contact.html">Book a site</a>
-              </div>
-            </article>
-          </div>
-        </header>
+        <!--@HERO-->
 
         <!--@STATS-->
 
-        <section class="intro-text-wrapper gl-padding_lr" id="accent_text">
+        <section class="gl-section gl-padding_lr" id="accent_text">
           <div class="css-grid-wrapper">
-          <header class="grid-item grid-60 xsm-grid-100 intro-text" data-reveal>
-            <h2>One agency, from the site survey to the last night of the run</h2>
-            <p class="accent-text">
-              AD PRO Communications Limited plans, builds and runs out-of-home advertising across
-              Bangladesh. We own and operate the network rather than reselling it, which is why we
-              can tell you what a site actually delivers before you book it — the traffic that
-              passes it, the angle it is read from, and the hours it is worth paying for.
-            </p>
-            <p class="accent-text">
-              Everything happens under one roof: site selection, structural work, printing,
-              mounting, permissions, and the monitoring photographs that prove your campaign ran
-              the way it was sold.
-            </p>
-            <div class="btn-wrapper">
-              <a class="btn addHover" href="billboards.html">Browse billboards</a>
-              <a class="btn addHover" href="contact.html">Book a site</a>
-            </div>
-          </header>
-          <div class="grid-item grid-40 xsm-grid-100" data-reveal data-reveal-delay="0.1">
-            <!--@NETWORK_INDEX-->
-          </div>
-          </div>
-        </section>
-
-        <!--@MARQUEE-->
-
-        <section class="module-1img module-img css-grid-wrapper gl-padding_lr" data-reveal>
-          <div class="grid-item grid-50 xsm-grid-100 grid-item-media has-link" data-cursor="media" data-cursor-label="Digital">
-            <div class="grid-item-media__inner" data-parallax="26" style="--card-img:url('/boards/dhaka-bashundhara-city-indoor.jpg'); --card-focus:50.0% 50.0%" aria-hidden="true"></div>
-            <span class="grid-item-media__label">Digital billboards</span>
-          </div>
-          <div class="grid-item grid-50 xsm-grid-100 grid-item-text">
-            <div class="card-grid__text">
-              <h3 class="accent-title">Full-motion LED, bookable by the day</h3>
-              <p>
-                Creative can change by time of day, so a breakfast message and an evening one run
-                from the same booking without a reprint. Proof-of-play on every slot.
+            <header class="grid-item grid-60 xsm-grid-100 intro-text" data-reveal>
+              <span class="eyebrow">The operator</span>
+              <i class="rule" data-reveal="line"></i>
+              <h2 data-split="words">One agency, from the site survey to the last night of the run</h2>
+              <p class="accent-text">
+                AD PRO Communications Limited plans, builds and runs out-of-home advertising across
+                Bangladesh. We own and operate the network rather than reselling it, which is why we
+                can tell you what a site actually delivers before you book it — the traffic that
+                passes it, the angle it is read from, and the hours it is worth paying for.
               </p>
-              <a class="text-link" href="digital-billboards.html">Digital billboards</a>
-            </div>
-          </div>
-        </section>
-
-        <section class="module-1img module-img css-grid-wrapper gl-padding_lr" data-reveal>
-          <div class="grid-item grid-50 xsm-grid-100 grid-item-text">
-            <div class="card-grid__text">
-              <h3 class="accent-title">Unipoles, gantries and building wraps</h3>
-              <p>
-                The formats that own a junction for a month at a time. Printed on weather-rated
-                media, mounted by our own crews, and photographed on installation.
+              <p class="accent-text">
+                Everything happens under one roof: site selection, structural work, printing,
+                mounting, permissions, and the monitoring photographs that prove your campaign ran
+                the way it was sold.
               </p>
-              <a class="text-link" href="static-billboards.html">Static billboards</a>
+              <div class="btn-wrapper">
+                <a class="btn btn--primary addHover" href="billboards.html"><span class="btn__label">Browse billboards</span></a>
+                <a class="btn addHover" href="contact.html"><span class="btn__label">Book a site</span></a>
+              </div>
+            </header>
+            <div class="grid-item grid-40 xsm-grid-100" data-reveal data-reveal-delay="0.1">
+              <!--@NETWORK_INDEX-->
             </div>
-          </div>
-          <div class="grid-item grid-50 xsm-grid-100 grid-item-media has-link" data-cursor="media" data-cursor-label="Static">
-            <div class="grid-item-media__inner" data-parallax="26" style="--card-img:url('/boards/sylhet-sylhet-bondor-bazar.jpg'); --card-focus:50.0% 50.0%" aria-hidden="true"></div>
-            <span class="grid-item-media__label">Static billboards</span>
           </div>
         </section>
 
-        <section class="intro-text-wrapper gl-padding_lr" data-reveal>
-          <span class="sub-text">How it works</span>
-          <h2 class="mtitle" data-parallax="18">Brief to close report, one team</h2>
-          <!--@PROCESS-->
-        </section>
+        <!--@SITES_RAIL-->
+
+        <!--@FORMATS-->
+
+        <!--@PROCESS-->
 
         <section class="gl-section gl-padding_lr" data-reveal>
           <div class="css-grid-wrapper">
             <div class="grid-item grid-40 xsm-grid-100">
-              <span class="sub-text">Before you book</span>
-              <h2 class="mtitle" data-parallax="18">Straight answers, no rate card</h2>
-              <p class="text-muted">
+              <span class="eyebrow">Before you book</span>
+              <h2 data-split="words">Straight answers, no rate card</h2>
+              <p>
                 Twenty questions we get asked every week, answered properly — what it costs and
                 why nobody publishes a rate, which format does which job, and how to tell whether
                 any of it worked.
               </p>
               <div class="btn-wrapper">
-                <a class="btn addHover" href="faq.html">Read the answers</a>
+                <a class="btn addHover" href="faq.html"><span class="btn__label">Read the answers</span></a>
               </div>
             </div>
             <div class="grid-item grid-60 xsm-grid-100">
-              <ul class="answer-list answer-list--compact">
-                <li class="answer-list__item">
+              <ul class="answer-list answer-list--compact ruled">
+                <li class="answer-list__item ruled__row">
                   <a class="answer-list__link" href="faq-billboard-advertising-cost-bangladesh.html">
                     <span class="answer-list__q">How much does billboard advertising cost in Bangladesh?</span>
                     <span class="answer-list__a">There is no single rate — digital is sold by the minute per day, so the site, the size and the run all move the number.</span>
                   </a>
                 </li>
-                <li class="answer-list__item">
+                <li class="answer-list__item ruled__row">
                   <a class="answer-list__link" href="faq-digital-vs-static-billboards.html">
                     <span class="answer-list__q">Digital or static — which is better?</span>
                     <span class="answer-list__a">Neither. Static owns a face for a season; digital changes the same day and targets the hour.</span>
                   </a>
                 </li>
-                <li class="answer-list__item">
+                <li class="answer-list__item ruled__row">
                   <a class="answer-list__link" href="faq-best-billboard-locations-in-dhaka.html">
                     <span class="answer-list__q">Where are the best billboard sites in Dhaka?</span>
                     <span class="answer-list__a">The slowest traffic, not the most. Gulshan, Mohakhali, Karwan Bazar and the junctions that queue.</span>
                   </a>
                 </li>
-                <li class="answer-list__item">
+                <li class="answer-list__item ruled__row">
                   <a class="answer-list__link" href="faq-how-to-book-a-billboard-in-bangladesh.html">
                     <span class="answer-list__q">How do you actually book one?</span>
                     <span class="answer-list__a">Four things — cities, dates, format, budget band — and a written plan comes back inside a working day.</span>
@@ -155,16 +103,11 @@
           </div>
         </section>
 
-        <section class="intro-text-wrapper gl-padding_lr" data-reveal>
-          <span class="sub-text">400+ brands and counting</span>
-          <h2 class="mtitle" data-parallax="18">Brands who have advertised with us</h2>
-          <!--@CLIENT_TEASER-->
-          <div class="btn-wrapper">
-            <a class="btn addHover" href="clients.html">See all clients</a>
-          </div>
-        </section>
+        <!--@CLIENT_TEASER-->
 
         <!--@CTA-->
+
+        <!--@MARQUEE-->
 
         <!--@FOOTER-->
       </div>

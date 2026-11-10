@@ -20,7 +20,7 @@
  * billboard listings follow.
  */
 
-import { boardBySlug, cityGroups, company, type Billboard } from '../data/site';
+import { accentOf, boardBySlug, cityGroups, company, type Billboard } from '../data/site';
 import {
   faqArticles,
   faqBySlug,
@@ -57,7 +57,45 @@ export const FAQ_HUB = 'faq.html';
    here: availability is a conversation, and a form makes the visitor wait for
    a reply they could have had in ninety seconds.                           */
 
-export function buildCta(line: string, context?: string): string {
+/*
+  The two contact links that are not a phone call. Both are written here
+  rather than imported from partials.ts, which imports this file — a circular
+  import would resolve, but build-time code should not have to rely on that.
+  The body is the same six lines the contact form produces (brief.ts), so a
+  visitor who starts from a button and one who fills in the form send the
+  sales desk the same shape of message.
+*/
+export const BRIEF_BODY = [
+  'Cities or areas:',
+  'Campaign window:',
+  'Format (digital / static / open):',
+  'Artwork exists:',
+  'Budget range:',
+  'Best number:',
+].join('\n');
+
+export const ctaMailto = (subjectHint?: string): string =>
+  esc(
+    `mailto:${company.email}?subject=${encodeURIComponent(
+      subjectHint ? `Brief: ${subjectHint}` : 'Brief: [city], [dates]',
+    )}&body=${encodeURIComponent(BRIEF_BODY)}`,
+  );
+
+export const ctaWhatsApp = (subjectHint?: string): string =>
+  esc(
+    `https://wa.me/${company.whatsapp}?text=${encodeURIComponent(
+      `Hello AD PRO — I'd like to book a billboard${subjectHint ? ` (${subjectHint})` : ''}.\n${BRIEF_BODY}`,
+    )}`,
+  );
+
+/**
+ * The conversion block.
+ *
+ * `subjectHint` names what the visitor was looking at — a site, a city — and
+ * is written into the subject line of the brief, so an email that arrives
+ * from a listing page says which listing without anyone typing it.
+ */
+export function buildCta(line: string, context?: string, subjectHint?: string): string {
   // The block carries its own gutter. It is dropped into hand-written
   // templates through a bare `<!--@CTA-->`, which has no section around it,
   // and a component that only lines up when its caller remembers to wrap it
@@ -65,17 +103,23 @@ export function buildCta(line: string, context?: string): string {
   return `
         <aside class="cta-block gl-padding_lr" data-reveal>
           <div class="cta-block__inner">
-            <p class="cta-block__line">${rich(line)}</p>
-            ${context ? `<p class="cta-block__context">${rich(context)}</p>` : ''}
-            <div class="btn-wrapper">
-              <a class="btn btn--primary addHover" href="tel:${esc(company.phoneHref)}">Call ${esc(company.phone)}</a>
-              <a class="btn addHover" href="contact.html">Send a brief</a>
+            <div class="cta-block__copy">
+              <p class="cta-block__line">${rich(line)}</p>
+              ${context ? `<p class="cta-block__context">${rich(context)}</p>` : ''}
             </div>
-            <ul class="cta-block__trust">
-              <li>Written plan within one working day</li>
-              <li>All-in cost — production and mounting included</li>
-              <li>Proof of play or dated site photographs at close</li>
-            </ul>
+            <div class="cta-block__act">
+              <div class="btn-wrapper">
+                <a class="btn btn--primary addHover" href="tel:${esc(company.phoneHref)}"><span class="btn__label">Call ${esc(company.phone).replace('-', '‑')}</span></a>
+                <a class="btn addHover" href="${ctaWhatsApp(subjectHint)}" rel="noopener noreferrer" target="_blank"><span class="btn__label">WhatsApp</span></a>
+                <a class="btn addHover" href="${ctaMailto(subjectHint)}" data-brief-link><span class="btn__label">Send a brief</span></a>
+              </div>
+              <ul class="cta-block__trust">
+                <li>Written plan within one working day</li>
+                <li>All-in cost — production and mounting included</li>
+                <li>Proof of play or dated site photographs at close</li>
+              </ul>
+            </div>
+            <i class="cta-block__scan" aria-hidden="true"></i>
           </div>
         </aside>`;
 }
@@ -90,16 +134,17 @@ function photoBlock(slug: string, caption: string): string {
 
   // The photograph links to the site it shows. An illustration in an article
   // that turns out to be bookable is a better call to action than a button.
+  // A plate: the caption sits under the photograph, on the ground, ruled.
   return `
-          <figure class="article-figure" data-ascii>
-            <a class="article-figure__link" href="${esc(boardPath(board))}">
+          <figure class="plate article-figure" data-reveal="clip" style="--accent:${esc(accentOf(board))}">
+            <a class="article-figure__link" href="${esc(boardPath(board))}" data-cursor="media" data-cursor-label="View site">
               <img class="article-figure__img" src="/${esc(board.image)}"
                    alt="${esc(board.title)} LED billboard in ${esc(board.city)}, facing ${esc(board.facing)}"
-                   style="object-position:${focus}"
-                   loading="lazy" decoding="async" width="1400" height="933" />
+                   style="object-position:${focus}" sizes="(max-width:767px) 100vw, 62vw"
+                   loading="lazy" decoding="async" width="1400" height="933" data-load />
             </a>
-            <figcaption class="article-figure__caption">
-              ${rich(caption)}
+            <figcaption class="plate__caption article-figure__caption">
+              <span>${rich(caption)}</span>
               <a class="text-link" href="${esc(boardPath(board))}">See this site</a>
             </figcaption>
           </figure>`;
@@ -136,7 +181,9 @@ export function renderBlock(b: FaqBlock): string {
                       .map((cell, i) =>
                         i === 0
                           ? `<th scope="row">${rich(cell)}</th>`
-                          : `<td>${rich(cell)}</td>`,
+                          : // The column heading rides along on each cell so the
+                            // table can stack into labelled rows on a phone.
+                            `<td data-label="${esc(b.head[i] ?? '')}">${rich(cell)}</td>`,
                       )
                       .join('')}</tr>`,
                 )
@@ -155,10 +202,10 @@ function relatedRail(article: FaqArticle): string {
     .filter((a): a is FaqArticle => Boolean(a))
     .map(
       (a) => `
-          <li class="related-q__item" data-reveal-item>
+          <li class="related-q__item ruled__row" data-reveal-item>
             <a class="related-q__link" href="${esc(faqPath(a.slug))}">
               <span class="related-q__question">${esc(a.question)}</span>
-              <span class="related-q__cat">${esc(a.category)}</span>
+              <span class="related-q__cat eyebrow">${esc(a.category)}</span>
             </a>
           </li>`,
     )
@@ -166,13 +213,13 @@ function relatedRail(article: FaqArticle): string {
 
   return `
         <section class="gl-section gl-padding_lr">
-          <div class="intro-text" data-reveal>
-            <span class="sub-text">Keep reading</span>
-            <h2 class="mtitle">People who asked this also asked</h2>
-          </div>
-          <ul class="related-q" data-reveal>${items}</ul>
+          <header class="section-head" data-reveal>
+            <span class="eyebrow">Keep reading</span>
+            <h2 data-split="words">People who asked this also asked</h2>
+          </header>
+          <ul class="related-q ruled" data-reveal>${items}</ul>
           <div class="btn-wrapper">
-            <a class="btn addHover" href="${FAQ_HUB}">All questions</a>
+            <a class="btn addHover" href="${FAQ_HUB}"><span class="btn__label">All questions</span></a>
           </div>
         </section>`;
 }
@@ -200,6 +247,7 @@ function inventoryRail(article: FaqArticle): string {
         <section class="gl-section gl-padding_lr" data-reveal>
           <div class="css-grid-wrapper">
             <div class="grid-item grid-40 xsm-grid-100">
+              <span class="eyebrow">Inventory</span>
               <h2 class="accent-title">See the actual sites</h2>
               <p class="text-muted">
                 Every screen has its own page with a photograph, the size, the direction it faces
@@ -209,9 +257,52 @@ function inventoryRail(article: FaqArticle): string {
             <div class="grid-item grid-60 xsm-grid-100">
               <ul class="city-links">${links}</ul>
               <div class="btn-wrapper">
-                <a class="btn addHover" href="billboards.html">Browse all 58 sites</a>
+                <a class="btn addHover" href="billboards.html"><span class="btn__label">Browse all 58 sites</span></a>
               </div>
             </div>
+          </div>
+        </section>`;
+}
+
+/* --- the page head ----------------------------------------------------------
+   The same shape partials.ts gives the generated pages: one mono readout,
+   a breadcrumb, then the title on the left. Written here rather than
+   imported because partials.ts imports this file.                         */
+
+interface HeadOptions {
+  readout: string;
+  crumbs?: { label: string; href?: string }[];
+  eyebrow: string;
+  title: string;
+  lede: string;
+  after?: string;
+}
+
+export function articleHead(o: HeadOptions): string {
+  const crumbs = o.crumbs?.length
+    ? `
+        <nav class="breadcrumb eyebrow" aria-label="Breadcrumb" data-reveal="fade">
+          ${o.crumbs
+            .map((c) =>
+              c.href
+                ? `<a class="text-link" href="${esc(c.href)}">${esc(c.label)}</a>`
+                : `<span aria-current="page">${esc(c.label)}</span>`,
+            )
+            .join('\n          <span aria-hidden="true">/</span>\n          ')}
+        </nav>`
+    : '';
+
+  return `
+        <section class="page-head gl-padding_lr">
+          <p class="page-head__readout" aria-hidden="true">[ ${esc(o.readout)} ]</p>${crumbs}
+          <div class="css-grid-wrapper">
+            <header class="grid-item grid-70 xsm-grid-100 intro-text" data-reveal>
+              <span class="eyebrow">${esc(o.eyebrow)}</span>
+              <i class="rule" data-reveal="line"></i>
+              <h1 data-split="words">${o.title}</h1>
+              <p class="lede">${o.lede}</p>
+              ${o.after ?? ''}
+            </header>
           </div>
         </section>`;
 }
@@ -226,33 +317,26 @@ export function buildFaqArticle(slug: string): string {
     .map((k) => `<li class="keyword-rail__item">${esc(k)}</li>`)
     .join('');
 
-  return `
-        <nav class="breadcrumb gl-padding_lr" aria-label="Breadcrumb" data-reveal>
-          <a class="text-link" href="${FAQ_HUB}">Answers</a>
-          <span aria-hidden="true">/</span>
-          <span>${esc(article.shortTitle)}</span>
-        </nav>
+  const index = faqArticles.findIndex((a) => a.slug === slug) + 1;
 
-        <section class="intro-text-wrapper gl-padding_lr">
-          <header class="intro-text" data-reveal>
-            <span class="sub-text">${esc(article.category)}</span>
-            <div class="ascii-rule" data-ascii-rule aria-hidden="true"></div>
-            <h1 class="listing-title" data-scramble>${esc(article.question)}</h1>
-            <p class="answer-lede">${rich(article.shortAnswer)}</p>
-            <div class="btn-wrapper">
-              <a class="btn btn--primary addHover" href="tel:${esc(company.phoneHref)}">Call for price</a>
-              <a class="btn addHover" href="billboards.html">See the sites</a>
-            </div>
-          </header>
-        </section>
+  return `
+        ${articleHead({
+          readout: `ANSWER ${String(index).padStart(2, '0')} / ${String(faqArticles.length).padStart(2, '0')} · ${article.category.toUpperCase()}`,
+          crumbs: [{ label: 'Answers', href: FAQ_HUB }, { label: article.shortTitle }],
+          eyebrow: article.category,
+          title: esc(article.question),
+          lede: rich(article.shortAnswer),
+          after: `<div class="btn-wrapper">
+                <a class="btn btn--primary addHover" href="tel:${esc(company.phoneHref)}"><span class="btn__label">Call for price</span></a>
+                <a class="btn addHover" href="billboards.html"><span class="btn__label">See the sites</span></a>
+              </div>`,
+        })}
 
         <section class="gl-section gl-padding_lr">
           <article class="article" data-reveal>
             ${article.body.map(renderBlock).join('\n')}
           </article>
         </section>
-
-        <!--@MARQUEE-->
 
         ${inventoryRail(article)}
         ${relatedRail(article)}
@@ -269,16 +353,15 @@ export function buildFaqHub(): string {
     .map(
       (group) => `
           <section class="answer-group" data-reveal>
-            <h2 class="answer-group__title" data-scramble>${esc(group.category)}</h2>
-            <ul class="answer-list">
+            <h2 class="answer-group__title" data-split="words">${esc(group.category)}</h2>
+            <ul class="answer-list ruled">
               ${group.articles
                 .map(
                   (a) => `
-                <li class="answer-list__item">
+                <li class="answer-list__item ruled__row">
                   <a class="answer-list__link" href="${esc(faqPath(a.slug))}">
                     <span class="answer-list__q">${esc(a.question)}</span>
                     <span class="answer-list__a">${esc(a.shortAnswer)}</span>
-                    <span class="text-link" aria-hidden="true">Read the answer</span>
                   </a>
                 </li>`,
                 )
@@ -289,24 +372,16 @@ export function buildFaqHub(): string {
     .join('');
 
   return `
-        <section class="intro-text-wrapper gl-padding_lr">
-          <header class="intro-text" data-reveal>
-            <span class="sub-text">${faqArticles.length} questions answered</span>
-            <div class="ascii-rule" data-ascii-rule aria-hidden="true"></div>
-            <h1 data-scramble>Billboard advertising in Bangladesh, explained</h1>
-            <p class="h1-em">
-              What it costs, how it is priced, which format does which job, where the good sites
-              are and how to tell whether any of it worked. Written by the people who own and run
-              the screens, which is why there is more detail here than a brochure would carry.
-            </p>
-            <div class="btn-wrapper">
-              <a class="btn btn--primary addHover" href="tel:${esc(company.phoneHref)}">Call for price</a>
-              <a class="btn addHover" href="billboards.html">See the 58 sites</a>
-            </div>
-          </header>
-        </section>
-
-        <!--@MARQUEE-->
+        ${articleHead({
+          readout: `ANSWERS · ${faqArticles.length} QUESTIONS`,
+          eyebrow: `${faqArticles.length} questions answered`,
+          title: 'Billboard advertising in Bangladesh, explained',
+          lede: 'What it costs, how it is priced, which format does which job, where the good sites are and how to tell whether any of it worked. Written by the people who own and run the screens, which is why there is more detail here than a brochure would carry.',
+          after: `<div class="btn-wrapper">
+                <a class="btn btn--primary addHover" href="tel:${esc(company.phoneHref)}"><span class="btn__label">Call for price</span></a>
+                <a class="btn addHover" href="billboards.html"><span class="btn__label">See the 58 sites</span></a>
+              </div>`,
+        })}
 
         <section class="gl-section gl-padding_lr">
           <div class="answer-groups">${groups}</div>

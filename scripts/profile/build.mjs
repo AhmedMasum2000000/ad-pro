@@ -53,7 +53,11 @@ const FACES = [
 function fontCss() {
   return FACES.map(([family, rel, desc]) => {
     const file = resolve(ROOT, rel);
-    if (!existsSync(file)) throw new Error(`missing font: ${rel} — run npm install`);
+    // Fraunces left the site's dependencies when the site stopped using it;
+    // the profile still sets its headings in it. Install it on demand
+    // (`npm i -D @fontsource-variable/fraunces`) rather than making the
+    // website carry a typeface it never renders.
+    if (!existsSync(file)) throw new Error(`missing font: ${rel} — run npm i -D ${rel.split('/files/')[0].replace('node_modules/', '')}`);
     const b64 = readFileSync(file).toString('base64');
     return (
       `@font-face{font-family:'${family}';${desc};font-display:swap;` +

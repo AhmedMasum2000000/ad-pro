@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <meta name="theme-color" content="#0e1420" />
+    <meta name="theme-color" content="#07090e" />
     <meta name="color-scheme" content="dark" />
     <meta name="robots" content="noindex" />
     <!--@HEAD-->
@@ -12,28 +12,34 @@
   <body class="isLoading" data-barba="wrapper">
     <!--@SHELL-->
 
-    <main class="all-content-wrapper hideOnLoad margin-auto" id="main">
+    <main class="all-content-wrapper margin-auto" id="main">
       <div class="page-content" data-barba="container" data-barba-namespace="notfound">
-        <section class="intro-text-wrapper gl-padding_lr">
-          <header class="intro-text" data-reveal>
-            <span class="sub-text">404</span>
-            <div class="ascii-rule" data-ascii-rule aria-hidden="true"></div>
-            <h1 data-scramble>This one is not on the network</h1>
-            <p class="h1-em">
-              The page you were after has moved or never existed. The 58 sites we operate are
-              all still here, though — and if you were looking for a particular junction, we can
-              probably find it faster over the phone.
-            </p>
-            <div class="btn-wrapper">
-              <a class="btn btn--primary addHover" href="tel:@PHONE_HREF@">Call @PHONE@</a>
-              <a class="btn addHover" href="billboards.html">Browse all 58 sites</a>
-            </div>
-          </header>
+        <section class="page-head gl-padding_lr">
+          <p class="page-head__readout" aria-hidden="true">[ NO SIGNAL ]</p>
+          <div class="css-grid-wrapper">
+            <header class="grid-item grid-70 xsm-grid-100 intro-text" data-reveal>
+              <span class="eyebrow">404</span>
+              <i class="rule" data-reveal="line"></i>
+              <h1 data-split="words">Nothing on this channel</h1>
+              <p class="lede">
+                The page you were after has moved or never existed. The 58 sites we operate are
+                all still here — and if you were looking for a particular junction, we can
+                probably find it faster over the phone.
+              </p>
+              <div class="btn-wrapper">
+                <a class="btn btn--primary addHover" href="billboards.html"><span class="btn__label">See the inventory</span></a>
+                <a class="btn addHover" href="index.html"><span class="btn__label">Home</span></a>
+              </div>
+            </header>
+          </div>
         </section>
+
+        <!--@SITES_RAIL_SHORT-->
 
         <section class="gl-section gl-padding_lr" data-reveal>
           <div class="css-grid-wrapper">
             <div class="grid-item grid-40 xsm-grid-100">
+              <span class="eyebrow">Or try</span>
               <h2 class="accent-title">Where you probably meant to go</h2>
             </div>
             <div class="grid-item grid-60 xsm-grid-100">
@@ -48,8 +54,8 @@
           </div>
         </section>
 
-        <!--@MARQUEE-->
         <!--@CTA-->
+        <!--@MARQUEE-->
         <!--@FOOTER-->
       </div>
     </main>
