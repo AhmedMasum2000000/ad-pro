@@ -520,7 +520,7 @@
     font-size: 2.5rem;
   }
 
-  .listing-title {
+  .page-head .listing-title {
     font-size: max(2.75rem, var(--display-1));
     max-width: none;
   }
@@ -541,7 +541,7 @@
      which "+880 1958‑503753" fits the gutter with room to spare. WhatsApp
      is the first button, in the head and in the brief. */
 
-  .contact-number {
+  .page-head .contact-number {
     font-size: clamp(2.75rem, 11vw, var(--display-1));
   }
 

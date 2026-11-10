@@ -120,10 +120,11 @@
   transition: opacity .4s var(--ease-out);
 }
 
-.chrome__read--tl { top: .5rem; left: .5rem; }
-.chrome__read--tr { top: .5rem; right: .5rem; }
-.chrome__read--bl { bottom: .5rem; left: .5rem; }
-.chrome__read--br { bottom: .5rem; right: .5rem; }
+/* Inset past the 14px corner ticks so a readout never sits on the frame. */
+.chrome__read--tl { top: 1rem; left: 1rem; }
+.chrome__read--tr { top: 1rem; right: 1rem; }
+.chrome__read--bl { bottom: 1rem; left: 1rem; }
+.chrome__read--br { bottom: 1rem; right: 1rem; }
 
 /* The state readout carries the lamp and a label. */
 .chrome__read--tr {

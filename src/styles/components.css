@@ -371,8 +371,14 @@
   display: block;
 }
 
+/* Page titles are questions and site names, often long; they are capped a
+   step below the hero's display-1 so a long question does not run to eight
+   lines of poster type. The home hero keeps display-1 (it is not a
+   `.page-head`). */
 .page-head h1 {
   margin-block: 1rem 1.25rem;
+  font-size: clamp(2.25rem, 5vw + .5rem, 5.5rem);
+  max-width: 14ch;
 }
 
 .page-head__aside {
@@ -776,6 +782,13 @@
 
 .rail__hint.is-done {
   opacity: 0;
+}
+
+/* A mouse cannot swipe: the hint is for fingers only. */
+@media (pointer: fine) {
+  .rail__hint {
+    display: none;
+  }
 }
 
 /* --- city rail / city cards ---------------------------------------------------
@@ -1376,13 +1389,6 @@
 }
 
 .board-card[hidden] { display: none; }
-
-/* Cards below the first rows are rendered lazily by the browser; the
-   intrinsic size holds the scrollbar steady until they arrive. */
-.board-card:nth-child(n + 10) {
-  content-visibility: auto;
-  contain-intrinsic-size: 1px 520px;
-}
 
 /*
   The whole card is the link, so the target is the photograph and the title
@@ -2058,14 +2064,18 @@ details[open] > .faq__a > *,
   z-index: 2;
 }
 
+/* No section padding here: the head above already carries its own gap, and
+   padding would show the blurred bleed as a grey band above the photograph
+   and push the glass card down over the caption. */
 .listing-hero {
   position: relative;
+  padding-block: 0;
   --caption-h: 2.25rem;
 }
 
 .listing__bleed {
   position: absolute;
-  inset: -6rem 0;
+  inset: 0;
   z-index: -1;
   background-image: var(--bleed-img, none);
   background-size: cover;
@@ -2256,7 +2266,7 @@ details[open] > .faq__a > *,
   non-breaking hyphen is in the markup — so "Gulshan Circle‑1, Upper" breaks
   between words at every width.
 */
-.listing-title {
+.page-head .listing-title {
   max-width: 12ch;
   hyphens: manual;
   overflow-wrap: normal;
@@ -2384,9 +2394,24 @@ details[open] > .faq__a > *,
    (brief.ts). The card is the one raised surface on the page and carries the
    amber rule. */
 
-.contact-number {
-  white-space: nowrap;
+/* Scoped under `.page-head` so it beats the generic `.page-head h1` cap.
+   The number may break at its hyphen rather than clip the column. */
+.page-head .contact-number {
+  font-size: clamp(2.5rem, 5.2vw, 5.5rem);
+  white-space: normal;
+  overflow-wrap: anywhere;
   max-width: none;
+}
+
+/* The number and the brief sit side by side from the top: the head is
+   shorter than the form, and bottom-aligning it leaves a hole above the
+   number. */
+.contact-head .css-grid-wrapper {
+  align-items: start;
+}
+
+.contact-head .page-head__aside {
+  align-self: start;
 }
 
 .contact-number a {

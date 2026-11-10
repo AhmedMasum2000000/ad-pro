@@ -257,14 +257,30 @@ function rankedBoards(minScore = 1.6): Billboard[] {
  * Dhaka site takes the first slot, then the rest in measured order — the
  * company is a Dhaka operator and the first frame should say so.
  */
+/** Sites that open the hero, in order. */
+const HERO_LEADS = [
+  'dhaka-gulshan-circle-1-upper',
+  'dhaka-gulshan-circle-2-east-side-rob-super-market',
+  'coxs-bazar-dolphin-moor-coxs-bazar',
+  'sylhet-sylhet-surma-point',
+];
+
+/** Indoor screens: fine in the inventory, wrong as the first thing seen. */
+const HERO_EXCLUDE = new Set(['dhaka-police-plaza-entry-gate-north-side']);
+
 export function heroBoards(): Billboard[] {
-  const six = rankedBoards()
-    .filter((b) => photoOf(b).width >= 900)
-    .slice(0, 6);
-  const dhaka = six.findIndex((b) => b.citySlug === 'dhaka');
-  if (dhaka > 0) six.unshift(...six.splice(dhaka, 1));
-  return six;
+  // The opening frames are chosen by eye, not by score: the lead has to be
+  // an outdoor junction that reads as a billboard at a glance. The rest
+  // follow in measured order. Indoor panels never take the stage.
+  const leads = HERO_LEADS.map((slug) => billboards.find((b) => b.slug === slug)).filter(
+    (b): b is Billboard => !!b && photoOf(b).exists && photoOf(b).width >= 700,
+  );
+  const rest = rankedBoards().filter(
+    (b) => photoOf(b).width >= 900 && !leads.includes(b) && !HERO_EXCLUDE.has(b.slug),
+  );
+  return [...leads, ...rest].slice(0, 6);
 }
+
 
 /** A city's cover: its best-scoring site whose photograph is actually on
     disk, so a missing file never becomes a black card. */
